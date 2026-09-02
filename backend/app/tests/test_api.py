@@ -1,7 +1,12 @@
 import unittest
 from fastapi.testclient import TestClient
-from app.main import app
-from app.core.config import settings
+
+try:
+    from app.main import app
+    from app.core.config import settings
+except ImportError:
+    from backend.app.main import app
+    from backend.app.core.config import settings
 
 
 class TestAPI(unittest.TestCase):
