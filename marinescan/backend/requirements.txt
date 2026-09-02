@@ -1,0 +1,28 @@
+# MarineScan Backend Dependencies
+# Python 3.14.3 | Generated 2026-09-02
+# Activate venv: source backend/.venv/bin/activate
+
+# --- Web Framework ---
+fastapi==0.141.1
+uvicorn[standard]==0.52.4
+
+# --- Data Validation ---
+pydantic==2.13.5
+pydantic-settings==2.15.0
+
+# --- Database ---
+sqlalchemy==2.0.52
+alembic==1.19.1
+psycopg[binary]==3.3.5
+
+# --- File Handling ---
+python-multipart==0.0.32
+
+# --- Numerical / Vision ---
+numpy==2.5.2
+opencv-python==5.0.0.93
+pillow==12.3.0
+
+# --- ML / Inference ---
+torch==2.13.0
+ultralytics==8.4.138
