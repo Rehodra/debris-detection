@@ -17,9 +17,9 @@ const App: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', width: '100vw', height: '100vh', overflow: 'hidden', background: '#eef1f9' }}>
+    <div className="app-container">
       <Sidebar active={activePage} onNavigate={setActivePage} />
-      <main style={{ flex: 1, height: '100vh', overflow: 'hidden' }}>
+      <main className="app-main">
         {renderPage()}
       </main>
     </div>

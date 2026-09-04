@@ -250,7 +250,7 @@ export const SonarAnalysis: React.FC = () => {
                   <div className={styles.panelBlockHeader}><span>SURVEY MAP</span></div>
                   <div className={styles.panelBlockBody}>
                     <div className={styles.mapMock}>
-                      <img src="/map.jpg" alt="Survey Map" className={styles.mapImage} />
+                      <img src="/surveymap.jpeg" alt="Survey Map" className={styles.mapImage} />
                     </div>
                   </div>
                 </div>

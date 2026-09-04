@@ -24,3 +24,29 @@ body {
 * {
   box-sizing: border-box;
 }
+
+.app-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #edf3fa;
+}
+
+.app-main {
+  flex: 1;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 760px) {
+  .app-container {
+    flex-direction: column;
+  }
+  .app-main {
+    height: auto;
+    flex: 1;
+  }
+}

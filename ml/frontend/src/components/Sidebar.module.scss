@@ -59,9 +59,35 @@ $muted: #a8c0df;
 .footer { margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.11); }
 
 @media (max-width: 760px) {
-  .sidebar { width: 68px; flex-basis: 68px; padding: 18px 8px; }
-  .brand { justify-content: center; padding: 0 0 20px; }
-  .brandText, .navLabel { display: none; }
-  .navItem { justify-content: center; padding: 0; border-left: 0; border-bottom: 3px solid transparent; border-radius: 7px; }
-  .navItem.active { border-bottom-color: $accent; }
+  .sidebar { 
+    width: 100%; 
+    height: 60px;
+    flex: 0 0 60px; 
+    flex-direction: row;
+    padding: 0; 
+    order: 2; /* Put it at the bottom */
+    z-index: 100;
+  }
+  .brand { display: none; }
+  .nav { 
+    flex-direction: row; 
+    padding: 0; 
+    width: 100%; 
+    justify-content: space-around; 
+    align-items: center; 
+  }
+  .navItem { 
+    justify-content: center; 
+    padding: 10px; 
+    border-left: 0; 
+    border-radius: 0; 
+    border-top: 3px solid transparent; 
+  }
+  .navItem.active { 
+    border-left-color: transparent;
+    border-top-color: $accent; 
+    background: linear-gradient(180deg, rgba(69, 198, 236, 0.22), rgba(69, 198, 236, 0.04));
+  }
+  .navLabel { display: none; }
+  .footer { display: none; }
 }
