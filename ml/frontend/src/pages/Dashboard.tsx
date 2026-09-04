@@ -66,8 +66,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       </header>
 
       <div className={styles.scrollArea}>
+        <Hero onLaunchAnalysis={() => onNavigate?.('Sonar Analysis')} />
         <div className={styles.body}>
-          <Hero onLaunchAnalysis={() => onNavigate?.('Sonar Analysis')} />
 
           <div className={styles.sectionTitle}>
             <h2>Live Survey Metrics</h2>
