@@ -5,26 +5,15 @@ import {
   CheckCircle2, Circle, FileJson
 } from 'lucide-react';
 import styles from './SonarAnalysis.module.scss';
-
-interface Target {
-  id: string;
-  type: string;
-  location: string;
-  conf: string;
-  shadow: string;
-}
-
-const MOCK_TARGETS: Target[] = [
-  { id: 'Ghost Net', type: 'Entanglement', location: '15.498, 73.827', conf: '91%', shadow: '82%' },
-  { id: 'Submerged Pipe', type: 'Infrastructure', location: '15.499, 73.828', conf: '87%', shadow: '78%' },
-  { id: 'Unknown Anomaly', type: 'Anomaly', location: '15.498, 73.827', conf: '89%', shadow: '31%' },
-  { id: 'Shipwreck', type: 'Wreck', location: '15.498, 73.827', conf: '96%', shadow: '94%' },
-];
+import { AnalysisTarget, MasterAnalysisResult, analyzeSonarImage, downloadAnalysisReport } from '../api/client';
 
 export const SonarAnalysis: React.FC = () => {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [analysis, setAnalysis] = useState<MasterAnalysisResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
-  const [analysisDone, setAnalysisDone] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -32,14 +21,34 @@ export const SonarAnalysis: React.FC = () => {
 
     const url = URL.createObjectURL(file);
     setImageSrc(url);
+    setSelectedFile(file);
+    setAnalysis(null);
+    setError(null);
     setIsAnalyzing(true);
-    setAnalysisDone(false);
 
-    setTimeout(() => {
-      setIsAnalyzing(false);
-      setAnalysisDone(true);
-    }, 1400);
+    analyzeSonarImage(file)
+      .then(setAnalysis)
+      .catch((err: Error) => setError(err.message))
+      .finally(() => setIsAnalyzing(false));
   };
+
+  const analysisDone = analysis !== null;
+  const targets = analysis?.targets ?? [];
+  const displayImage = analysis?.prediction_image_url || imageSrc;
+
+  const handleExport = async (format: 'json' | 'csv') => {
+    if (!selectedFile) return;
+    setIsExporting(true);
+    try {
+      await downloadAnalysisReport(selectedFile, format);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Report export failed');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const formatTargetType = (target: AnalysisTarget) => target.class_name.replace('_', ' ').toUpperCase();
 
   const showSidePanel = imageSrc !== null;
 
@@ -85,7 +94,7 @@ export const SonarAnalysis: React.FC = () => {
                 </label>
               ) : (
                 <div className={styles.sonarViewport}>
-                  <img src={imageSrc} alt="Sonar Scan" className={styles.sonarImage} />
+                  <img src={displayImage ?? imageSrc} alt="Sonar Scan" className={styles.sonarImage} />
 
                   {isAnalyzing && (
                     <div className={styles.scannerOverlay}>
@@ -98,12 +107,10 @@ export const SonarAnalysis: React.FC = () => {
 
                   <div className={styles.imageMetaFooter}>
                     <div className={styles.metaLeft}>
-                      <span>LAT <strong>15.498912</strong></span>
-                      <span>LON <strong>73.827845</strong></span>
-                      <span>HDG <strong>142.5°</strong></span>
-                      <span>SPD <strong>4.2kt</strong></span>
-                      <span>ALT <strong>12.4m</strong></span>
-                      <span>RNG <strong>40m</strong></span>
+                      <span>LAT <strong>{targets[0]?.coordinates.latitude.toFixed(5) ?? '—'}</strong></span>
+                      <span>LON <strong>{targets[0]?.coordinates.longitude.toFixed(5) ?? '—'}</strong></span>
+                      <span>QUALITY <strong>{analysis?.quality_assessment.quality_tier ?? '—'}</strong></span>
+                      <span>CONF <strong>{analysis ? `${Math.round((targets[0]?.calibrated_confidence ?? 0) * 100)}%` : '—'}</strong></span>
                     </div>
                     <div className={styles.metaRight}>
                       <div><span>FRM</span><strong>0042</strong></div>
@@ -141,9 +148,12 @@ export const SonarAnalysis: React.FC = () => {
               <div className={styles.panelBlock}>
                 <div className={styles.panelBlockHeader}>
                   <span>DETECTION LIST</span>
-                  {analysisDone && <span className={styles.countBadge}>2 Targets</span>}
+                  {analysisDone && <span className={styles.countBadge}>{targets.length} Targets</span>}
                   {analysisDone && (
-                    <button className={styles.exportBtn}><Download size={12} /> EXPORT JSON</button>
+                    <>
+                      <button className={styles.exportBtn} onClick={() => handleExport('json')} disabled={isExporting}><Download size={12} /> EXPORT JSON</button>
+                      <button className={styles.exportBtn} onClick={() => handleExport('csv')} disabled={isExporting}><Download size={12} /> CSV</button>
+                    </>
                   )}
                 </div>
 
@@ -155,27 +165,19 @@ export const SonarAnalysis: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <div className={styles.detectionCardAlert}>
-                        <div className={styles.cardMain}>
-                          <span className={styles.targetTitle}>GHOST_NET</span>
-                          <span className={styles.targetConfRed}>91% CONF</span>
+                      {targets.map((target) => (
+                        <div key={target.detection_id} className={target.risk_tier === 'CRITICAL' || target.risk_tier === 'HIGH' ? styles.detectionCardAlert : styles.detectionCardWarn}>
+                          <div className={styles.cardMain}>
+                            <span className={styles.targetTitle}>{formatTargetType(target)}</span>
+                            <span className={target.calibrated_confidence >= 0.8 ? styles.targetConfRed : styles.targetConfAmber}>{Math.round(target.calibrated_confidence * 100)}% CONF</span>
+                          </div>
+                          <div className={styles.cardSub}>
+                            <span>{target.risk_tier}</span>
+                            <span className={target.trust_tier === 'VERIFIED_TARGET' ? styles.statusVerified : styles.statusReview}>{target.trust_tier.replace(/_/g, ' ')}</span>
+                          </div>
                         </div>
-                        <div className={styles.cardSub}>
-                          <span>FRM: 0042</span>
-                          <span className={styles.statusVerified}>VERIFIED</span>
-                        </div>
-                      </div>
-
-                      <div className={styles.detectionCardWarn}>
-                        <div className={styles.cardMain}>
-                          <span className={styles.targetTitle}>SUB_PIPE</span>
-                          <span className={styles.targetConfAmber}>84% CONF</span>
-                        </div>
-                        <div className={styles.cardSub}>
-                          <span>FRM: 0038</span>
-                          <span className={styles.statusReview}>REVIEW</span>
-                        </div>
-                      </div>
+                      ))}
+                      {targets.length === 0 && <p>No targets detected in this scan.</p>}
                     </>
                   )}
                 </div>
@@ -188,9 +190,9 @@ export const SonarAnalysis: React.FC = () => {
                     <div className={styles.skeletonRow}></div>
                   ) : (
                     <>
-                      <div className={styles.metricRow}><span>Shadow Length</span><strong>4.2m</strong></div>
-                      <div className={styles.metricRow}><span>Est. Height</span><strong>1.8m</strong></div>
-                      <div className={styles.metricRow}><span>Geometry Score</span><strong className={styles.greenText}>82%</strong></div>
+                      <div className={styles.metricRow}><span>Shadow Length</span><strong>{targets[0]?.shadow_evidence.shadow_length_m?.toFixed(2) ?? '—'}m</strong></div>
+                      <div className={styles.metricRow}><span>Est. Height</span><strong>{targets[0]?.shadow_evidence.estimated_height_m?.toFixed(2) ?? '—'}m</strong></div>
+                      <div className={styles.metricRow}><span>Shadow Score</span><strong className={styles.greenText}>{targets[0] ? `${Math.round(targets[0].shadow_evidence.shadow_score * 100)}%` : '—'}</strong></div>
                     </>
                   )}
                 </div>
@@ -203,10 +205,10 @@ export const SonarAnalysis: React.FC = () => {
                     <div className={styles.skeletonRow}></div>
                   ) : (
                     <div className={styles.grid2x2}>
-                      <div><small>FRAMES</small><h4>14,204</h4></div>
-                      <div><small>TARGETS</small><h4>12</h4></div>
-                      <div><small>VERIFIED</small><h4>4</h4></div>
-                      <div><small>COVERAGE</small><h4>42%</h4></div>
+                      <div><small>MISSION</small><h4>{analysis.mission_id}</h4></div>
+                      <div><small>TARGETS</small><h4>{analysis.summary.total_targets_detected}</h4></div>
+                      <div><small>VERIFIED</small><h4>{analysis.summary.verified_targets}</h4></div>
+                      <div><small>QUALITY</small><h4>{Math.round(analysis.quality_assessment.overall_quality_score * 100)}%</h4></div>
                     </div>
                   )}
                 </div>
@@ -217,7 +219,7 @@ export const SonarAnalysis: React.FC = () => {
                   <div className={styles.panelBlockHeader}><span>TARGET CLASSIFICATION</span></div>
                   <div className={styles.panelBlockBody}>
                     <p className={styles.classificationSubtitle}>
-                      4 TARGETS DETECTED · 3 VERIFIED · 1 REQUIRES REVIEW
+                      {analysis.summary.total_targets_detected} TARGETS DETECTED · {analysis.summary.verified_targets} VERIFIED
                     </p>
                     <table className={styles.miniTable}>
                       <thead>
@@ -230,13 +232,13 @@ export const SonarAnalysis: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {MOCK_TARGETS.map((row) => (
-                          <tr key={row.id}>
-                            <td>{row.id}</td>
-                            <td>{row.type}</td>
-                            <td>{row.location}</td>
-                            <td>{row.conf}</td>
-                            <td>{row.shadow}</td>
+                        {targets.map((target) => (
+                          <tr key={target.detection_id}>
+                            <td>{target.display_name}</td>
+                            <td>{formatTargetType(target)}</td>
+                            <td>{target.coordinates.latitude.toFixed(4)}, {target.coordinates.longitude.toFixed(4)}</td>
+                            <td>{Math.round(target.calibrated_confidence * 100)}%</td>
+                            <td>{Math.round(target.shadow_evidence.shadow_score * 100)}%</td>
                           </tr>
                         ))}
                       </tbody>
