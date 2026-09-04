@@ -57,12 +57,13 @@ def parse_yolo_results(
                 continue
 
             class_id = int(clss[idx])
-            class_name = get_class_name(class_id)
+            model_names = getattr(result, "names", None) or {}
+            class_name = model_names.get(class_id, get_class_name(class_id))
 
             if classes_filter and class_name.lower() not in [c.lower() for c in classes_filter]:
                 continue
 
-            metadata = get_class_metadata(class_id)
+            metadata = get_class_metadata(class_name)
             risk_level = metadata.risk_level if metadata else "Unknown"
             category = metadata.category if metadata else "Unknown"
             color_hex = metadata.color_hex if metadata else "#3B82F6"
