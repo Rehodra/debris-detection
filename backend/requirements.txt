@@ -24,5 +24,8 @@ pillow==11.0.0
 requests==2.32.3
 
 # --- Optional ML stack (install separately when needed on a compatible environment) ---
-# torch>=2.5.1
-# ultralytics>=8.3.0
+# --- ML / Inference ---
+torch==2.13.0
+ultralytics==8.4.138
+# Optional upload delivery for generated prediction images
+cloudinary==1.44.1
