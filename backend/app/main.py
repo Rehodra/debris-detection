@@ -1,14 +1,40 @@
-import sys
-from pathlib import Path
+import logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.core.config import settings
+from app.api.v1 import api_v1_router
+from app.ml.model_loader import model_loader
 
-try:
-    from app.core.config import settings
-    from app.api.v1 import api_v1_router
-except ImportError:
-    from backend.app.core.config import settings
-    from backend.app.api.v1 import api_v1_router
+# try:
+#     from app.core.config import settings
+#     from app.api.v1 import api_v1_router
+#     from app.ml.model_loader import model_loader
+# except ImportError:
+#     from backend.app.core.config import settings
+#     from backend.app.api.v1 import api_v1_router
+#     from backend.app.ml.model_loader import model_loader
+
+logger = logging.getLogger("marinescan.main")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Application lifespan manager.
+    Loads and warms up the ML model on startup to ensure instant inference response.
+    """
+    logger.info("Initializing MarineScan API...")
+    try:
+        model_loader.load()
+        logger.info("MarineScan YOLO model successfully initialized on startup.")
+    except Exception as exc:
+        logger.warning(
+            "Could not load ML model on startup: %s. Model will be loaded on demand.",
+            exc,
+        )
+    yield
+    logger.info("Shutting down MarineScan API...")
 
 
 def create_application() -> FastAPI:
@@ -17,6 +43,7 @@ def create_application() -> FastAPI:
         openapi_url=f"{settings.API_V1_STR}/openapi.json",
         docs_url="/docs",
         redoc_url="/redoc",
+        lifespan=lifespan,
     )
 
     # Set up CORS middleware
@@ -38,6 +65,8 @@ def create_application() -> FastAPI:
             "name": settings.PROJECT_NAME,
             "version": "1.0.0",
             "health_check": f"{settings.API_V1_STR}/health",
+            "models_endpoint": f"{settings.API_V1_STR}/models/current",
+            "detections_endpoint": f"{settings.API_V1_STR}/detections/predict",
             "documentation": "/docs",
         }
 
