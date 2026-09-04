@@ -1,0 +1,67 @@
+$navy-950: #061632;
+$navy-900: #0a2450;
+$navy-800: #104c91;
+$accent: #45c6ec;
+$muted: #a8c0df;
+
+.sidebar {
+  width: 238px;
+  height: 100vh;
+  flex: 0 0 238px;
+  display: flex;
+  flex-direction: column;
+  padding: 26px 14px 18px;
+  color: #fff;
+  background: linear-gradient(165deg, $navy-950 0%, $navy-900 54%, $navy-800 100%);
+  box-shadow: 12px 0 32px rgba(6, 22, 50, 0.16);
+  z-index: 10;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 12px 27px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.11);
+}
+
+.brandLogo {
+  width: 35px;
+  height: 35px;
+  flex: 0 0 35px;
+  object-fit: contain;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.brandText h2 { margin: 0; font-size: 17px; letter-spacing: -0.3px; }
+.brandText span { display: block; margin-top: 4px; color: $muted; font-size: 9px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase; }
+.nav { display: flex; flex-direction: column; gap: 5px; padding-top: 24px; }
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 43px;
+  padding: 0 13px;
+  color: $muted;
+  border-left: 3px solid transparent;
+  border-radius: 0 7px 7px 0;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.navItem:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+.navItem.active { color: #fff; background: linear-gradient(90deg, rgba(69, 198, 236, 0.22), rgba(69, 198, 236, 0.04)); border-left-color: $accent; }
+.navIcon { display: grid; place-items: center; width: 20px; }
+.footer { margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.11); }
+
+@media (max-width: 760px) {
+  .sidebar { width: 68px; flex-basis: 68px; padding: 18px 8px; }
+  .brand { justify-content: center; padding: 0 0 20px; }
+  .brandText, .navLabel { display: none; }
+  .navItem { justify-content: center; padding: 0; border-left: 0; border-bottom: 3px solid transparent; border-radius: 7px; }
+  .navItem.active { border-bottom-color: $accent; }
+}

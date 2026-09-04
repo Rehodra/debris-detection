@@ -1,0 +1,55 @@
+$navy-950: #060f2b;
+$navy-900: #0b1a3f;
+$border-light: rgba(255, 255, 255, 0.08);
+$navy-950: #061632;
+$navy-900: #0a2450;
+$navy-800: #104c91;
+$accent: #45c6ec;
+$silver: #cddcf0;
+
+@keyframes sweep { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 84, 104, .45); } 50% { box-shadow: 0 0 0 8px rgba(255, 84, 104, 0); } }
+
+.heroCard {
+  position: relative;
+  overflow: hidden;
+  padding: 42px 44px;
+  border-radius: 6px;
+  background: radial-gradient(circle at 88% 18%, rgba(69, 198, 236, .18), transparent 30%), linear-gradient(135deg, $navy-950, $navy-900 58%, $navy-800);
+  box-shadow: 0 20px 42px rgba(6, 22, 50, .2);
+}
+
+.heroGlow { position: absolute; inset: auto -120px -180px auto; width: 400px; height: 400px; border-radius: 50%; background: radial-gradient(circle, rgba(69, 198, 236, .16), transparent 68%); pointer-events: none; }
+.heroInner { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 36px; }
+.heroText { flex: 1; min-width: 280px; max-width: 620px; }
+.eyebrow { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 18px; color: $accent; font-size: 10px; font-weight: 700; letter-spacing: 1px; }
+.heroTitle { margin: 0 0 14px; color: #fff; font-size: clamp(30px, 3vw, 42px); line-height: 1.08; font-weight: 800; }
+.gradientWord { color: $accent; }
+.heroSubtitle { max-width: 590px; margin: 0 0 25px; color: $silver; font-size: 13px; line-height: 1.65; }
+.heroActions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 30px; }
+.primaryBtn, .ghostBtn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 16px; border-radius: 4px; color: #fff; font: 700 12px inherit; cursor: pointer; }
+.primaryBtn { border: 0; background: linear-gradient(135deg, #1766b1, $accent); box-shadow: 0 8px 18px rgba(23, 102, 177, .3); }
+.ghostBtn { border: 1px solid rgba(255, 255, 255, .24); background: rgba(255, 255, 255, .06); }
+.primaryBtn:hover, .ghostBtn:hover { filter: brightness(1.1); }
+.trustRow { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.trustItem { display: flex; flex-direction: column; gap: 3px; }
+.trustItem h3 { margin: 0; color: #fff; font-size: 19px; }
+.trustItem span { color: $silver; font-size: 10px; }
+.trustDivider { width: 1px; height: 28px; background: rgba(255, 255, 255, .2); }
+.heroVisual { position: relative; width: 230px; height: 230px; flex: 0 0 230px; display: grid; place-items: center; }
+.radarRing1, .radarRing2, .radarRing3 { position: absolute; border: 1px solid rgba(69, 198, 236, .3); border-radius: 50%; }
+.radarRing1 { inset: 0; } .radarRing2 { inset: 15%; } .radarRing3 { inset: 30%; }
+.radarSweep { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(rgba(69, 198, 236, .32), transparent 55deg, transparent); animation: sweep 5s linear infinite; mask-image: radial-gradient(circle, #000 60%, transparent 61%); }
+.radarCore { position: relative; z-index: 1; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; color: #fff; background: linear-gradient(135deg, #1766b1, $accent); box-shadow: 0 0 28px rgba(69, 198, 236, .45); }
+.detectionPing { position: absolute; z-index: 2; display: flex; align-items: center; gap: 6px; }
+.pingDot { width: 8px; height: 8px; border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+.pingLabel, .visualBadge { color: #fff; background: rgba(6, 22, 50, .82); border: 1px solid rgba(255, 255, 255, .15); border-radius: 4px; font-size: 9px; font-weight: 700; white-space: nowrap; }
+.pingLabel { padding: 4px 6px; } .pingRed { top: 18%; left: 0; } .pingRed .pingDot { background: #ff5468; }
+.pingAmber { right: -4%; bottom: 18%; } .pingAmber .pingDot { background: #ffb648; animation-delay: .6s; }
+.visualBadge { bottom: -12px; display: flex; align-items: center; gap: 6px; padding: 6px 9px; color: $silver; font-weight: 600; }
+
+@media (max-width: 760px) {
+  .heroCard { padding: 28px 24px 34px; }
+  .heroInner { align-items: flex-start; flex-direction: column; }
+  .heroVisual { align-self: center; width: 190px; height: 190px; flex-basis: 190px; }
+}

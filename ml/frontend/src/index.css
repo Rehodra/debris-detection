@@ -1,0 +1,26 @@
+:root {
+  font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color: #15253d;
+  background-color: #edf3fa;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #edf3fa;
+}
+
+* {
+  box-sizing: border-box;
+}
