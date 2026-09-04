@@ -5,11 +5,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "MarineScan Debris Detection API"
+    PROJECT_NAME: str = "AquaTrace Debris Detection API"
     API_V1_STR: str = "/api/v1"
     
     # Environment variables requested
-    DATABASE_URL: str = "sqlite:///./marinescan.db"
+    DATABASE_URL: str = "sqlite:///./AquaTrace.db"
     API_BASE_URL: str = "http://localhost:8000"
     MODEL_PATH: str = "ml/weights/best.pt"
     DEMO_MODE: bool = True

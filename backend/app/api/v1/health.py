@@ -12,5 +12,5 @@ async def health_check() -> Dict[str, str]:
     """
     return {
         "status": "ok",
-        "service": "marinescan"
+        "service": "AquaTrace"
     }

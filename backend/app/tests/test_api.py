@@ -20,7 +20,7 @@ class TestAPI(unittest.TestCase):
             response.json(),
             {
                 "status": "ok",
-                "service": "marinescan"
+                "service": "AquaTrace"
             }
         )
 
