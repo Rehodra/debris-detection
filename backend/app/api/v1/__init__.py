@@ -11,6 +11,7 @@ from .confidence import router as confidence_router
 from .geolocation import router as geolocation_router
 from .risk import router as risk_router
 from .analyses import router as analyses_router
+from .exports import router as exports_router
 
 api_v1_router = APIRouter()
 
@@ -25,5 +26,6 @@ api_v1_router.include_router(confidence_router, prefix="/confidence", tags=["Con
 api_v1_router.include_router(geolocation_router, prefix="/geolocation", tags=["Geolocation & Navigation"])
 api_v1_router.include_router(risk_router, prefix="/risk", tags=["Maritime Risk Assessment"])
 api_v1_router.include_router(analyses_router, prefix="/analyses", tags=["Master Survey Analysis Pipeline"])
+api_v1_router.include_router(exports_router, prefix="/exports", tags=["Report Exports"])
 
 __all__ = ["api_v1_router"]
