@@ -516,7 +516,6 @@ class ShadowService:
         Draw highlight boxes (yellow), shadow polygons (cyan/blue), and projection arrows.
         """
         annotated = image_bgr.copy()
-        overlay = annotated.copy()
 
         for res in shadow_results:
             if not res.has_shadow or not res.candidate:
@@ -525,11 +524,14 @@ class ShadowService:
             cand = res.candidate
             spat = res.spatial_relationship
 
-            # Draw filled semi-transparent polygon for shadow region
+            # Draw a thin outline so shadow evidence does not hide the sonar image.
             if cand.contour_points and len(cand.contour_points) >= 3:
                 pts = np.array(cand.contour_points, dtype=np.int32).reshape((-1, 1, 2))
-                cv2.drawContours(overlay, [pts], -1, (255, 200, 0), -1)  # Cyan fill in BGR
-                cv2.polylines(annotated, [pts], True, (255, 255, 0), 2)   # Cyan border
+                x, y, width, height = cv2.boundingRect(pts)
+                image_height, image_width = annotated.shape[:2]
+                oversized = width > image_width * 0.75 or height > image_height * 0.75
+                if not oversized:
+                    cv2.polylines(annotated, [pts], True, (255, 255, 0), 2)  # Cyan outline
 
             # Draw acoustic projection vector arrow from highlight to shadow
             if spat:
@@ -553,8 +555,6 @@ class ShadowService:
                     cv2.LINE_AA,
                 )
 
-        # Blend semi-transparent shadow mask
-        cv2.addWeighted(overlay, 0.4, annotated, 0.6, 0, annotated)
         return annotated
 
 

@@ -56,8 +56,8 @@ CLASS_MAP: Dict[int, ClassMetadata] = {
         display_name="Shipwreck",
         category="Maritime Vessel",
         risk_level="High",
-        color_hex="#457B9D",
-        color_rgb=(69, 123, 157),
+        color_hex="#FF2D2D",
+        color_rgb=(255, 45, 45),
         description="Submerged vessel hull, superstructure or derelict wreck presenting navigation or environmental hazards."
     ),
 }
