@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Sidebar } from './components/sidebar';
+import { Navbar } from './components/Navbar';
 import { Dashboard } from './pages/Dashboard';
 import { SonarAnalysis } from './pages/SonarAnalysis';
 
@@ -15,6 +16,17 @@ const App: React.FC = () => {
         return <Dashboard onNavigate={setActivePage} />;
     }
   };
+
+  if (activePage === 'Dashboard') {
+    return (
+      <div className="app-container-vertical">
+        <Navbar active={activePage} onNavigate={setActivePage} />
+        <main className="app-main">
+          {renderPage()}
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="app-container">
