@@ -12,34 +12,19 @@ import math
 import logging
 from typing import Optional, List, Dict, Any, Tuple
 
-try:
-    from app.schemas.physics import (
-        SedimentType,
-        OceanEnvironmentParams,
-        AcousticEnvironment,
-        SonarGeometry,
-        ObjectPhysicalProperties,
-        HydrodynamicStability,
-        PhysicalPlausibility,
-        TargetPhysicsAnalysis,
-        BatchPhysicsResponse,
-    )
-    from app.schemas.detection import DetectionItem, BoundingBox
-    from app.schemas.shadow import ShadowAnalysisResult
-except ImportError:
-    from backend.app.schemas.physics import (
-        SedimentType,
-        OceanEnvironmentParams,
-        AcousticEnvironment,
-        SonarGeometry,
-        ObjectPhysicalProperties,
-        HydrodynamicStability,
-        PhysicalPlausibility,
-        TargetPhysicsAnalysis,
-        BatchPhysicsResponse,
-    )
-    from backend.app.schemas.detection import DetectionItem, BoundingBox
-    from backend.app.schemas.shadow import ShadowAnalysisResult
+from app.schemas.physics import (
+    SedimentType,
+    OceanEnvironmentParams,
+    AcousticEnvironment,
+    SonarGeometry,
+    ObjectPhysicalProperties,
+    HydrodynamicStability,
+    PhysicalPlausibility,
+    TargetPhysicsAnalysis,
+    BatchPhysicsResponse,
+)
+from app.schemas.detection import DetectionItem, BoundingBox
+from app.schemas.shadow import ShadowAnalysisResult
 
 logger = logging.getLogger("marinescan.services.physics")
 

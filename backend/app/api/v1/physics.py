@@ -8,30 +8,17 @@ import logging
 from typing import Optional, List
 from fastapi import APIRouter, UploadFile, File, Query, HTTPException, status
 
-try:
-    from app.services.physics_service import physics_service
-    from app.services.inference_service import inference_service
-    from app.services.shadow_service import shadow_service
-    from app.schemas.physics import (
-        SedimentType,
-        OceanEnvironmentParams,
-        AcousticEnvironment,
-        TargetPhysicsAnalysis,
-        BatchPhysicsResponse,
-    )
-    from app.schemas.common import ErrorResponse
-except ImportError:
-    from backend.app.services.physics_service import physics_service
-    from backend.app.services.inference_service import inference_service
-    from backend.app.services.shadow_service import shadow_service
-    from backend.app.schemas.physics import (
-        SedimentType,
-        OceanEnvironmentParams,
-        AcousticEnvironment,
-        TargetPhysicsAnalysis,
-        BatchPhysicsResponse,
-    )
-    from backend.app.schemas.common import ErrorResponse
+from app.services.physics_service import physics_service
+from app.services.inference_service import inference_service
+from app.services.shadow_service import shadow_service
+from app.schemas.physics import (
+    SedimentType,
+    OceanEnvironmentParams,
+    AcousticEnvironment,
+    TargetPhysicsAnalysis,
+    BatchPhysicsResponse,
+)
+from app.schemas.common import ErrorResponse
 
 logger = logging.getLogger("marinescan.api.physics")
 

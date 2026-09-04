@@ -8,26 +8,15 @@ import logging
 from typing import Optional, List
 from fastapi import APIRouter, UploadFile, File, Query, HTTPException, status, Response
 
-try:
-    from app.services.preprocessing_service import preprocessing_service
-    from app.schemas.preprocessing import (
-        PreprocessingConfig,
-        PreprocessingPreset,
-        ColormapType,
-        PreprocessingResponse,
-        PresetInfo,
-    )
-    from app.schemas.common import ErrorResponse
-except ImportError:
-    from backend.app.services.preprocessing_service import preprocessing_service
-    from backend.app.schemas.preprocessing import (
-        PreprocessingConfig,
-        PreprocessingPreset,
-        ColormapType,
-        PreprocessingResponse,
-        PresetInfo,
-    )
-    from backend.app.schemas.common import ErrorResponse
+from app.services.preprocessing_service import preprocessing_service
+from app.schemas.preprocessing import (
+    PreprocessingConfig,
+    PreprocessingPreset,
+    ColormapType,
+    PreprocessingResponse,
+    PresetInfo,
+)
+from app.schemas.common import ErrorResponse
 
 logger = logging.getLogger("marinescan.api.preprocessing")
 

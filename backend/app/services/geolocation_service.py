@@ -8,32 +8,18 @@ import math
 import logging
 from typing import Optional, List, Dict, Any, Tuple
 
-try:
-    from app.schemas.geolocation import (
-        NavigationalFix,
-        TowfishConfig,
-        SonarScanOrigin,
-        GeoCoordinates,
-        GeolocatedTarget,
-        GeoJSONGeometry,
-        GeoJSONFeature,
-        GeoJSONFeatureCollection,
-        BatchGeolocationResponse,
-    )
-    from app.schemas.detection import BoundingBox, DetectionItem
-except ImportError:
-    from backend.app.schemas.geolocation import (
-        NavigationalFix,
-        TowfishConfig,
-        SonarScanOrigin,
-        GeoCoordinates,
-        GeolocatedTarget,
-        GeoJSONGeometry,
-        GeoJSONFeature,
-        GeoJSONFeatureCollection,
-        BatchGeolocationResponse,
-    )
-    from backend.app.schemas.detection import BoundingBox, DetectionItem
+from app.schemas.geolocation import (
+    NavigationalFix,
+    TowfishConfig,
+    SonarScanOrigin,
+    GeoCoordinates,
+    GeolocatedTarget,
+    GeoJSONGeometry,
+    GeoJSONFeature,
+    GeoJSONFeatureCollection,
+    BatchGeolocationResponse,
+)
+from app.schemas.detection import BoundingBox, DetectionItem
 
 logger = logging.getLogger("marinescan.services.geolocation")
 

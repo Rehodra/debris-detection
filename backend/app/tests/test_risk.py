@@ -10,16 +10,10 @@ import numpy as np
 import cv2
 from fastapi.testclient import TestClient
 
-try:
-    from app.main import app
-    from app.core.config import settings
-    from app.services.risk_service import risk_service
-    from app.schemas.risk import RiskTier
-except ImportError:
-    from backend.app.main import app
-    from backend.app.core.config import settings
-    from backend.app.services.risk_service import risk_service
-    from backend.app.schemas.risk import RiskTier
+from app.main import app
+from app.core.config import settings
+from app.services.risk_service import risk_service
+from app.schemas.risk import RiskTier
 
 
 class TestRiskService(unittest.TestCase):

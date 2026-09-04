@@ -10,24 +10,14 @@ import numpy as np
 import cv2
 from fastapi.testclient import TestClient
 
-try:
-    from app.main import app
-    from app.core.config import settings
-    from app.services.physics_service import physics_service
-    from app.schemas.physics import (
-        OceanEnvironmentParams,
-        SedimentType,
-    )
-    from app.schemas.shadow import ShadowAnalysisResult, ShadowExtent
-except ImportError:
-    from backend.app.main import app
-    from backend.app.core.config import settings
-    from backend.app.services.physics_service import physics_service
-    from backend.app.schemas.physics import (
-        OceanEnvironmentParams,
-        SedimentType,
-    )
-    from backend.app.schemas.shadow import ShadowAnalysisResult, ShadowExtent
+from app.main import app
+from app.core.config import settings
+from app.services.physics_service import physics_service
+from app.schemas.physics import (
+    OceanEnvironmentParams,
+    SedimentType,
+)
+from app.schemas.shadow import ShadowAnalysisResult, ShadowExtent
 
 
 class TestPhysicsService(unittest.TestCase):

@@ -8,16 +8,10 @@ import logging
 from typing import Optional, Tuple
 from fastapi import APIRouter, UploadFile, File, Query, HTTPException, status, Response
 
-try:
-    from app.services.shadow_service import shadow_service
-    from app.services.inference_service import inference_service
-    from app.schemas.shadow import ShadowAnalysisResponse
-    from app.schemas.common import ErrorResponse
-except ImportError:
-    from backend.app.services.shadow_service import shadow_service
-    from backend.app.services.inference_service import inference_service
-    from backend.app.schemas.shadow import ShadowAnalysisResponse
-    from backend.app.schemas.common import ErrorResponse
+from app.services.shadow_service import shadow_service
+from app.services.inference_service import inference_service
+from app.schemas.shadow import ShadowAnalysisResponse
+from app.schemas.common import ErrorResponse
 
 logger = logging.getLogger("marinescan.api.shadows")
 

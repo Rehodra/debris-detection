@@ -14,10 +14,7 @@ import numpy as np
 from PIL import Image
 from app.ml.class_map import get_class_metadata, get_class_name
 
-# try:
-#     from app.ml.class_map import get_class_metadata, get_class_name
-# except ImportError:
-#     from backend.app.ml.class_map import get_class_metadata, get_class_name
+
 
 
 def parse_yolo_results(

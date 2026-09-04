@@ -4,40 +4,22 @@ import unittest
 import numpy as np
 import cv2
 
-try:
-    from app.ml.class_map import (
-        CLASS_MAP,
-        CLASS_NAMES,
-        get_class_name,
-        get_class_id,
-        get_class_metadata,
-        get_all_classes,
-    )
-    from app.ml.model_loader import model_loader
-    from app.ml.postprocess import (
-        render_detections_overlay,
-        encode_image_to_jpeg_bytes,
-        encode_image_to_base64,
-    )
-    from app.services.inference_service import inference_service
-    from app.schemas.detection import TilingConfig
-except ImportError:
-    from backend.app.ml.class_map import (
-        CLASS_MAP,
-        CLASS_NAMES,
-        get_class_name,
-        get_class_id,
-        get_class_metadata,
-        get_all_classes,
-    )
-    from backend.app.ml.model_loader import model_loader
-    from backend.app.ml.postprocess import (
-        render_detections_overlay,
-        encode_image_to_jpeg_bytes,
-        encode_image_to_base64,
-    )
-    from backend.app.services.inference_service import inference_service
-    from backend.app.schemas.detection import TilingConfig
+from app.ml.class_map import (
+    CLASS_MAP,
+    CLASS_NAMES,
+    get_class_name,
+    get_class_id,
+    get_class_metadata,
+    get_all_classes,
+)
+from app.ml.model_loader import model_loader
+from app.ml.postprocess import (
+    render_detections_overlay,
+    encode_image_to_jpeg_bytes,
+    encode_image_to_base64,
+)
+from app.services.inference_service import inference_service
+from app.schemas.detection import TilingConfig
 
 
 class TestMLComponents(unittest.TestCase):

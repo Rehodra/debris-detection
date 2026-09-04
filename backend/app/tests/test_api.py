@@ -7,14 +7,7 @@ from app.main import app
 from app.core.config import settings
 from app.ml.model_loader import model_loader
 
-# try:
-#     from app.main import app
-#     from app.core.config import settings
-#     from app.ml.model_loader import model_loader
-# except ImportError:
-#     from backend.app.main import app
-#     from backend.app.core.config import settings
-#     from backend.app.ml.model_loader import model_loader
+
 
 
 class TestAPI(unittest.TestCase):

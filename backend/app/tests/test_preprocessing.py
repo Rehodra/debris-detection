@@ -6,24 +6,14 @@ import numpy as np
 import cv2
 from fastapi.testclient import TestClient
 
-try:
-    from app.main import app
-    from app.core.config import settings
-    from app.services.preprocessing_service import preprocessing_service
-    from app.schemas.preprocessing import (
-        PreprocessingConfig,
-        PreprocessingPreset,
-        ColormapType,
-    )
-except ImportError:
-    from backend.app.main import app
-    from backend.app.core.config import settings
-    from backend.app.services.preprocessing_service import preprocessing_service
-    from backend.app.schemas.preprocessing import (
-        PreprocessingConfig,
-        PreprocessingPreset,
-        ColormapType,
-    )
+from app.main import app
+from app.core.config import settings
+from app.services.preprocessing_service import preprocessing_service
+from app.schemas.preprocessing import (
+    PreprocessingConfig,
+    PreprocessingPreset,
+    ColormapType,
+)
 
 
 class TestPreprocessingService(unittest.TestCase):

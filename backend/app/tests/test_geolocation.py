@@ -10,24 +10,14 @@ import numpy as np
 import cv2
 from fastapi.testclient import TestClient
 
-try:
-    from app.main import app
-    from app.core.config import settings
-    from app.services.geolocation_service import geolocation_service
-    from app.schemas.geolocation import (
-        NavigationalFix,
-        TowfishConfig,
-        SonarScanOrigin,
-    )
-except ImportError:
-    from backend.app.main import app
-    from backend.app.core.config import settings
-    from backend.app.services.geolocation_service import geolocation_service
-    from backend.app.schemas.geolocation import (
-        NavigationalFix,
-        TowfishConfig,
-        SonarScanOrigin,
-    )
+from app.main import app
+from app.core.config import settings
+from app.services.geolocation_service import geolocation_service
+from app.schemas.geolocation import (
+    NavigationalFix,
+    TowfishConfig,
+    SonarScanOrigin,
+)
 
 
 class TestGeolocationService(unittest.TestCase):

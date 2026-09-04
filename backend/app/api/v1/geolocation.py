@@ -8,30 +8,17 @@ import logging
 from typing import Optional
 from fastapi import APIRouter, UploadFile, File, Query, HTTPException, status, Response
 
-try:
-    from app.services.geolocation_service import geolocation_service
-    from app.services.inference_service import inference_service
-    from app.schemas.geolocation import (
-        NavigationalFix,
-        TowfishConfig,
-        SonarScanOrigin,
-        GeoCoordinates,
-        GeolocatedTarget,
-        BatchGeolocationResponse,
-    )
-    from app.schemas.common import ErrorResponse
-except ImportError:
-    from backend.app.services.geolocation_service import geolocation_service
-    from backend.app.services.inference_service import inference_service
-    from backend.app.schemas.geolocation import (
-        NavigationalFix,
-        TowfishConfig,
-        SonarScanOrigin,
-        GeoCoordinates,
-        GeolocatedTarget,
-        BatchGeolocationResponse,
-    )
-    from backend.app.schemas.common import ErrorResponse
+from app.services.geolocation_service import geolocation_service
+from app.services.inference_service import inference_service
+from app.schemas.geolocation import (
+    NavigationalFix,
+    TowfishConfig,
+    SonarScanOrigin,
+    GeoCoordinates,
+    GeolocatedTarget,
+    BatchGeolocationResponse,
+)
+from app.schemas.common import ErrorResponse
 
 logger = logging.getLogger("marinescan.api.geolocation")
 

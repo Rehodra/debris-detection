@@ -12,20 +12,12 @@ import cv2
 from pathlib import Path
 from fastapi.testclient import TestClient
 
-try:
-    from app.main import app
-    from app.core.config import settings
-    from app.services.input_service import input_service, InputValidationError
-    from app.services.quality_service import quality_service
-    from app.services.master_pipeline_service import master_pipeline_service
-    from app.schemas.analysis import QualityTier
-except ImportError:
-    from backend.app.main import app
-    from backend.app.core.config import settings
-    from backend.app.services.input_service import input_service, InputValidationError
-    from backend.app.services.quality_service import quality_service
-    from backend.app.services.master_pipeline_service import master_pipeline_service
-    from backend.app.schemas.analysis import QualityTier
+from app.main import app
+from app.core.config import settings
+from app.services.input_service import input_service, InputValidationError
+from app.services.quality_service import quality_service
+from app.services.master_pipeline_service import master_pipeline_service
+from app.schemas.analysis import QualityTier
 
 
 class TestMasterPipeline(unittest.TestCase):

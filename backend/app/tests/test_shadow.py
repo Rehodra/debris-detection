@@ -5,23 +5,24 @@ extent geometry, hydrographic height estimation, and composite shadow scoring.
 """
 
 import io
+import sys
 import unittest
+from pathlib import Path
+from typing import Tuple, List, Optional, Dict
 import numpy as np
 import cv2
 from PIL import Image
 from fastapi.testclient import TestClient
 
-try:
-    from app.main import app
-    from app.core.config import settings
-    from app.schemas.detection import BoundingBox
-    from app.services.shadow_service import shadow_service
-except ImportError:
-    from backend.app.main import app
-    from backend.app.core.config import settings
-    from backend.app.schemas.detection import BoundingBox
-    from backend.app.services.shadow_service import shadow_service
+# Ensure backend root is on sys.path for IDE & test runner compatibility
+backend_root = Path(__file__).resolve().parents[2]
+if str(backend_root) not in sys.path:
+    sys.path.insert(0, str(backend_root))
 
+from app.main import app
+from app.core.config import settings
+from app.schemas.detection import BoundingBox
+from app.services.shadow_service import shadow_service
 
 class TestShadowService(unittest.TestCase):
     @classmethod

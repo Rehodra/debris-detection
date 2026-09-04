@@ -15,52 +15,28 @@ import cv2
 import numpy as np
 from PIL import Image
 
-try:
-    from app.core.config import settings
-    from app.ml.model_loader import model_loader
-    from app.ml.class_map import get_class_metadata, get_class_name
-    from app.ml.postprocess import (
-        parse_yolo_results,
-        render_detections_overlay,
-        encode_image_to_jpeg_bytes,
-        encode_image_to_base64,
-    )
-    from app.schemas.detection import (
-        DetectionResponse,
-        DetectionItem,
-        DetectionSummary,
-        BoundingBox,
-        PhysicalDimensions,
-        ImageMetadata,
-        TimingBreakdown,
-        TilingConfig,
-        BatchDetectionResponse,
-    )
-    from app.schemas.preprocessing import PreprocessingConfig, PreprocessingPreset
-    from app.services.preprocessing_service import preprocessing_service
-except ImportError:
-    from backend.app.core.config import settings
-    from backend.app.ml.model_loader import model_loader
-    from backend.app.ml.class_map import get_class_metadata, get_class_name
-    from backend.app.ml.postprocess import (
-        parse_yolo_results,
-        render_detections_overlay,
-        encode_image_to_jpeg_bytes,
-        encode_image_to_base64,
-    )
-    from backend.app.schemas.detection import (
-        DetectionResponse,
-        DetectionItem,
-        DetectionSummary,
-        BoundingBox,
-        PhysicalDimensions,
-        ImageMetadata,
-        TimingBreakdown,
-        TilingConfig,
-        BatchDetectionResponse,
-    )
-    from backend.app.schemas.preprocessing import PreprocessingConfig, PreprocessingPreset
-    from backend.app.services.preprocessing_service import preprocessing_service
+from app.core.config import settings
+from app.ml.model_loader import model_loader
+from app.ml.class_map import get_class_metadata, get_class_name
+from app.ml.postprocess import (
+    parse_yolo_results,
+    render_detections_overlay,
+    encode_image_to_jpeg_bytes,
+    encode_image_to_base64,
+)
+from app.schemas.detection import (
+    DetectionResponse,
+    DetectionItem,
+    DetectionSummary,
+    BoundingBox,
+    PhysicalDimensions,
+    ImageMetadata,
+    TimingBreakdown,
+    TilingConfig,
+    BatchDetectionResponse,
+)
+from app.schemas.preprocessing import PreprocessingConfig, PreprocessingPreset
+from app.services.preprocessing_service import preprocessing_service
 
 logger = logging.getLogger("marinescan.services.inference")
 

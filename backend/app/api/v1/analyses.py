@@ -9,20 +9,12 @@ from typing import Optional
 from fastapi import APIRouter, UploadFile, File, Query, HTTPException, status, Response
 import cv2
 
-try:
-    from app.services.master_pipeline_service import master_pipeline_service
-    from app.services.input_service import InputValidationError
-    from app.services.shadow_service import shadow_service
-    from app.ml.postprocess import render_detections_overlay, encode_image_to_jpeg_bytes
-    from app.schemas.analysis import MasterAnalysisResult
-    from app.schemas.common import ErrorResponse
-except ImportError:
-    from backend.app.services.master_pipeline_service import master_pipeline_service
-    from backend.app.services.input_service import InputValidationError
-    from backend.app.services.shadow_service import shadow_service
-    from backend.app.ml.postprocess import render_detections_overlay, encode_image_to_jpeg_bytes
-    from backend.app.schemas.analysis import MasterAnalysisResult
-    from backend.app.schemas.common import ErrorResponse
+from app.services.master_pipeline_service import master_pipeline_service
+from app.services.input_service import InputValidationError
+from app.services.shadow_service import shadow_service
+from app.ml.postprocess import render_detections_overlay, encode_image_to_jpeg_bytes
+from app.schemas.analysis import MasterAnalysisResult
+from app.schemas.common import ErrorResponse
 
 logger = logging.getLogger("marinescan.api.analyses")
 

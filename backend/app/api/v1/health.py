@@ -5,10 +5,7 @@ from fastapi import APIRouter
 from app.ml.model_loader import model_loader
 
 
-# try:
-#     from app.ml.model_loader import model_loader
-# except ImportError:
-#     from backend.app.ml.model_loader import model_loader
+
 
 router = APIRouter()
 

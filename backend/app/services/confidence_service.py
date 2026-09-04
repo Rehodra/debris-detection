@@ -11,32 +11,18 @@ from typing import Optional, List, Dict, Any, Tuple
 import cv2
 import numpy as np
 
-try:
-    from app.schemas.confidence import (
-        TrustTier,
-        ImageQualityMetrics,
-        ConfidencePillars,
-        TargetConfidenceProfile,
-        BatchConfidenceResponse,
-    )
-    from app.schemas.detection import BoundingBox, DetectionItem
-    from app.schemas.shadow import ShadowAnalysisResult
-    from app.schemas.physics import TargetPhysicsAnalysis
-    from app.services.physics_service import physics_service
-    from app.services.shadow_service import shadow_service
-except ImportError:
-    from backend.app.schemas.confidence import (
-        TrustTier,
-        ImageQualityMetrics,
-        ConfidencePillars,
-        TargetConfidenceProfile,
-        BatchConfidenceResponse,
-    )
-    from backend.app.schemas.detection import BoundingBox, DetectionItem
-    from backend.app.schemas.shadow import ShadowAnalysisResult
-    from backend.app.schemas.physics import TargetPhysicsAnalysis
-    from backend.app.services.physics_service import physics_service
-    from backend.app.services.shadow_service import shadow_service
+from app.schemas.confidence import (
+    TrustTier,
+    ImageQualityMetrics,
+    ConfidencePillars,
+    TargetConfidenceProfile,
+    BatchConfidenceResponse,
+)
+from app.schemas.detection import BoundingBox, DetectionItem
+from app.schemas.shadow import ShadowAnalysisResult
+from app.schemas.physics import TargetPhysicsAnalysis
+from app.services.physics_service import physics_service
+from app.services.shadow_service import shadow_service
 
 logger = logging.getLogger("marinescan.services.confidence")
 

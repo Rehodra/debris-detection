@@ -10,10 +10,7 @@ from typing import Tuple
 import cv2
 import numpy as np
 
-try:
-    from app.schemas.detection import ImageMetadata
-except ImportError:
-    from backend.app.schemas.detection import ImageMetadata
+from app.schemas.detection import ImageMetadata
 
 logger = logging.getLogger("marinescan.services.input")
 

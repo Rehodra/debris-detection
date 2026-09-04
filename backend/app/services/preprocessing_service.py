@@ -15,24 +15,14 @@ import cv2
 import numpy as np
 from PIL import Image
 
-try:
-    from app.schemas.preprocessing import (
-        PreprocessingConfig,
-        PreprocessingPreset,
-        ColormapType,
-        ImageStats,
-        PreprocessingResponse,
-        PresetInfo,
-    )
-except ImportError:
-    from backend.app.schemas.preprocessing import (
-        PreprocessingConfig,
-        PreprocessingPreset,
-        ColormapType,
-        ImageStats,
-        PreprocessingResponse,
-        PresetInfo,
-    )
+from app.schemas.preprocessing import (
+    PreprocessingConfig,
+    PreprocessingPreset,
+    ColormapType,
+    ImageStats,
+    PreprocessingResponse,
+    PresetInfo,
+)
 
 logger = logging.getLogger("marinescan.services.preprocessing")
 

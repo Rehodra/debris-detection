@@ -18,12 +18,7 @@ from ultralytics import YOLO
 from app.core.config import settings
 from app.ml.class_map import CLASS_NAMES
 
-# try:
-#     from app.core.config import settings
-#     from app.ml.class_map import CLASS_NAMES
-# except ImportError:
-#     from backend.app.core.config import settings
-#     from backend.app.ml.class_map import CLASS_NAMES
+
 
 logger = logging.getLogger("marinescan.ml.model_loader")
 
@@ -96,11 +91,17 @@ class ModelLoader:
 
         for path in search_paths:
             if path.is_file():
-                return path.resolve()
+                try:
+                    return Path(os.path.relpath(path, cwd))
+                except Exception:
+                    return path.resolve()
 
         # If not found yet, raise or return the primary target path
         primary = Path(target) if target else search_paths[0]
-        return primary.resolve()
+        try:
+            return Path(os.path.relpath(primary, cwd))
+        except Exception:
+            return primary.resolve()
 
     def load(self, model_path: Optional[str] = None, force_reload: bool = False) -> YOLO:
         """Load the YOLO model from disk and perform warmup inference."""

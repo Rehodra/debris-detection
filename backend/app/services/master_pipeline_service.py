@@ -22,64 +22,34 @@ from typing import Optional, List, Dict, Any, Tuple
 import cv2
 import numpy as np
 
-try:
-    from app.schemas.analysis import (
-        MasterAnalysisResult,
-        MasterTargetResult,
-        ExecutiveSummary,
-        StageTimings,
-        QualityAssessment,
-        ShadowEvidence,
-        MasterPhysicalDimensions,
-    )
-    from app.schemas.detection import BoundingBox, TilingConfig
-    from app.schemas.preprocessing import PreprocessingConfig, PreprocessingPreset
-    from app.schemas.geolocation import (
-        NavigationalFix,
-        TowfishConfig,
-        SonarScanOrigin,
-        GeoJSONFeatureCollection,
-    )
-    from app.schemas.risk import RiskTier
-    from app.services.input_service import input_service, InputValidationError
-    from app.services.quality_service import quality_service
-    from app.services.preprocessing_service import preprocessing_service
-    from app.services.inference_service import inference_service
-    from app.services.shadow_service import shadow_service
-    from app.services.physics_service import physics_service
-    from app.services.confidence_service import confidence_service
-    from app.services.geolocation_service import geolocation_service
-    from app.services.risk_service import risk_service
-    from app.ml.postprocess import render_detections_overlay, encode_image_to_base64
-except ImportError:
-    from backend.app.schemas.analysis import (
-        MasterAnalysisResult,
-        MasterTargetResult,
-        ExecutiveSummary,
-        StageTimings,
-        QualityAssessment,
-        ShadowEvidence,
-        MasterPhysicalDimensions,
-    )
-    from backend.app.schemas.detection import BoundingBox, TilingConfig
-    from backend.app.schemas.preprocessing import PreprocessingConfig, PreprocessingPreset
-    from backend.app.schemas.geolocation import (
-        NavigationalFix,
-        TowfishConfig,
-        SonarScanOrigin,
-        GeoJSONFeatureCollection,
-    )
-    from backend.app.schemas.risk import RiskTier
-    from backend.app.services.input_service import input_service, InputValidationError
-    from backend.app.services.quality_service import quality_service
-    from backend.app.services.preprocessing_service import preprocessing_service
-    from backend.app.services.inference_service import inference_service
-    from backend.app.services.shadow_service import shadow_service
-    from backend.app.services.physics_service import physics_service
-    from backend.app.services.confidence_service import confidence_service
-    from backend.app.services.geolocation_service import geolocation_service
-    from backend.app.services.risk_service import risk_service
-    from backend.app.ml.postprocess import render_detections_overlay, encode_image_to_base64
+from app.schemas.analysis import (
+    MasterAnalysisResult,
+    MasterTargetResult,
+    ExecutiveSummary,
+    StageTimings,
+    QualityAssessment,
+    ShadowEvidence,
+    MasterPhysicalDimensions,
+)
+from app.schemas.detection import BoundingBox, TilingConfig
+from app.schemas.preprocessing import PreprocessingConfig, PreprocessingPreset
+from app.schemas.geolocation import (
+    NavigationalFix,
+    TowfishConfig,
+    SonarScanOrigin,
+    GeoJSONFeatureCollection,
+)
+from app.schemas.risk import RiskTier
+from app.services.input_service import input_service, InputValidationError
+from app.services.quality_service import quality_service
+from app.services.preprocessing_service import preprocessing_service
+from app.services.inference_service import inference_service
+from app.services.shadow_service import shadow_service
+from app.services.physics_service import physics_service
+from app.services.confidence_service import confidence_service
+from app.services.geolocation_service import geolocation_service
+from app.services.risk_service import risk_service
+from app.ml.postprocess import render_detections_overlay, encode_image_to_base64
 
 logger = logging.getLogger("marinescan.services.master_pipeline")
 
@@ -327,7 +297,13 @@ class MasterPipelineService:
                     seabed_mobility_status=stab.mobility_status,
                 )
             else:
-                bbox_dict = cand.get("bbox", {})
+                raw_bbox_dict = cand.get("bbox")
+                if isinstance(raw_bbox_dict, BoundingBox):
+                    bbox_dict = raw_bbox_dict.model_dump()
+                elif isinstance(raw_bbox_dict, dict):
+                    bbox_dict = raw_bbox_dict
+                else:
+                    bbox_dict = {}
                 w_m = float(bbox_dict.get("width", 20)) * meters_per_pixel
                 h_m = float(bbox_dict.get("height", 20)) * meters_per_pixel
                 dim_obj = MasterPhysicalDimensions(
@@ -385,13 +361,25 @@ class MasterPipelineService:
                 recs = []
                 risk_counts[RiskTier.LOW.value] += 1
 
+            raw_bbox = cand.get("bbox")
+            if isinstance(raw_bbox, BoundingBox):
+                bbox_obj = raw_bbox
+            elif isinstance(raw_bbox, dict):
+                bbox_obj = BoundingBox(**raw_bbox)
+            else:
+                bbox_obj = BoundingBox(
+                    x_min=0.0, y_min=0.0, x_max=0.0, y_max=0.0,
+                    width=0.0, height=0.0,
+                    normalized_x_min=0.0, normalized_y_min=0.0, normalized_x_max=0.0, normalized_y_max=0.0
+                )
+
             target_res = MasterTargetResult(
                 detection_id=tid,
                 class_id=cand.get("class_id", 0),
                 class_name=cname,
                 display_name=cand.get("display_name", cname.title()),
                 category=cand.get("category", "Maritime Anomaly"),
-                bbox=BoundingBox(**cand.get("bbox")),
+                bbox=bbox_obj,
                 ai_confidence=round(ai_c, 3),
                 calibrated_confidence=round(cal_c, 3),
                 trust_tier=t_tier,

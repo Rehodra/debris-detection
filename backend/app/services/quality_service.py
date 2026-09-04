@@ -10,10 +10,7 @@ from typing import List
 import cv2
 import numpy as np
 
-try:
-    from app.schemas.analysis import QualityAssessment, QualityTier
-except ImportError:
-    from backend.app.schemas.analysis import QualityAssessment, QualityTier
+from app.schemas.analysis import QualityAssessment, QualityTier
 
 logger = logging.getLogger("marinescan.services.quality")
 

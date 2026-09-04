@@ -6,14 +6,7 @@ from app.core.config import settings
 from app.api.v1 import api_v1_router
 from app.ml.model_loader import model_loader
 
-# try:
-#     from app.core.config import settings
-#     from app.api.v1 import api_v1_router
-#     from app.ml.model_loader import model_loader
-# except ImportError:
-#     from backend.app.core.config import settings
-#     from backend.app.api.v1 import api_v1_router
-#     from backend.app.ml.model_loader import model_loader
+
 
 logger = logging.getLogger("marinescan.main")
 

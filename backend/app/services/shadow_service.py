@@ -13,28 +13,16 @@ from typing import Optional, List, Tuple, Dict, Any
 import cv2
 import numpy as np
 
-try:
-    from app.schemas.detection import BoundingBox, DetectionItem
-    from app.schemas.shadow import (
-        ShadowCandidate,
-        SpatialRelationship,
-        ShadowDirection,
-        ShadowExtent,
-        ShadowAnalysisResult,
-        ShadowAnalysisResponse,
-    )
-    from app.ml.postprocess import encode_image_to_jpeg_bytes, encode_image_to_base64
-except ImportError:
-    from backend.app.schemas.detection import BoundingBox, DetectionItem
-    from backend.app.schemas.shadow import (
-        ShadowCandidate,
-        SpatialRelationship,
-        ShadowDirection,
-        ShadowExtent,
-        ShadowAnalysisResult,
-        ShadowAnalysisResponse,
-    )
-    from backend.app.ml.postprocess import encode_image_to_jpeg_bytes, encode_image_to_base64
+from app.schemas.detection import BoundingBox, DetectionItem
+from app.schemas.shadow import (
+    ShadowCandidate,
+    SpatialRelationship,
+    ShadowDirection,
+    ShadowExtent,
+    ShadowAnalysisResult,
+    ShadowAnalysisResponse,
+)
+from app.ml.postprocess import encode_image_to_jpeg_bytes, encode_image_to_base64
 
 logger = logging.getLogger("marinescan.services.shadow")
 
@@ -51,12 +39,13 @@ class ShadowService:
         image_gray: np.ndarray,
         highlight_bbox: BoundingBox,
         search_radius_factor: float = 3.0,
-    ) -> List[Tuple[np.ndarray, Tuple[int, int, int, int], float]]:
+    ) -> List[Tuple[np.ndarray, Tuple[int, int, int, int], float, float, float]]:
         """
         Extract dark acoustic shadow candidate regions in the vicinity of the highlight.
 
         Returns:
-            List of (contour, (x, y, w, h), mean_intensity) sorted by darkness and area.
+            List of (contour, (x, y, w, h), mean_intensity, area, ambient_median)
+            sorted by darkness and area.
         """
         img_h, img_w = image_gray.shape[:2]
 

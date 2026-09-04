@@ -7,32 +7,18 @@ subsea infrastructure threats, environmental pollution risks, and composite haza
 import logging
 from typing import Optional, List, Dict, Any, Tuple
 
-try:
-    from app.schemas.risk import (
-        RiskTier,
-        NavigationalClearance,
-        RiskFactors,
-        ActionRecommendation,
-        TargetRiskAssessment,
-        BatchRiskResponse,
-    )
-    from app.schemas.detection import DetectionItem
-    from app.schemas.shadow import ShadowAnalysisResult
-    from app.schemas.physics import TargetPhysicsAnalysis
-    from app.schemas.confidence import TargetConfidenceProfile, TrustTier
-except ImportError:
-    from backend.app.schemas.risk import (
-        RiskTier,
-        NavigationalClearance,
-        RiskFactors,
-        ActionRecommendation,
-        TargetRiskAssessment,
-        BatchRiskResponse,
-    )
-    from backend.app.schemas.detection import DetectionItem
-    from backend.app.schemas.shadow import ShadowAnalysisResult
-    from backend.app.schemas.physics import TargetPhysicsAnalysis
-    from backend.app.schemas.confidence import TargetConfidenceProfile, TrustTier
+from app.schemas.risk import (
+    RiskTier,
+    NavigationalClearance,
+    RiskFactors,
+    ActionRecommendation,
+    TargetRiskAssessment,
+    BatchRiskResponse,
+)
+from app.schemas.detection import DetectionItem
+from app.schemas.shadow import ShadowAnalysisResult
+from app.schemas.physics import TargetPhysicsAnalysis
+from app.schemas.confidence import TargetConfidenceProfile, TrustTier
 
 logger = logging.getLogger("marinescan.services.risk")
 

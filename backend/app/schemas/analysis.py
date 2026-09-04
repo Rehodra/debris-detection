@@ -10,16 +10,10 @@ from typing import List, Optional, Dict, Any
 from enum import Enum
 from pydantic import BaseModel, Field
 
-try:
-    from app.schemas.detection import BoundingBox, ImageMetadata
-    from app.schemas.confidence import TrustTier
-    from app.schemas.risk import RiskTier, NavigationalClearance, ActionRecommendation
-    from app.schemas.geolocation import GeoCoordinates, GeoJSONFeatureCollection
-except ImportError:
-    from backend.app.schemas.detection import BoundingBox, ImageMetadata
-    from backend.app.schemas.confidence import TrustTier
-    from backend.app.schemas.risk import RiskTier, NavigationalClearance, ActionRecommendation
-    from backend.app.schemas.geolocation import GeoCoordinates, GeoJSONFeatureCollection
+from app.schemas.detection import BoundingBox, ImageMetadata
+from app.schemas.confidence import TrustTier
+from app.schemas.risk import RiskTier, NavigationalClearance, ActionRecommendation
+from app.schemas.geolocation import GeoCoordinates, GeoJSONFeatureCollection
 
 
 class QualityTier(str, Enum):

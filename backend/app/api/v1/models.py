@@ -12,16 +12,7 @@ from app.ml.class_map import get_all_classes
 from app.schemas.detection import ModelInfoResponse, ClassInfoResponse
 from app.schemas.common import StatusResponse, ErrorResponse
 
-# try:
-#     from app.ml.model_loader import model_loader
-#     from app.ml.class_map import get_all_classes
-#     from app.schemas.detection import ModelInfoResponse, ClassInfoResponse
-#     from app.schemas.common import StatusResponse, ErrorResponse
-# except ImportError:
-#     from backend.app.ml.model_loader import model_loader
-#     from backend.app.ml.class_map import get_all_classes
-#     from backend.app.schemas.detection import ModelInfoResponse, ClassInfoResponse
-#     from backend.app.schemas.common import StatusResponse, ErrorResponse
+
 
 logger = logging.getLogger("marinescan.api.models")
 

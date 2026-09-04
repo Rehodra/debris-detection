@@ -8,14 +8,9 @@ import logging
 from typing import Optional, List
 from fastapi import APIRouter, UploadFile, File, Query, HTTPException, status, Response
 
-try:
-    from app.services.inference_service import inference_service
-    from app.schemas.detection import DetectionResponse, BatchDetectionResponse, TilingConfig
-    from app.schemas.common import ErrorResponse
-except ImportError:
-    from backend.app.services.inference_service import inference_service
-    from backend.app.schemas.detection import DetectionResponse, BatchDetectionResponse, TilingConfig
-    from backend.app.schemas.common import ErrorResponse
+from app.services.inference_service import inference_service
+from app.schemas.detection import DetectionResponse, BatchDetectionResponse, TilingConfig
+from app.schemas.common import ErrorResponse
 
 logger = logging.getLogger("marinescan.api.detections")
 
