@@ -297,7 +297,7 @@ class InferenceService:
             for b_idx in range(len(confs)):
                 conf = float(confs[b_idx])
                 cid = int(clss[b_idx])
-                cname = get_class_name(cid)
+                cname = model.names.get(cid, get_class_name(cid))
 
                 if classes_filter and cname.lower() not in [c.lower() for c in classes_filter]:
                     continue
@@ -340,8 +340,8 @@ class InferenceService:
                     bx, by, bw, bh = raw_boxes[i]
                     conf = raw_scores[i]
                     cid = raw_class_ids[i]
-                    cname = get_class_name(cid)
-                    meta = get_class_metadata(cid)
+                    cname = model.names.get(cid, get_class_name(cid))
+                    meta = get_class_metadata(cname)
 
                     risk_level = meta.risk_level if meta else "Unknown"
                     if risk_level in ["Critical", "High"]:
