@@ -15,6 +15,11 @@ class Settings(BaseSettings):
     DEMO_MODE: bool = True
     CONFIDENCE_THRESHOLD: float = 0.50
 
+    # Optional Cloudinary delivery for generated prediction images.
+    CLOUDINARY_CLOUD_NAME: str = ""
+    CLOUDINARY_API_KEY: str = ""
+    CLOUDINARY_API_SECRET: str = ""
+
     # Server & Debug settings
     DEBUG: bool = False
     HOST: str = "0.0.0.0"

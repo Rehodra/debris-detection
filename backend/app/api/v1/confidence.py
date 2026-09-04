@@ -46,7 +46,8 @@ async def evaluate_target_confidence(
         base_val = 80
         img_patch = np.full((patch_size, patch_size), base_val, dtype=np.uint8)
         # Add target contrast scaled by quality_score
-        contrast_add = int(quality_score * 120)
+        effective_quality_score = quality_score if quality_score is not None else 0.85
+        contrast_add = int(effective_quality_score * 120)
         cv2.rectangle(img_patch, (20, 20), (80, 80), base_val + contrast_add, -1)
 
         bbox = BoundingBox(
@@ -65,6 +66,10 @@ async def evaluate_target_confidence(
                 has_shadow=(shadow_score > 0.1),
                 shadow_score=shadow_score,
                 confidence_adjustment=0.10 if shadow_score >= 0.6 else -0.05,
+                candidate=None,
+                spatial_relationship=None,
+                direction=None,
+                extent=None,
                 quality_assessment="Corroborated Shadow" if shadow_score >= 0.6 else "Weak Shadow",
             )
 

@@ -127,3 +127,5 @@ class MasterAnalysisResult(BaseModel):
     geojson: GeoJSONFeatureCollection = Field(..., description="RFC 7946 GeoJSON FeatureCollection for mapping")
     summary: ExecutiveSummary = Field(..., description="Executive mission summary")
     annotated_image_base64: Optional[str] = Field(None, description="Base64 encoded visual overlay with boxes & shadows")
+    prediction_image_path: Optional[str] = Field(None, description="Backend path of the persisted prediction image")
+    prediction_image_url: Optional[str] = Field(None, description="Cloudinary HTTPS URL when configured")

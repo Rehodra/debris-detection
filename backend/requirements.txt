@@ -26,3 +26,5 @@ pillow==12.3.0
 # --- ML / Inference ---
 torch==2.13.0
 ultralytics==8.4.138
+# Optional upload delivery for generated prediction images
+cloudinary==1.44.1

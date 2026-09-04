@@ -49,7 +49,8 @@ from app.services.physics_service import physics_service
 from app.services.confidence_service import confidence_service
 from app.services.geolocation_service import geolocation_service
 from app.services.risk_service import risk_service
-from app.ml.postprocess import render_detections_overlay, encode_image_to_base64
+from app.services.image_output_service import image_output_service
+from app.ml.postprocess import render_detections_overlay, encode_image_to_jpeg_bytes
 
 logger = logging.getLogger("marinescan.services.master_pipeline")
 
@@ -426,11 +427,18 @@ class MasterPipelineService:
 
         # Visual overlay rendering
         annotated_b64 = None
+        prediction_image_path = None
+        prediction_image_url = None
         if return_visualization:
             # Composite rendering: shadow contours + projection rays + detection boxes
             rendered_bgr = shadow_service.render_shadow_overlay(img_bgr, shadow_response.results)
             rendered_bgr = render_detections_overlay(rendered_bgr, candidates)
-            annotated_b64 = encode_image_to_base64(rendered_bgr)
+            rendered_jpeg_bytes = encode_image_to_jpeg_bytes(rendered_bgr)
+            rendered_jpeg = image_output_service.save_and_upload(
+                rendered_jpeg_bytes, prefix="master_analysis"
+            )
+            prediction_image_path = rendered_jpeg["local_path"]
+            prediction_image_url = rendered_jpeg["cloudinary_url"] or rendered_jpeg["local_url"]
 
         total_elapsed_ms = (time.perf_counter() - pipeline_start) * 1000.0
 
@@ -459,6 +467,8 @@ class MasterPipelineService:
             geojson=geo_batch.geojson,
             summary=exec_summary,
             annotated_image_base64=annotated_b64,
+            prediction_image_path=prediction_image_path,
+            prediction_image_url=prediction_image_url,
         )
 
 

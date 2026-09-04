@@ -86,6 +86,12 @@ class DetectionResponse(BaseModel):
     annotated_image_base64: Optional[str] = Field(
         None, description="Optional Base64-encoded JPEG image with rendered bounding boxes"
     )
+    prediction_image_path: Optional[str] = Field(
+        None, description="Backend path of the persisted prediction image"
+    )
+    prediction_image_url: Optional[str] = Field(
+        None, description="Cloudinary HTTPS URL when Cloudinary is configured"
+    )
 
 
 class BatchDetectionResponse(BaseModel):

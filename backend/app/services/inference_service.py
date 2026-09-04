@@ -22,7 +22,6 @@ from app.ml.postprocess import (
     parse_yolo_results,
     render_detections_overlay,
     encode_image_to_jpeg_bytes,
-    encode_image_to_base64,
 )
 from app.schemas.detection import (
     DetectionResponse,
@@ -37,6 +36,7 @@ from app.schemas.detection import (
 )
 from app.schemas.preprocessing import PreprocessingConfig, PreprocessingPreset
 from app.services.preprocessing_service import preprocessing_service
+from app.services.image_output_service import image_output_service
 
 logger = logging.getLogger("marinescan.services.inference")
 
@@ -192,9 +192,14 @@ class InferenceService:
 
         # Render overlay if requested
         annotated_b64 = None
+        prediction_image_path = None
+        prediction_image_url = None
         if return_visualization:
             annotated_bgr = render_detections_overlay(image_bgr, detections)
-            annotated_b64 = encode_image_to_base64(annotated_bgr)
+            annotated_jpeg = encode_image_to_jpeg_bytes(annotated_bgr)
+            output = image_output_service.save_and_upload(annotated_jpeg, prefix="detection")
+            prediction_image_path = output["local_path"]
+            prediction_image_url = output["cloudinary_url"] or output["local_url"]
 
         total_duration_ms = (time.perf_counter() - total_start) * 1000.0 + decode_duration_ms
 
@@ -218,6 +223,8 @@ class InferenceService:
             summary=summary,
             tiling_applied=tiling_applied,
             annotated_image_base64=annotated_b64,
+            prediction_image_path=prediction_image_path,
+            prediction_image_url=prediction_image_url,
         )
 
     # -------------------------------------------------------------------------
@@ -494,6 +501,7 @@ class InferenceService:
         det_dicts = [d.model_dump() for d in resp.detections]
         annotated_bgr = render_detections_overlay(img_bgr, det_dicts)
         jpeg_bytes = encode_image_to_jpeg_bytes(annotated_bgr)
+        image_output_service.save_and_upload(jpeg_bytes, prefix="detection")
 
         return jpeg_bytes, resp.summary.total_detections
 

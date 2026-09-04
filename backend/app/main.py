@@ -1,7 +1,9 @@
 import logging
+from pathlib import Path
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.api.v1 import api_v1_router
 from app.ml.model_loader import model_loader
@@ -31,6 +33,9 @@ async def lifespan(app: FastAPI):
 
 
 def create_application() -> FastAPI:
+    prediction_dir = Path(__file__).resolve().parents[1] / "pred_img"
+    prediction_dir.mkdir(parents=True, exist_ok=True)
+
     application = FastAPI(
         title=settings.PROJECT_NAME,
         openapi_url=f"{settings.API_V1_STR}/openapi.json",
@@ -51,6 +56,7 @@ def create_application() -> FastAPI:
 
     # Include API routers
     application.include_router(api_v1_router, prefix=settings.API_V1_STR)
+    application.mount("/pred_img", StaticFiles(directory=prediction_dir), name="prediction-images")
 
     @application.get("/", tags=["Root"])
     async def root_endpoint():

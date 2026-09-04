@@ -13,6 +13,7 @@ from app.services.master_pipeline_service import master_pipeline_service
 from app.services.input_service import InputValidationError
 from app.services.shadow_service import shadow_service
 from app.ml.postprocess import render_detections_overlay, encode_image_to_jpeg_bytes
+from app.services.image_output_service import image_output_service
 from app.schemas.analysis import MasterAnalysisResult
 from app.schemas.common import ErrorResponse
 
@@ -173,12 +174,20 @@ async def visualize_sonar_survey(
                         area_pixels=100.0,
                         estimated_object_height_m=t.shadow_evidence.estimated_height_m,
                     ),
+                    quality_assessment=(
+                        "Strong Shadow"
+                        if t.shadow_evidence.shadow_score >= 0.8
+                        else "Moderate Shadow"
+                        if t.shadow_evidence.shadow_score >= 0.5
+                        else "Weak Shadow"
+                    ),
                 )
                 shadow_results.append(shd_res)
 
         rendered_bgr = shadow_service.render_shadow_overlay(img_bgr, shadow_results)
         rendered_bgr = render_detections_overlay(rendered_bgr, det_dicts)
         jpeg_bytes = encode_image_to_jpeg_bytes(rendered_bgr)
+        image_output_service.save_and_upload(jpeg_bytes, prefix="master_visualize")
 
         return Response(
             content=jpeg_bytes,
