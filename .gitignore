@@ -69,3 +69,8 @@ backend/app/storage/reports/*
 .vscode/
 *.swp
 *.swo
+
+
+models/*.pt
+models/*.onnx
+models/*.engine
