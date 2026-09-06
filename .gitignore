@@ -71,6 +71,6 @@ backend/app/storage/reports/*
 *.swo
 
 
-models/*.pt
-models/*.onnx
-models/*.engine
+*.pt
+*.onnx
+*.engine
