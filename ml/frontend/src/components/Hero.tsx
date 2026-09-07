@@ -20,6 +20,13 @@ export const Hero: React.FC<HeroProps> = ({ onLaunchAnalysis }) => {
       <div className={styles.overlay}>
         <div className={styles.heroContent}>
           <h1 className={styles.animatedText}>AquaTrace</h1>
+          <p className={styles.heroSubtitle}>
+            AI-powered side-scan sonar intelligence for safer oceans. Detect debris, validate acoustic shadows, and turn complex seafloor imagery into precise, actionable maritime insight.
+
+Identify hidden underwater hazards, reduce false alarms, and accurately locate marine debris in real time. Built to support faster decision-making, safer marine operations, and more effective disaster response.
+
+From sonar signals to situational awareness — empowering teams to understand, respond, and protect what lies beneath the surface.
+          </p>
           <div className={styles.heroActions}>
             <button className={styles.primaryBtn} onClick={onLaunchAnalysis}>
               Start Sonar Analysis <ArrowRight size={16} />

@@ -1,61 +1,35 @@
-:root {
-  font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-  color: #15253d;
-  background-color: #edf3fa;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+html, body, #root {
+  height: 100%;
+  width: 100%;
 }
 
 body {
-  margin: 0;
-  padding: 0;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+  font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
   background: #edf3fa;
-}
-
-* {
-  box-sizing: border-box;
 }
 
 .app-container {
   display: flex;
-  width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background: #edf3fa;
 }
 
 .app-container-vertical {
   display: flex;
   flex-direction: column;
-  width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background: #edf3fa;
 }
 
 .app-main {
   flex: 1;
-  height: 100vh;
+  min-width: 0;
+  min-height: 0;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-@media (max-width: 760px) {
-  .app-container {
-    flex-direction: column;
-  }
-  .app-main {
-    height: auto;
-    flex: 1;
-  }
 }

@@ -1,13 +1,13 @@
 import React from 'react';
-import { Waves, Radio, MapPin, Github, Mail } from 'lucide-react';
-import styles from './Footer.module.scss';
+import { Radio, Github, Mail, MapPin } from 'lucide-react';
+import styles from './LandingFooter.module.scss';
 
-export const Footer: React.FC = () => {
+export const LandingFooter: React.FC = () => {
   return (
     <footer className={styles.footer}>
       <div className={styles.footerTop}>
         <div className={styles.footerBrand}>
-          <div className={styles.brandMark}><Waves size={16} /></div>
+          <div className={styles.brandMark}><Radio size={16} /></div>
           <div>
             <h4>AquaTrace</h4>
             <p>Underwater debris & disaster detection, powered by real-time sonar AI.</p>
@@ -16,23 +16,14 @@ export const Footer: React.FC = () => {
 
         <div className={styles.footerCol}>
           <h5>Platform</h5>
-          <a href="#">Dashboard</a>
-          <a href="#">Sonar Analysis</a>
-          <a href="#">Detections</a>
-          <a href="#">Survey Map</a>
-        </div>
-
-        <div className={styles.footerCol}>
-          <h5>Resources</h5>
-          <a href="#">Documentation</a>
-          <a href="#">API Reference</a>
-          <a href="#">Detection Models</a>
-          <a href="#">Changelog</a>
+          <a href="#home">Home</a>
+          <a href="#how-it-works">How It Works</a>
+          <a href="#accidents">Safety</a>
         </div>
 
         <div className={styles.footerCol}>
           <h5>Contact</h5>
-          <a href="#"><Mail size={13} /> support@AquaTrace.io</a>
+          <a href="#"><Mail size={13} /> support@aquatrace.io</a>
           <a href="#"><Github size={13} /> github.com/AquaTrace</a>
         </div>
       </div>
@@ -48,4 +39,4 @@ export const Footer: React.FC = () => {
   );
 };
 
-export default Footer;
+export default LandingFooter;
