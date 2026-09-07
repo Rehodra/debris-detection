@@ -14,11 +14,9 @@ $amber: #ffb648;
 $amber-bg: rgba(255, 255, 255, 0.12);
 $red: #ff5468;
 $border-light: #e3e8f6;
-
 @mixin accent-gradient($deg: 135deg) {
   background: linear-gradient($deg, $accent-start 0%, $accent-end 100%);
 }
-
 .card {
   background: $white;
   border-radius: 16px;

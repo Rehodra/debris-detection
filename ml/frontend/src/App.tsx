@@ -1,40 +1,16 @@
 import React, { useState } from 'react';
-import { Sidebar } from './components/sidebar';
-import { Navbar } from './components/Navbar';
-import { Dashboard } from './pages/Dashboard';
+import { LandingPage } from './pages/LandingPage';
 import { SonarAnalysis } from './pages/SonarAnalysis';
 
 const App: React.FC = () => {
-  const [activePage, setActivePage] = useState<string>('Dashboard');
+  const [activePage, setActivePage] = useState<string>('Landing');
 
-  const renderPage = () => {
-    switch (activePage) {
-      case 'Sonar Analysis':
-        return <SonarAnalysis />;
-      case 'Dashboard':
-      default:
-        return <Dashboard onNavigate={setActivePage} />;
-    }
-  };
-
-  if (activePage === 'Dashboard') {
-    return (
-      <div className="app-container-vertical">
-        <Navbar active={activePage} onNavigate={setActivePage} />
-        <main className="app-main">
-          {renderPage()}
-        </main>
-      </div>
-    );
+  if (activePage === 'Landing') {
+    return <LandingPage onEnterApp={() => setActivePage('Dashboard')} />;
   }
 
   return (
-    <div className="app-container">
-      <Sidebar active={activePage} onNavigate={setActivePage} />
-      <main className="app-main">
-        {renderPage()}
-      </main>
-    </div>
+    <SonarAnalysis />
   );
 };
 
