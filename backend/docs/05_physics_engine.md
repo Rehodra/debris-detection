@@ -26,14 +26,17 @@ $$\text{Grazing Angle: } \psi = \arcsin\left(\frac{H_{\text{alt}}}{R_s}\right)$$
 
 ## 3. 3D Volumetric Displacement & Structural Mass
 
-Target dimensions (Length $L$, Width $W$, Height $H$) are scaled using class compaction factors:
+Target dimensions (Length $L$, Width $W$, Height $H$) are scaled using class compaction factors calibrated for subsea structures:
 
 | Class | Shape Compaction Factor ($\phi$) | Typical Bulk Density ($\rho$ in $\text{kg/m}^3$) | Description |
 |---|---|---|---|
 | `shipwreck` | $0.65$ | $1800.0$ | Sunken steel hull, machinery, cargo holds |
-| `aircraft` | $0.35$ | $1400.0$ | Hollow fuselage, wings, lightweight airframe |
-| `other` | $0.50$ | $1400.0$ | Lost shipping containers, metal scrap |
-| `fish` | $0.48$ | $1050.0$ | Natural marine biomass |
+| `pipe` | $0.70$ | $7850.0$ | Subsea steel oil/gas pipeline, heavy tubular conduit |
+| `ghost_net` | $0.25$ | $1150.0$ | Synthetic fishing gear polymer filaments in seawater |
+| `marine_debris` | $0.50$ | $1350.0$ | Mixed plastic, metal drums, container fragments |
+| `aircraft` | $0.35$ | $650.0$ | Hollow fuselage, wings, lightweight aluminum airframe |
+| `other` | $0.50$ | $1400.0$ | Lost shipping containers, structural seafloor scrap |
+| `fish` | $0.48$ | $1025.0$ | Neutrally buoyant marine biomass |
 
 $$\text{Volume: } V = L \times W \times H \times \phi \quad (\text{m}^3)$$
 $$\text{Dry Mass: } M_{\text{dry}} = \frac{V \times \rho_{\text{material}}}{1000.0} \quad (\text{metric tons})$$
@@ -79,8 +82,20 @@ $$S_{\text{stability}} = \frac{F_f}{\max(0.001, F_D)}$$
 
 ---
 
-## API Endpoints
+## API Endpoints & Usage
 
 - **`GET /api/v1/physics/environment`**: Calculate sound speed, absorption, and wavelength for specified ocean conditions.
 - **`POST /api/v1/physics/analyze-target`**: Compute 3D volume, mass, crane hoist rating, and seabed stability for a single target.
 - **`POST /api/v1/physics/analyze-image`**: Execute end-to-end detection + shadow + physics synthesis.
+
+### Ocean Environment Calculation Example
+
+#### macOS / Linux (cURL)
+```bash
+curl -X GET "http://localhost:8000/api/v1/physics/environment?temperature_c=18.5&salinity_psu=35.0&depth_m=45.0&frequency_khz=455.0"
+```
+
+#### Windows (PowerShell)
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8000/api/v1/physics/environment?temperature_c=18.5&salinity_psu=35.0&depth_m=45.0&frequency_khz=455.0" -Method Get
+```

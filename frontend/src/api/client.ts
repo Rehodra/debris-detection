@@ -12,7 +12,18 @@ export interface AnalysisTarget {
     display_name: string;
     calibrated_confidence: number;
     trust_tier: string;
-    bbox: { width: number; height: number };
+    bbox: {
+        width: number;
+        height: number;
+        x_min?: number;
+        y_min?: number;
+        x_max?: number;
+        y_max?: number;
+        normalized_x_min?: number;
+        normalized_y_min?: number;
+        normalized_x_max?: number;
+        normalized_y_max?: number;
+    };
     shadow_evidence: {
         has_shadow: boolean;
         shadow_score: number;

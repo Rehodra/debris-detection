@@ -71,7 +71,27 @@ Without an acoustic shadow, a bright return is likely a 2D surface feature (e.g.
 
 ---
 
-## API Endpoints
+## API Endpoints & Usage
 
 - **`POST /api/v1/shadows/analyze`**: Extract acoustic shadows, directional metrics, and 3D height off seabed.
 - **`POST /api/v1/shadows/visualize`**: Stream an annotated image with cyan shadow contours and yellow projection vectors.
+
+### Example: Shadow Extraction & 3D Height Analysis
+
+#### macOS / Linux (cURL)
+```bash
+curl -X POST "http://localhost:8000/api/v1/shadows/analyze" \
+  -F "file=@sample_sidescan.png" \
+  -F "altitude_m=12.0" \
+  -F "meters_per_pixel=0.05"
+```
+
+#### Windows (PowerShell)
+```powershell
+$form = @{
+    file = Get-Item "sample_sidescan.png"
+    altitude_m = "12.0"
+    meters_per_pixel = "0.05"
+}
+Invoke-RestMethod -Uri "http://localhost:8000/api/v1/shadows/analyze" -Method Post -Form $form
+```

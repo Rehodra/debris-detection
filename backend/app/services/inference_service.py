@@ -22,6 +22,7 @@ from app.ml.postprocess import (
     parse_yolo_results,
     render_detections_overlay,
     encode_image_to_jpeg_bytes,
+    encode_image_to_base64,
 )
 from app.schemas.detection import (
     DetectionResponse,
@@ -196,6 +197,7 @@ class InferenceService:
         prediction_image_url = None
         if return_visualization:
             annotated_bgr = render_detections_overlay(image_bgr, detections)
+            annotated_b64 = encode_image_to_base64(annotated_bgr)
             annotated_jpeg = encode_image_to_jpeg_bytes(annotated_bgr)
             output = image_output_service.save_and_upload(annotated_jpeg, prefix="detection")
             prediction_image_path = output["local_path"]

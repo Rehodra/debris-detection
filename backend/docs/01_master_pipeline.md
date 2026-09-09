@@ -13,7 +13,7 @@ The **Master Pipeline** ([`master_pipeline_service.py`](file:///Users/priyangshu
                          ↓
                    3. Preprocessing
                          ↓
-                    4. YOLO11-Seg
+                    4. YOLO11 Inference
                          ↓
                   5. Candidate list
                          ↓
@@ -61,11 +61,12 @@ The **Master Pipeline** ([`master_pipeline_service.py`](file:///Users/priyangshu
   - Gamma lookup-table adjustment ($I' = 255 \cdot (I / 255)^\gamma$).
   - Curated enhancement presets (`sonar_acoustic`, `turbid_water`, `edge_enhance`, etc.).
 
-### Stage 4: Neural Detection & Segmentation
+### Stage 4: Neural Detection
 - **Engine**: [`inference_service.py`](file:///Users/priyangshu/Desktop/Coding/debris/debris-detection/backend/app/services/inference_service.py)
 - **Inference**:
-  - Executes active Ultralytics YOLOv8/YOLO11 model (`best.pt`).
-  - Hardware acceleration: automatically binds to Apple Silicon `mps`, NVIDIA `cuda`, or `cpu`.
+  - Executes active Ultralytics YOLO11 model (`weights/yolo11_sonar_best.pt`, 5.20 MB).
+  - 7-class subsea taxonomy: `shipwreck`, `pipe`, `ghost_net`, `marine_debris`, `aircraft`, `other`, `fish`.
+  - Hardware acceleration: automatically binds to Apple Silicon `mps` on macOS, NVIDIA `cuda` on Windows/Linux, or `cpu`.
   - Supports high-resolution sliding-window tiling (`predict_tiled`) with **Global NMS** to prevent target truncation on large waterfall strips.
 
 ### Stage 5: Candidate List Extraction
@@ -111,7 +112,7 @@ The **Master Pipeline** ([`master_pipeline_service.py`](file:///Users/priyangshu
 - **Engine**: [`risk_service.py`](file:///Users/priyangshu/Desktop/Coding/debris/debris-detection/backend/app/services/risk_service.py)
 - **Hazard Scoring**:
   - Evaluates under-keel water clearance ($\text{Clearance} = \text{Depth} - H_{\text{object}}$) against vessel drafts: shallow ($\le 3.5\text{m}$), medium ($\le 7.5\text{m}$), deep ($\le 15.0\text{m}$).
-  - Evaluates commercial bottom trawl snag hazards and subsea pipeline collision risks.
+  - Evaluates commercial bottom trawl snag hazards (especially for `ghost_net` and `pipe`) and subsea pipeline collision risks.
   - Generates standardized directives: USCG/IMO NOTMAR alerts, IHO S-57 ENC chart obstruction updates, and ROV surveys.
 
 ### Stage 12: Final Result Synthesis
@@ -124,7 +125,37 @@ The **Master Pipeline** ([`master_pipeline_service.py`](file:///Users/priyangshu
 
 ---
 
-## API Endpoints
+## API Endpoints & Cross-Platform Invocations
 
 - **`POST /api/v1/analyses/analyze`**: Run the complete 12-stage Master Pipeline.
 - **`POST /api/v1/analyses/visualize`**: Stream directly an annotated JPEG visual overlay.
+
+### Full Pipeline Analysis Example
+
+#### macOS / Linux (cURL)
+```bash
+curl -X POST "http://localhost:8000/api/v1/analyses/analyze" \
+  -F "file=@sample_sidescan.png" \
+  -F "vessel_lat=24.8607" \
+  -F "vessel_lon=67.0011" \
+  -F "vessel_heading_deg=45.0" \
+  -F "water_depth_m=35.0" \
+  -F "meters_per_pixel=0.05" \
+  -F "confidence_threshold=0.25" \
+  -F "preprocessing_preset=sonar_acoustic"
+```
+
+#### Windows (PowerShell)
+```powershell
+$form = @{
+    file = Get-Item "sample_sidescan.png"
+    vessel_lat = "24.8607"
+    vessel_lon = "67.0011"
+    vessel_heading_deg = "45.0"
+    water_depth_m = "35.0"
+    meters_per_pixel = "0.05"
+    confidence_threshold = "0.25"
+    preprocessing_preset = "sonar_acoustic"
+}
+Invoke-RestMethod -Uri "http://localhost:8000/api/v1/analyses/analyze" -Method Post -Form $form
+```

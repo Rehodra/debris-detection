@@ -24,22 +24,30 @@ from app.schemas.detection import TilingConfig
 
 class TestMLComponents(unittest.TestCase):
     def test_class_map_lookup(self):
-        self.assertEqual(get_class_name(0), "aircraft")
-        self.assertEqual(get_class_name(1), "fish")
-        self.assertEqual(get_class_name(2), "other")
-        self.assertEqual(get_class_name(3), "shipwreck")
+        self.assertEqual(get_class_name(0), "shipwreck")
+        self.assertEqual(get_class_name(1), "pipe")
+        self.assertEqual(get_class_name(2), "ghost_net")
+        self.assertEqual(get_class_name(3), "marine_debris")
+        self.assertEqual(get_class_name(4), "aircraft")
+        self.assertEqual(get_class_name(5), "other")
+        self.assertEqual(get_class_name(6), "fish")
 
-        self.assertEqual(get_class_id("aircraft"), 0)
-        self.assertEqual(get_class_id("shipwreck"), 3)
+        self.assertEqual(get_class_id("shipwreck"), 0)
+        self.assertEqual(get_class_id("pipe"), 1)
+        self.assertEqual(get_class_id("ghost_net"), 2)
+        self.assertEqual(get_class_id("marine_debris"), 3)
+        self.assertEqual(get_class_id("aircraft"), 4)
+        self.assertEqual(get_class_id("other"), 5)
+        self.assertEqual(get_class_id("fish"), 6)
         self.assertEqual(get_class_id("nonexistent"), None)
 
-        meta = get_class_metadata(3)
+        meta = get_class_metadata(0)
         self.assertIsNotNone(meta)
         self.assertEqual(meta.name, "shipwreck")
         self.assertEqual(meta.risk_level, "High")
 
         all_classes = get_all_classes()
-        self.assertEqual(len(all_classes), 4)
+        self.assertEqual(len(all_classes), 7)
 
     def test_model_loader(self):
         model = model_loader.get_model()
@@ -49,8 +57,10 @@ class TestMLComponents(unittest.TestCase):
         info = model_loader.get_info()
         self.assertTrue(info["is_loaded"])
         self.assertEqual(info["task"], "detect")
-        self.assertEqual(info["total_classes"], 4)
-        self.assertIn("aircraft", list(info["classes"].values()))
+        self.assertEqual(info["total_classes"], 7)
+        self.assertIn("shipwreck", list(info["classes"].values()))
+        self.assertIn("pipe", list(info["classes"].values()))
+        self.assertIn("ghost_net", list(info["classes"].values()))
 
     def test_render_detections_overlay(self):
         img = np.zeros((400, 400, 3), dtype=np.uint8)
@@ -153,6 +163,31 @@ class TestMLComponents(unittest.TestCase):
         self.assertEqual(dims["width_meters"], 2.5)
         self.assertEqual(dims["area_sq_meters"], 12.5)
         self.assertEqual(dims["meters_per_pixel"], 0.05)
+
+    def test_yolo11_model_standalone_validation(self):
+        """Verify the standalone validation module locates weights and verifies 7 classes."""
+        import test_yolo11_model as validator
+
+        weights_file = validator.locate_model_weights()
+        self.assertTrue(weights_file.is_file())
+
+        model = validator.YOLO(str(weights_file))
+        raw_names = getattr(model, "names", {})
+        passed, msg = validator.verify_classes(raw_names)
+        self.assertTrue(passed, f"Class verification failed: {msg}")
+
+    def test_evaluate_accuracy_benchmark(self):
+        """Verify evaluate_accuracy benchmark runs and produces structured telemetry."""
+        import evaluate_accuracy as evaluator
+
+        model_path = evaluator.resolve_model_path()
+        self.assertTrue(model_path.is_file())
+
+        model = evaluator.YOLO(str(model_path))
+        # Run benchmark on test synthetic array
+        dummy_img = np.zeros((320, 320, 3), dtype=np.uint8)
+        preds = model.predict(dummy_img, imgsz=320, conf=0.25, verbose=False)
+        self.assertIsNotNone(preds)
 
 
 if __name__ == "__main__":

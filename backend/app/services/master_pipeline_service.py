@@ -50,7 +50,7 @@ from app.services.confidence_service import confidence_service
 from app.services.geolocation_service import geolocation_service
 from app.services.risk_service import risk_service
 from app.services.image_output_service import image_output_service
-from app.ml.postprocess import render_detections_overlay, encode_image_to_jpeg_bytes
+from app.ml.postprocess import render_detections_overlay, encode_image_to_jpeg_bytes, encode_image_to_base64
 
 logger = logging.getLogger("marinescan.services.master_pipeline")
 
@@ -433,6 +433,7 @@ class MasterPipelineService:
             # Composite rendering: shadow contours + projection rays + detection boxes
             rendered_bgr = shadow_service.render_shadow_overlay(img_bgr, shadow_response.results)
             rendered_bgr = render_detections_overlay(rendered_bgr, candidates)
+            annotated_b64 = encode_image_to_base64(rendered_bgr)
             rendered_jpeg_bytes = encode_image_to_jpeg_bytes(rendered_bgr)
             rendered_jpeg = image_output_service.save_and_upload(
                 rendered_jpeg_bytes, prefix="master_analysis"

@@ -99,8 +99,32 @@ Every geolocated target outputs multiple international standards:
 
 ---
 
-## API Endpoints
+## API Endpoints & Usage
 
 - **`POST /api/v1/geolocation/layback`**: Calculate towfish coordinates astern of surface vessel from cable payout and depth.
 - **`POST /api/v1/geolocation/target`**: Geolocate single pixel target to WGS84, DMS, and UTM.
 - **`POST /api/v1/geolocation/analyze-image`**: Execute end-to-end detection + geolocation + GeoJSON export.
+
+### Example: Image Geolocation Analysis
+
+#### macOS / Linux (cURL)
+```bash
+curl -X POST "http://localhost:8000/api/v1/geolocation/analyze-image" \
+  -F "file=@sample_sidescan.png" \
+  -F "vessel_lat=24.8607" \
+  -F "vessel_lon=67.0011" \
+  -F "vessel_heading_deg=45.0" \
+  -F "meters_per_pixel=0.05"
+```
+
+#### Windows (PowerShell)
+```powershell
+$form = @{
+    file = Get-Item "sample_sidescan.png"
+    vessel_lat = "24.8607"
+    vessel_lon = "67.0011"
+    vessel_heading_deg = "45.0"
+    meters_per_pixel = "0.05"
+}
+Invoke-RestMethod -Uri "http://localhost:8000/api/v1/geolocation/analyze-image" -Method Post -Form $form
+```

@@ -24,6 +24,26 @@ Executes the full 12-stage Master Pipeline.
   - `use_tiling` (bool, default `false`): Enable sliding-window tiling
 - **Response**: `200 OK` $\rightarrow$ [`MasterAnalysisResult`](file:///Users/priyangshu/Desktop/Coding/debris/debris-detection/backend/app/schemas/analysis.py)
 
+#### macOS / Linux (cURL)
+```bash
+curl -X POST "http://localhost:8000/api/v1/analyses/analyze" \
+  -F "file=@sample_sidescan.png" \
+  -F "vessel_lat=24.8607" \
+  -F "vessel_lon=67.0011" \
+  -F "confidence_threshold=0.25"
+```
+
+#### Windows (PowerShell)
+```powershell
+$form = @{
+    file = Get-Item "sample_sidescan.png"
+    vessel_lat = "24.8607"
+    vessel_lon = "67.0011"
+    confidence_threshold = "0.25"
+}
+Invoke-RestMethod -Uri "http://localhost:8000/api/v1/analyses/analyze" -Method Post -Form $form
+```
+
 ### `POST /api/v1/analyses/visualize`
 Executes Master Pipeline and streams directly the rendered JPEG binary overlay.
 - **Content-Type**: `multipart/form-data`
@@ -34,7 +54,7 @@ Executes Master Pipeline and streams directly the rendered JPEG binary overlay.
 ## 2. Detection Endpoints (`/api/v1/detections`)
 
 ### `POST /api/v1/detections/predict`
-Single-image YOLOv8 inference with optional preprocessing and physical scaling.
+Single-image YOLO11 inference (7 classes) with optional preprocessing and physical scaling.
 - **Response**: `200 OK` $\rightarrow$ `DetectionResponse`
 
 ### `POST /api/v1/detections/predict-batch`
@@ -83,7 +103,7 @@ Computes Mackenzie speed of sound in seawater, acoustic absorption ($\alpha$), a
 - **Response**: `200 OK` $\rightarrow$ `OceanAcousticEnvironment`
 
 ### `POST /api/v1/physics/analyze-target`
-Computes 3D volume, mass, crane hoist rating, and seabed stability for a single target.
+Computes 3D volume, mass, crane hoist rating, and seabed stability for a single target across 7 subsea classes.
 - **Response**: `200 OK` $\rightarrow$ `TargetPhysicsAnalysis`
 
 ### `POST /api/v1/physics/analyze-image`
@@ -137,8 +157,18 @@ End-to-end detection + clearance + risk scoring + NOTMAR directives.
 ### `GET /api/v1/models/current`
 Returns active model architecture, compute device (`mps`, `cuda`, `cpu`), and class list.
 
+#### macOS / Linux
+```bash
+curl -s http://localhost:8000/api/v1/models/current
+```
+
+#### Windows (PowerShell)
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8000/api/v1/models/current" -Method Get
+```
+
 ### `GET /api/v1/models/classes`
-Returns metadata, display names, hazard levels, and color tokens for all classes.
+Returns metadata, display names, hazard levels, and color tokens for all 7 classes.
 
 ### `POST /api/v1/models/reload`
 Hot-reloads neural model weights from disk.

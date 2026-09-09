@@ -44,6 +44,39 @@ CLASS_PHYSICAL_MODELS = {
         "max_width_m": 50.0,
         "max_height_m": 35.0,
     },
+    "pipe": {
+        "compaction_factor": 0.70,
+        "density_kg_m3": 7850.0,  # Steel / heavy pipeline
+        "drag_coeff": 0.85,
+        "default_height_ratio": 0.20,
+        "min_length_m": 0.5,
+        "max_length_m": 300.0,
+        "min_width_m": 0.1,
+        "max_width_m": 6.0,
+        "max_height_m": 6.0,
+    },
+    "ghost_net": {
+        "compaction_factor": 0.25,
+        "density_kg_m3": 1150.0,  # Synthetic fishing gear polymers in brine
+        "drag_coeff": 1.45,
+        "default_height_ratio": 0.35,
+        "min_length_m": 0.5,
+        "max_length_m": 200.0,
+        "min_width_m": 0.5,
+        "max_width_m": 100.0,
+        "max_height_m": 15.0,
+    },
+    "marine_debris": {
+        "compaction_factor": 0.50,
+        "density_kg_m3": 1350.0,  # Mixed plastic, metal drums, container fragments
+        "drag_coeff": 1.05,
+        "default_height_ratio": 0.40,
+        "min_length_m": 0.2,
+        "max_length_m": 50.0,
+        "min_width_m": 0.2,
+        "max_width_m": 25.0,
+        "max_height_m": 15.0,
+    },
     "aircraft": {
         "compaction_factor": 0.35,
         "density_kg_m3": 650.0,

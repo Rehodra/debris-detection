@@ -56,8 +56,27 @@ Translates single-channel or grayscale sonar backscatter into hydrographically o
 
 ---
 
-## API Endpoints
+## API Endpoints & Usage
 
 - **`GET /api/v1/preprocessing/presets`**: List all 6 presets and their configuration parameters.
 - **`POST /api/v1/preprocessing/process`**: Process an image with custom settings or presets and return telemetry (SNR, dynamic range, contrast).
 - **`POST /api/v1/preprocessing/preview`**: Process and stream directly the enhanced JPEG binary.
+
+### Example: Image Enhancement Preview
+
+#### macOS / Linux (cURL)
+```bash
+curl -X POST "http://localhost:8000/api/v1/preprocessing/preview" \
+  -F "file=@sample_sidescan.png" \
+  -F "preset=sonar_acoustic" \
+  --output enhanced_preview.jpg
+```
+
+#### Windows (PowerShell)
+```powershell
+$form = @{
+    file = Get-Item "sample_sidescan.png"
+    preset = "sonar_acoustic"
+}
+Invoke-WebRequest -Uri "http://localhost:8000/api/v1/preprocessing/preview" -Method Post -Form $form -OutFile "enhanced_preview.jpg"
+```

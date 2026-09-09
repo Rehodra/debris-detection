@@ -1,0 +1,17 @@
+# MarineScan 7-Class Sidescan Sonar Detection Dataset Configuration
+# Format: Ultralytics YOLOv8 / YOLO11 Dataset Specification
+
+path: ./datasets/marine_debris  # Dataset root directory
+train: images/train             # Train images directory (relative to 'path')
+val: images/val                 # Validation images directory (relative to 'path')
+test: images/test               # Test images directory (optional, relative to 'path')
+
+# 7-Class Marine Detection Taxonomy
+names:
+  0: shipwreck
+  1: pipe
+  2: ghost_net
+  3: marine_debris
+  4: aircraft
+  5: other
+  6: fish

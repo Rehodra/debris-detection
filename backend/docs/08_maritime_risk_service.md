@@ -22,9 +22,12 @@ $$\text{Clearance}_{\text{m}} = \text{Water Depth} - H_{\text{object}}$$
 MarineScan calculates a composite risk index in $[0, 100]$ across 5 weighted maritime factors:
 $$R_{\text{composite}} = 0.35 \cdot R_{\text{nav}} + 0.20 \cdot R_{\text{trawl}} + 0.20 \cdot R_{\text{infra}} + 0.15 \cdot R_{\text{env}} + 0.10 \cdot R_{\text{mobility}}$$
 
-### Factor Breakdown
+### Factor Breakdown & 7-Class Hazard Specifics
 1. **Navigational Risk ($R_{\text{nav}}$)**: Scaled non-linearly by under-keel clearance ($100.0$ if clearance $\le 3.5\text{m}$).
-2. **Trawl Snag Risk ($R_{\text{trawl}}$)**: Risk of catching commercial bottom trawls, drift nets, or ghost gear on protruding metal hulls, masts, or aircraft wings.
+2. **Trawl Snag Risk ($R_{\text{trawl}}$)**:
+   - **`ghost_net`**: Extreme entanglement hazard for commercial bottom trawlers, drift nets, diving operations, and ship propulsion screws.
+   - **`pipe`**: Heavy snag hazard where otter boards or dredge gear hook under exposed pipelines, risking cable rupture or vessel capsize.
+   - **`shipwreck` / `aircraft`**: High risk of tearing nets on jagged metal superstructures, masts, and airframe wings.
 3. **Subsea Infrastructure Threat ($R_{\text{infra}}$)**: Risk to proximate gas/oil pipelines, subsea fiber optic cables, or offshore wind farm lines, factoring in debris mobility under bottom currents.
 4. **Environmental Contamination ($R_{\text{env}}$)**: Chemical, toxic paint, heavy metals, and trapped bunker fuel leakage risk (scaled by 3D volumetric displacement).
 5. **Seabed Mobility Risk ($R_{\text{mobility}}$)**: Current drift hazard derived from `physics_service.hydrodynamic_stability`.
@@ -55,11 +58,31 @@ Generates official directives compliant with international maritime authorities 
 - **`[HIGH] SALVAGE`**:
   *"Establish a 250m subsea work and anchoring exclusion zone around proximate pipeline corridor."*
 - **`[STANDARD] ENVIRONMENTAL`**:
-  *"Deploy ROV inspection team for environmental survey to assess fuel containment and hull structural integrity."*
+  *"Deploy ROV inspection team for environmental survey to assess fuel containment and structural integrity."*
 
 ---
 
-## API Endpoints
+## API Endpoints & Cross-Platform Invocations
 
 - **`POST /api/v1/risk/evaluate-target`**: Evaluate multi-factor maritime risk and action recommendations for an individual target.
 - **`POST /api/v1/risk/analyze-image`**: Execute end-to-end detection + shadow + physics + confidence + risk assessment.
+
+### Example: Image Risk Analysis
+
+#### macOS / Linux (cURL)
+```bash
+curl -X POST "http://localhost:8000/api/v1/risk/analyze-image" \
+  -F "file=@sample_sidescan.png" \
+  -F "water_depth_m=35.0" \
+  -F "meters_per_pixel=0.05"
+```
+
+#### Windows (PowerShell)
+```powershell
+$form = @{
+    file = Get-Item "sample_sidescan.png"
+    water_depth_m = "35.0"
+    meters_per_pixel = "0.05"
+}
+Invoke-RestMethod -Uri "http://localhost:8000/api/v1/risk/analyze-image" -Method Post -Form $form
+```

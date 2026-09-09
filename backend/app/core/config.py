@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     # Environment variables requested
     DATABASE_URL: str = "sqlite:///./AquaTrace.db"
     API_BASE_URL: str = "http://localhost:8000"
-    MODEL_PATH: str = "ml/weights/best.pt"
+    MODEL_PATH: str = "backend/app/ml/weights/yolo11_sonar_best.pt"
     DEMO_MODE: bool = True
     CONFIDENCE_THRESHOLD: float = 0.50
 

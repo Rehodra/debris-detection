@@ -1,0 +1,71 @@
+{
+  "model_path": "/Users/priyangshu/Desktop/Coding/debris/debris-detection/backend/app/ml/weights/yolo11_sonar_best.pt",
+  "model_task": "detect",
+  "model_type": "DetectionModel",
+  "model_classes": {
+    "0": "shipwreck",
+    "1": "pipe",
+    "2": "ghost_net",
+    "3": "marine_debris",
+    "4": "aircraft",
+    "5": "other",
+    "6": "fish"
+  },
+  "class_verification": {
+    "passed": true,
+    "details": "All 7 classes and IDs exactly match the MarineScan specification.",
+    "expected_classes": {
+      "0": "shipwreck",
+      "1": "pipe",
+      "2": "ghost_net",
+      "3": "marine_debris",
+      "4": "aircraft",
+      "5": "other",
+      "6": "fish"
+    },
+    "actual_classes": {
+      "0": "shipwreck",
+      "1": "pipe",
+      "2": "ghost_net",
+      "3": "marine_debris",
+      "4": "aircraft",
+      "5": "other",
+      "6": "fish"
+    }
+  },
+  "input_image": "/Users/priyangshu/Desktop/Coding/debris/debris-detection/backend/test_sonar.png",
+  "image_width": 1728,
+  "image_height": 2458,
+  "inference_parameters": {
+    "confidence_threshold": 0.25,
+    "iou_threshold": 0.45,
+    "imgsz": 640
+  },
+  "inference_time_ms": 1296.22,
+  "detection_count": 1,
+  "class_summary": {
+    "shipwreck": 1,
+    "pipe": 0,
+    "ghost_net": 0,
+    "marine_debris": 0,
+    "aircraft": 0,
+    "other": 0,
+    "fish": 0
+  },
+  "detections": [
+    {
+      "detection_index": 1,
+      "class_id": 0,
+      "class_name": "shipwreck",
+      "confidence": 0.8443,
+      "bbox": [
+        19.15,
+        672.01,
+        607.81,
+        812.13
+      ],
+      "bbox_width": 588.66,
+      "bbox_height": 140.12
+    }
+  ]
+}

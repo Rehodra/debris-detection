@@ -108,12 +108,32 @@ class RiskService:
                 base += 10.0
             return min(100.0, base)
 
+        elif c == "ghost_net":
+            # ALDFG nets present extreme trawl snagging and gear loss hazards
+            base = 90.0
+            if length_m >= 15.0:
+                base += 10.0
+            return min(100.0, base)
+
+        elif c == "pipe":
+            # Subsea pipes snag bottom trawl otter boards and cables
+            base = 60.0
+            if object_height_m >= 1.5:
+                base += 20.0
+            return min(90.0, base)
+
         elif c == "aircraft":
             # Wings, stabilizers, and broken fuselage strongly snag bottom gear
             base = 60.0
             if length_m >= 10.0:
                 base += 15.0
             return min(95.0, base)
+
+        elif c == "marine_debris":
+            base = 45.0
+            if object_height_m >= 2.0:
+                base += 20.0
+            return min(80.0, base)
 
         else:  # other
             base = 35.0
@@ -171,12 +191,23 @@ class RiskService:
             else:
                 return 45.0
 
+        elif c == "ghost_net":
+            # Perpetual ghost fishing, marine mammal/turtle entrapment, synthetic polymer shedding
+            return 85.0
+
+        elif c == "pipe":
+            # Hydrocarbon / effluent residue, corrosive structural metal
+            return 60.0
+
         elif c == "aircraft":
             # Hydraulic fluid, fuel residues, lithium battery packs
             return 50.0
 
+        elif c == "marine_debris":
+            return 45.0
+
         else:  # other
-            # Ghost nets, plastics, containers
+            # Miscellaneous plastics, containers
             return 35.0
 
     def evaluate_mobility_risk(

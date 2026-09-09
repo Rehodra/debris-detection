@@ -74,20 +74,25 @@ class ModelLoader:
         if target:
             search_paths.append(Path(target))
 
-        # Check relative to backend/app/ml/weights/best.pt
         ml_dir = Path(__file__).resolve().parent
-        search_paths.append(ml_dir / "weights" / "best.pt")
-
-        # Check relative to repository root (ml/weights/best.pt)
         repo_root = ml_dir.parents[2]  # backend/app/ml -> app -> backend -> repo root
-        search_paths.append(repo_root / "ml" / "weights" / "best.pt")
-        search_paths.append(repo_root / "backend" / "app" / "ml" / "weights" / "best.pt")
-
-        # Current working directory
         cwd = Path.cwd()
-        search_paths.append(cwd / "ml" / "weights" / "best.pt")
-        search_paths.append(cwd / "backend" / "app" / "ml" / "weights" / "best.pt")
-        search_paths.append(cwd / "weights" / "best.pt")
+
+        # Check preferred model names
+        known_filenames = ["yolo11_sonar_best.pt", "best.pt"]
+        weight_dirs = [
+            ml_dir / "weights",
+            repo_root / "backend" / "app" / "ml" / "weights",
+            repo_root / "ml" / "weights",
+            cwd / "backend" / "app" / "ml" / "weights",
+            cwd / "ml" / "weights",
+            cwd / "weights",
+            cwd / "app" / "ml" / "weights",
+        ]
+
+        for w_dir in weight_dirs:
+            for fname in known_filenames:
+                search_paths.append(w_dir / fname)
 
         for path in search_paths:
             if path.is_file():
@@ -96,7 +101,17 @@ class ModelLoader:
                 except Exception:
                     return path.resolve()
 
-        # If not found yet, raise or return the primary target path
+        # Fallback: scan for any .pt file in the weight directories
+        for w_dir in weight_dirs:
+            if w_dir.is_dir():
+                pt_files = sorted(w_dir.glob("*.pt"), key=lambda p: p.stat().st_size, reverse=True)
+                if pt_files:
+                    try:
+                        return Path(os.path.relpath(pt_files[0], cwd))
+                    except Exception:
+                        return pt_files[0].resolve()
+
+        # If not found yet, return primary target path
         primary = Path(target) if target else search_paths[0]
         try:
             return Path(os.path.relpath(primary, cwd))
