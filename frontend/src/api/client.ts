@@ -82,6 +82,24 @@ export interface AnalysisHistoryItem {
     filename?: string | null;
 }
 
+/**
+ * FastAPI/Pydantic error responses don't always carry a plain string in
+ * `detail` — validation errors (422/400) return an array of
+ * { loc, msg, type } objects instead. Stringifying that array directly (the
+ * previous behaviour, `body?.detail ?? fallback`) produced the literal text
+ * "[object Object]" in the UI with no indication of what was actually wrong.
+ */
+function extractErrorMessage(body: unknown, fallback: string): string {
+    const detail = (body as { detail?: unknown } | null)?.detail;
+    if (typeof detail === 'string') return detail;
+    if (Array.isArray(detail)) {
+        return detail
+            .map((d) => (d && typeof d === 'object' && 'msg' in d ? String((d as { msg: unknown }).msg) : String(d)))
+            .join('; ') || fallback;
+    }
+    return fallback;
+}
+
 function vesselParamString(vessel?: VesselParams): string {
     if (!vessel) return '';
     return new URLSearchParams({
@@ -105,7 +123,7 @@ export async function analyzeSonarImage(file: File, vessel?: VesselParams): Prom
 
     if (!response.ok) {
         const body = await response.json().catch(() => null);
-        throw new Error(body?.detail ?? `Analysis failed (${response.status})`);
+        throw new Error(extractErrorMessage(body, `Analysis failed (${response.status})`));
     }
 
     return response.json() as Promise<MasterAnalysisResult>;
@@ -129,7 +147,7 @@ export async function downloadAnalysisReport(file: File, format: 'json' | 'csv',
 
     if (!response.ok) {
         const body = await response.json().catch(() => null);
-        throw new Error(body?.detail ?? `Report export failed (${response.status})`);
+        throw new Error(extractErrorMessage(body, `Report export failed (${response.status})`));
     }
 
     const blob = await response.blob();
