@@ -1,0 +1,120 @@
+$bg-page: #eef1f9;
+$navy-950: #060f2b;
+$navy-800: #142a5c;
+$white: #ffffff;
+$text-dark: #1b2440;
+$text-muted: #6b7490;
+$border-light: #e3e8f6;
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: $bg-page;
+}
+
+.header {
+  padding: 20px 24px 12px;
+  h1 { margin: 0; font-size: 20px; color: $text-dark; }
+  p { margin: 4px 0 0; font-size: 13px; color: $text-muted; }
+}
+
+.body {
+  flex: 1;
+  display: flex;
+  gap: 16px;
+  padding: 0 24px 24px;
+  overflow: hidden;
+}
+
+.listPanel {
+  width: 340px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row {
+  text-align: left;
+  background: $white;
+  border: 1px solid $border-light;
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-family: inherit;
+
+  &:hover { border-color: #2f6fed; }
+}
+
+.rowActive {
+  border-color: #2f6fed;
+  box-shadow: 0 0 0 2px rgba(47, 111, 237, 0.15);
+}
+
+.rowMain {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  color: $text-dark;
+}
+
+.rowTime {
+  font-weight: 400;
+  color: $text-muted;
+  font-size: 11px;
+}
+
+.rowMeta {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: $text-muted;
+}
+
+.detailPanel {
+  flex: 1;
+  overflow-y: auto;
+  background: $white;
+  border: 1px solid $border-light;
+  border-radius: 14px;
+  padding: 16px;
+
+  h3 { margin: 0 0 8px; color: $text-dark; }
+}
+
+.alertMessage {
+  font-size: 13px;
+  color: $text-muted;
+  margin-bottom: 12px;
+}
+
+.emptyState {
+  padding: 24px;
+  text-align: center;
+  color: $text-muted;
+  font-size: 13px;
+}
+
+.miniTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  font-size: 12px;
+
+  th {
+    text-align: left;
+    color: $text-muted;
+    font-weight: 600;
+    padding: 6px 8px;
+    border-bottom: 1px solid $border-light;
+  }
+  td {
+    padding: 6px 8px;
+    border-bottom: 1px solid $border-light;
+    color: $text-dark;
+  }
+}
