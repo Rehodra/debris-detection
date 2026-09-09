@@ -5,7 +5,7 @@ import {
   CheckCircle2, Circle, FileJson, FileSpreadsheet, Radar
 } from 'lucide-react';
 import styles from './SonarAnalysis.module.scss';
-import { AnalysisTarget, MasterAnalysisResult, VesselParams, analyzeSonarImage, downloadAnalysisReport, resolveApiAssetUrl } from '../api/client';
+import { AnalysisTarget, MasterAnalysisResult, VesselParams, analyzeSonarImage, clampVesselField, downloadAnalysisReport, resolveApiAssetUrl } from '../api/client';
 
 /* A real Bay-of-Bengal point off Chennai (matches the Detection Map page's
    default). Without a real vessel fix the backend falls back to a hardcoded
@@ -644,7 +644,7 @@ export const SonarAnalysis: React.FC = () => {
               disabled={isAnalyzing}
               onChange={(e) => {
                 const raw = Number(e.target.value);
-                const clamped = Number.isFinite(raw) ? Math.min(90, Math.max(-90, raw)) : 0;
+                const clamped = clampVesselField(raw, "vesselLat");
                 setVessel((v) => ({ ...v, vesselLat: clamped }));
               }}
               style={{ width: '72px', background: 'transparent', border: '1px solid currentColor', borderRadius: '3px', color: 'inherit', font: 'inherit', padding: '1px 4px' }}
@@ -662,7 +662,7 @@ export const SonarAnalysis: React.FC = () => {
               disabled={isAnalyzing}
               onChange={(e) => {
                 const raw = Number(e.target.value);
-                const clamped = Number.isFinite(raw) ? Math.min(180, Math.max(-180, raw)) : 0;
+                const clamped = clampVesselField(raw, "vesselLon");
                 setVessel((v) => ({ ...v, vesselLon: clamped }));
               }}
               style={{ width: '76px', background: 'transparent', border: '1px solid currentColor', borderRadius: '3px', color: 'inherit', font: 'inherit', padding: '1px 4px' }}
@@ -680,7 +680,7 @@ export const SonarAnalysis: React.FC = () => {
               disabled={isAnalyzing}
               onChange={(e) => {
                 const raw = Number(e.target.value);
-                const clamped = Number.isFinite(raw) ? Math.min(359, Math.max(0, raw)) : 0;
+                const clamped = clampVesselField(raw, "vesselHeadingDeg");
                 setVessel((v) => ({ ...v, vesselHeadingDeg: clamped }));
               }}
               style={{ width: '52px', background: 'transparent', border: '1px solid currentColor', borderRadius: '3px', color: 'inherit', font: 'inherit', padding: '1px 4px' }}

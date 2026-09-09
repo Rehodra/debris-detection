@@ -5,6 +5,7 @@ import "leaflet/dist/leaflet.css";
 import { Upload, Crosshair, Loader2, Download } from "lucide-react";
 import {
   analyzeSonarImage,
+  clampVesselField,
   downloadAnalysisReport,
   resolveApiAssetUrl,
   type AnalysisTarget,
@@ -415,7 +416,7 @@ export default function MapPage() {
               // also breaks Leaflet's own rendering (map goes blank).
               onChange={(e) => {
                 const raw = Number(e.target.value);
-                const clamped = Number.isFinite(raw) ? Math.min(90, Math.max(-90, raw)) : 0;
+                const clamped = clampVesselField(raw, "vesselLat");
                 setVessel((v) => ({ ...v, vesselLat: clamped }));
               }}
               className="w-20 px-1.5 py-0.5"
@@ -432,7 +433,7 @@ export default function MapPage() {
               value={vessel.vesselLon}
               onChange={(e) => {
                 const raw = Number(e.target.value);
-                const clamped = Number.isFinite(raw) ? Math.min(180, Math.max(-180, raw)) : 0;
+                const clamped = clampVesselField(raw, "vesselLon");
                 setVessel((v) => ({ ...v, vesselLon: clamped }));
               }}
               className="w-20 px-1.5 py-0.5"
@@ -453,7 +454,7 @@ export default function MapPage() {
               // bad heading is impossible to submit in the first place.
               onChange={(e) => {
                 const raw = Number(e.target.value);
-                const clamped = Number.isFinite(raw) ? Math.min(359, Math.max(0, raw)) : 0;
+                const clamped = clampVesselField(raw, "vesselHeadingDeg");
                 setVessel((v) => ({ ...v, vesselHeadingDeg: clamped }));
               }}
               className="w-16 px-1.5 py-0.5"
