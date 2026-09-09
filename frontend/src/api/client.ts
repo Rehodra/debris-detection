@@ -6,6 +6,29 @@ export interface VesselParams {
     vesselHeadingDeg: number;
 }
 
+/**
+ * Physically valid bounds for each vessel field. A single source of truth so
+ * Map.tsx and SonarAnalysis.tsx clamp the same way instead of each carrying
+ * its own copy of these numbers.
+ */
+export const VESSEL_BOUNDS = {
+    vesselLat: { min: -90, max: 90 },
+    vesselLon: { min: -180, max: 180 },
+    vesselHeadingDeg: { min: 0, max: 359 },
+} as const;
+
+/**
+ * Clamp a raw input value into a vessel field's valid range, falling back to
+ * 0 for non-finite input (e.g. a cleared field). `min`/`max` on a number
+ * input are advisory only — the browser still accepts typed values outside
+ * that range, which the backend then rejects with a 400 — so this must run
+ * on every change, not just be declared on the input.
+ */
+export function clampVesselField(raw: number, field: keyof VesselParams): number {
+    const { min, max } = VESSEL_BOUNDS[field];
+    return Number.isFinite(raw) ? Math.min(max, Math.max(min, raw)) : 0;
+}
+
 export function resolveApiAssetUrl(assetUrl: string | null | undefined): string | null {
     if (!assetUrl) return null;
     if (assetUrl.startsWith('data:') || assetUrl.startsWith('blob:')) return assetUrl;
@@ -82,6 +105,24 @@ export interface AnalysisHistoryItem {
     filename?: string | null;
 }
 
+/**
+ * FastAPI/Pydantic error responses don't always carry a plain string in
+ * `detail` — validation errors (422/400) return an array of
+ * { loc, msg, type } objects instead. Stringifying that array directly (the
+ * previous behaviour, `body?.detail ?? fallback`) produced the literal text
+ * "[object Object]" in the UI with no indication of what was actually wrong.
+ */
+function extractErrorMessage(body: unknown, fallback: string): string {
+    const detail = (body as { detail?: unknown } | null)?.detail;
+    if (typeof detail === 'string') return detail;
+    if (Array.isArray(detail)) {
+        return detail
+            .map((d) => (d && typeof d === 'object' && 'msg' in d ? String((d as { msg: unknown }).msg) : String(d)))
+            .join('; ') || fallback;
+    }
+    return fallback;
+}
+
 function vesselParamString(vessel?: VesselParams): string {
     if (!vessel) return '';
     return new URLSearchParams({
@@ -105,7 +146,7 @@ export async function analyzeSonarImage(file: File, vessel?: VesselParams): Prom
 
     if (!response.ok) {
         const body = await response.json().catch(() => null);
-        throw new Error(body?.detail ?? `Analysis failed (${response.status})`);
+        throw new Error(extractErrorMessage(body, `Analysis failed (${response.status})`));
     }
 
     return response.json() as Promise<MasterAnalysisResult>;
@@ -129,7 +170,7 @@ export async function downloadAnalysisReport(file: File, format: 'json' | 'csv',
 
     if (!response.ok) {
         const body = await response.json().catch(() => null);
-        throw new Error(body?.detail ?? `Report export failed (${response.status})`);
+        throw new Error(extractErrorMessage(body, `Report export failed (${response.status})`));
     }
 
     const blob = await response.blob();

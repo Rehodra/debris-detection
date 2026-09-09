@@ -5,7 +5,13 @@ import {
   CheckCircle2, Circle, FileJson, FileSpreadsheet, Radar
 } from 'lucide-react';
 import styles from './SonarAnalysis.module.scss';
-import { AnalysisTarget, MasterAnalysisResult, analyzeSonarImage, downloadAnalysisReport, resolveApiAssetUrl } from '../api/client';
+import { AnalysisTarget, MasterAnalysisResult, VesselParams, analyzeSonarImage, clampVesselField, downloadAnalysisReport, resolveApiAssetUrl } from '../api/client';
+
+/* A real Bay-of-Bengal point off Chennai (matches the Detection Map page's
+   default). Without a real vessel fix the backend falls back to a hardcoded
+   point off Karachi, Pakistan — every detection through this page used to
+   geolocate there regardless of where the survey actually happened. */
+const DEFAULT_VESSEL: VesselParams = { vesselLat: 13.05, vesselLon: 80.42, vesselHeadingDeg: 90 };
 
 const defaultSampleTargets: AnalysisTarget[] = [
   {
@@ -75,6 +81,7 @@ export const SonarAnalysis: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [vessel, setVessel] = useState<VesselParams>(DEFAULT_VESSEL);
   const [filter, setFilter] = useState<'all' | 'verified' | 'high_risk'>('all');
   const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
 
@@ -483,7 +490,7 @@ export const SonarAnalysis: React.FC = () => {
     setPan({ x: 0, y: 0 });
     setIsAnalyzing(true);
 
-    analyzeSonarImage(file)
+    analyzeSonarImage(file, vessel)
       .then(setAnalysis)
       .catch((err: Error) => setError(err.message))
       .finally(() => setIsAnalyzing(false));
@@ -573,7 +580,7 @@ export const SonarAnalysis: React.FC = () => {
           URL.revokeObjectURL(url);
         }
       } else if (selectedFile) {
-        await downloadAnalysisReport(selectedFile, format);
+        await downloadAnalysisReport(selectedFile, format, vessel);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Report export failed');
@@ -622,9 +629,63 @@ export const SonarAnalysis: React.FC = () => {
     <div className={`${styles.container} sonar-page page-enter`}>
       <header className={styles.header}>
         <div className={styles.vesselInfo}>
-          <span>VESSEL <strong>RV-Explorer</strong></span>
+          {/* Real, editable survey position — every detection is geolocated
+              relative to this. Without it the backend falls back to a
+              hardcoded point off Karachi, Pakistan, regardless of where the
+              survey actually happened. */}
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            LAT
+            <input
+              type="number"
+              step="0.0001"
+              min={-90}
+              max={90}
+              value={vessel.vesselLat}
+              disabled={isAnalyzing}
+              onChange={(e) => {
+                const raw = Number(e.target.value);
+                const clamped = clampVesselField(raw, "vesselLat");
+                setVessel((v) => ({ ...v, vesselLat: clamped }));
+              }}
+              style={{ width: '72px', background: 'transparent', border: '1px solid currentColor', borderRadius: '3px', color: 'inherit', font: 'inherit', padding: '1px 4px' }}
+            />
+          </span>
           <span className={styles.divider}>|</span>
-          <span>SURVEY <strong>S-2023-11A</strong></span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            LON
+            <input
+              type="number"
+              step="0.0001"
+              min={-180}
+              max={180}
+              value={vessel.vesselLon}
+              disabled={isAnalyzing}
+              onChange={(e) => {
+                const raw = Number(e.target.value);
+                const clamped = clampVesselField(raw, "vesselLon");
+                setVessel((v) => ({ ...v, vesselLon: clamped }));
+              }}
+              style={{ width: '76px', background: 'transparent', border: '1px solid currentColor', borderRadius: '3px', color: 'inherit', font: 'inherit', padding: '1px 4px' }}
+            />
+          </span>
+          <span className={styles.divider}>|</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            HDG
+            <input
+              type="number"
+              step="1"
+              min={0}
+              max={359}
+              value={vessel.vesselHeadingDeg}
+              disabled={isAnalyzing}
+              onChange={(e) => {
+                const raw = Number(e.target.value);
+                const clamped = clampVesselField(raw, "vesselHeadingDeg");
+                setVessel((v) => ({ ...v, vesselHeadingDeg: clamped }));
+              }}
+              style={{ width: '52px', background: 'transparent', border: '1px solid currentColor', borderRadius: '3px', color: 'inherit', font: 'inherit', padding: '1px 4px' }}
+            />
+          </span>
         </div>
         <div className={styles.statusBadges}>
           <span className={styles.statusDot}><i className={styles.dotGreen}></i> SONAR ONLINE</span>
