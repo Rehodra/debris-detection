@@ -1,5 +1,11 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
 
+export interface VesselParams {
+    vesselLat: number;
+    vesselLon: number;
+    vesselHeadingDeg: number;
+}
+
 export interface AnalysisTarget {
     detection_id: string;
     class_name: string;
@@ -40,15 +46,24 @@ export interface MasterAnalysisResult {
         max_hazard_score: number;
         primary_alert_message: string;
     };
+    geojson: { type: 'FeatureCollection'; features: Array<{ type: 'Feature'; geometry: { type: 'Point'; coordinates: number[] }; properties: Record<string, unknown> }> };
     prediction_image_url?: string | null;
     annotated_image_base64?: string | null;
 }
 
-export async function analyzeSonarImage(file: File): Promise<MasterAnalysisResult> {
+function vesselParamString(vessel: VesselParams): string {
+    return new URLSearchParams({
+        vessel_lat: String(vessel.vesselLat),
+        vessel_lon: String(vessel.vesselLon),
+        vessel_heading_deg: String(vessel.vesselHeadingDeg),
+    }).toString();
+}
+
+export async function analyzeSonarImage(file: File, vessel: VesselParams): Promise<MasterAnalysisResult> {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch(`${API_BASE_URL}/api/v1/analyses/analyze`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/analyses/analyze?${vesselParamString(vessel)}`, {
         method: 'POST',
         body: formData,
     });
@@ -61,11 +76,11 @@ export async function analyzeSonarImage(file: File): Promise<MasterAnalysisResul
     return response.json() as Promise<MasterAnalysisResult>;
 }
 
-export async function downloadAnalysisReport(file: File, format: 'json' | 'csv'): Promise<void> {
+export async function downloadAnalysisReport(file: File, format: 'json' | 'csv', vessel: VesselParams): Promise<void> {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch(`${API_BASE_URL}/api/v1/exports/report?report_format=${format}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/exports/report?report_format=${format}&${vesselParamString(vessel)}`, {
         method: 'POST',
         body: formData,
     });

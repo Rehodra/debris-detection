@@ -77,6 +77,42 @@ CLASS_PHYSICAL_MODELS = {
         "max_width_m": 30.0,
         "max_height_m": 15.0,
     },
+    # Real project classes (ours_ghostnet_pipe_debris.pt) — added alongside the
+    # legacy entries above rather than replacing them, since existing tests
+    # exercise the legacy class names directly.
+    "ghost_net": {
+        "compaction_factor": 0.15,   # porous mesh, mostly open space in its bounding box
+        "density_kg_m3": 1050.0,     # waterlogged nylon/polypropylene netting, slightly denser than seawater
+        "drag_coeff": 1.30,          # open mesh catches significant current flow
+        "default_height_ratio": 0.12,  # lies flat on the seabed unless snagged into a mound
+        "min_length_m": 0.5,
+        "max_length_m": 150.0,       # large derelict net masses can span many meters
+        "min_width_m": 0.3,
+        "max_width_m": 60.0,
+        "max_height_m": 4.0,
+    },
+    "pipe": {
+        "compaction_factor": 0.78,   # circular cylinder cross-section (~pi/4 of bounding box)
+        "density_kg_m3": 2200.0,     # steel / concrete-coated subsea pipeline
+        "drag_coeff": 1.20,          # cylinder in crossflow
+        "default_height_ratio": 0.90,  # height approx equals width (circular cross-section)
+        "min_length_m": 2.0,
+        "max_length_m": 500.0,       # pipeline segments can run very long
+        "min_width_m": 0.1,
+        "max_width_m": 2.5,
+        "max_height_m": 2.5,
+    },
+    "marine_debris": {
+        "compaction_factor": 0.50,
+        "density_kg_m3": 1400.0,
+        "drag_coeff": 1.05,
+        "default_height_ratio": 0.40,
+        "min_length_m": 0.15,
+        "max_length_m": 60.0,
+        "min_width_m": 0.15,
+        "max_width_m": 30.0,
+        "max_height_m": 15.0,
+    },
 }
 
 SEDIMENT_FRICTION_MAP = {

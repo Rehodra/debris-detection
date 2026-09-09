@@ -24,33 +24,32 @@ from app.schemas.detection import TilingConfig
 
 class TestMLComponents(unittest.TestCase):
     def test_class_map_lookup(self):
-        self.assertEqual(get_class_name(0), "aircraft")
-        self.assertEqual(get_class_name(1), "fish")
-        self.assertEqual(get_class_name(2), "other")
-        self.assertEqual(get_class_name(3), "shipwreck")
+        self.assertEqual(get_class_name(0), "ghost_net")
+        self.assertEqual(get_class_name(1), "pipe")
+        self.assertEqual(get_class_name(2), "marine_debris")
 
-        self.assertEqual(get_class_id("aircraft"), 0)
-        self.assertEqual(get_class_id("shipwreck"), 3)
+        self.assertEqual(get_class_id("ghost_net"), 0)
+        self.assertEqual(get_class_id("pipe"), 1)
         self.assertEqual(get_class_id("nonexistent"), None)
 
-        meta = get_class_metadata(3)
+        meta = get_class_metadata(1)
         self.assertIsNotNone(meta)
-        self.assertEqual(meta.name, "shipwreck")
+        self.assertEqual(meta.name, "pipe")
         self.assertEqual(meta.risk_level, "High")
 
         all_classes = get_all_classes()
-        self.assertEqual(len(all_classes), 4)
+        self.assertEqual(len(all_classes), 3)
 
     def test_model_loader(self):
         model = model_loader.get_model()
         self.assertIsNotNone(model)
         self.assertTrue(model_loader.is_loaded)
-        
+
         info = model_loader.get_info()
         self.assertTrue(info["is_loaded"])
         self.assertEqual(info["task"], "detect")
-        self.assertEqual(info["total_classes"], 4)
-        self.assertIn("aircraft", list(info["classes"].values()))
+        self.assertEqual(info["total_classes"], 3)
+        self.assertIn("ghost_net", list(info["classes"].values()))
 
     def test_render_detections_overlay(self):
         img = np.zeros((400, 400, 3), dtype=np.uint8)

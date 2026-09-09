@@ -145,7 +145,7 @@ class ConfidenceService:
                 notes.append(f"Faint acoustic shadow detected (score: {int(raw_shadow_score * 100)}%).")
         else:
             # Shadow absent
-            if c_lower in ["shipwreck", "aircraft"]:
+            if c_lower in ["shipwreck", "aircraft", "pipe"]:
                 shadow_component = 0.20
                 notes.append(f"Absence of acoustic shadow for large {class_name} suggests potential flat seabed anomaly.")
             else:

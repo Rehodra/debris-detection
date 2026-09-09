@@ -3,6 +3,7 @@ import { Sidebar } from './components/sidebar';
 import { Navbar } from './components/Navbar';
 import { Dashboard } from './pages/Dashboard';
 import { SonarAnalysis } from './pages/SonarAnalysis';
+import { History } from './pages/History';
 
 const App: React.FC = () => {
   const [activePage, setActivePage] = useState<string>('Dashboard');
@@ -11,6 +12,8 @@ const App: React.FC = () => {
     switch (activePage) {
       case 'Sonar Analysis':
         return <SonarAnalysis />;
+      case 'History':
+        return <History />;
       case 'Dashboard':
       default:
         return <Dashboard onNavigate={setActivePage} />;

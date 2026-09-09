@@ -1,141 +1,151 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
-  Radio, MapPin, Waves, ShieldAlert, TrendingUp,
-  Anchor, Activity, ArrowUpRight, Search
+  Waves, ShieldAlert, Anchor, TrendingUp, ArrowUpRight,
+  Activity, Database, Cpu,
 } from 'lucide-react';
 import { Hero } from '../components/Hero';
 import { Footer } from '../components/Footer';
-import { DetectionCard, DetectionCardData } from '../components/DetectionCard';
 import styles from './Dashboard.module.scss';
 
-interface StatCard {
-  label: string;
-  value: string;
-  delta?: string;
-  icon: React.ElementType;
+const API_BASE = 'http://127.0.0.1:8000';
+
+interface AnalysisHistoryItem {
+  mission_id: string;
+  created_at: string;
+  filename: string;
+  total_targets: number;
+  verified_targets: number;
+  max_risk_tier: string | null;
+  class_breakdown: Record<string, number>;
 }
-
-const STATS: StatCard[] = [
-  { label: 'Total Frames Scanned', value: '14,204', delta: '+312 today', icon: Waves },
-  { label: 'Targets Detected', value: '12', delta: '+2 this survey', icon: ShieldAlert },
-  { label: 'Verified Targets', value: '4', delta: '33% of total', icon: Anchor },
-  { label: 'Survey Coverage', value: '42%', delta: 'S-2023-11A', icon: TrendingUp },
-];
-
-const DETECTIONS: DetectionCardData[] = [
-  { id: '1', name: 'Ghost Net Entanglement', type: 'Entanglement', description: 'Large drifting net mass flagged near the reef edge, high hazard to marine life.', status: 'Verified', confidence: 91, frame: '0042', shadowScore: 82 },
-  { id: '2', name: 'Submerged Pipeline', type: 'Infrastructure', description: 'Linear metallic return consistent with a subsea pipeline segment.', status: 'Review', confidence: 84, frame: '0038', shadowScore: 68 },
-  { id: '3', name: 'Unknown Anomaly', type: 'Anomaly', description: 'Irregular acoustic shadow with unclear geometry, requires manual review.', status: 'Review', confidence: 89, frame: '0051', shadowScore: 31 },
-  { id: '4', name: 'Shipwreck Debris Field', type: 'Wreck', description: 'Confirmed hull structure with debris scatter consistent with a wreck site.', status: 'Verified', confidence: 96, frame: '0067', shadowScore: 94 },
-];
-
-const TYPE_FILTERS = ['All', 'Entanglement', 'Infrastructure', 'Anomaly', 'Wreck'];
-const STATUS_FILTERS = ['All', 'Verified', 'Review'];
 
 interface DashboardProps {
   onNavigate?: (page: string) => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
-  const [search, setSearch] = useState('');
-  const [typeFilter, setTypeFilter] = useState('All');
-  const [statusFilter, setStatusFilter] = useState('All');
+  const [history, setHistory] = useState<AnalysisHistoryItem[] | null>(null);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [backendReachable, setBackendReachable] = useState<boolean | null>(null);
+  const [modelInfo, setModelInfo] = useState<{ is_loaded: boolean; total_classes: number } | null>(null);
 
-  const filteredDetections = useMemo(() => {
-    return DETECTIONS.filter((d) => {
-      const matchesSearch = d.name.toLowerCase().includes(search.toLowerCase());
-      const matchesType = typeFilter === 'All' || d.type === typeFilter;
-      const matchesStatus = statusFilter === 'All' || d.status === statusFilter;
-      return matchesSearch && matchesType && matchesStatus;
-    });
-  }, [search, typeFilter, statusFilter]);
+  useEffect(() => {
+    fetch(`${API_BASE}/api/v1/health`)
+      .then((r) => setBackendReachable(r.ok))
+      .catch(() => setBackendReachable(false));
+
+    fetch(`${API_BASE}/api/v1/models/current`)
+      .then((r) => r.json())
+      .then((d) => setModelInfo({ is_loaded: d.is_loaded, total_classes: d.total_classes }))
+      .catch(() => setModelInfo(null));
+
+    fetch(`${API_BASE}/api/v1/analyses/history?limit=50`)
+      .then((r) => {
+        if (!r.ok) throw new Error(`Backend returned ${r.status}`);
+        return r.json();
+      })
+      .then((d) => setHistory(d))
+      .catch(() => {
+        setHistory([]);
+        setHistoryError('Could not reach the analysis backend.');
+      });
+  }, []);
+
+  const stats = useMemo(() => {
+    const list = history ?? [];
+    const totalTargets = list.reduce((sum, h) => sum + h.total_targets, 0);
+    const totalVerified = list.reduce((sum, h) => sum + h.verified_targets, 0);
+    const latestRiskTier = list[0]?.max_risk_tier ?? 'N/A';
+    return {
+      analysesRun: list.length,
+      totalTargets,
+      totalVerified,
+      latestRiskTier,
+    };
+  }, [history]);
+
+  const classBreakdownAllTime = useMemo(() => {
+    const totals: Record<string, number> = {};
+    for (const h of history ?? []) {
+      for (const [cls, count] of Object.entries(h.class_breakdown ?? {})) {
+        totals[cls] = (totals[cls] ?? 0) + count;
+      }
+    }
+    return totals;
+  }, [history]);
+
+  const STATS = [
+    { label: 'Analyses Run', value: String(stats.analysesRun), icon: Waves },
+    { label: 'Targets Detected', value: String(stats.totalTargets), icon: ShieldAlert },
+    { label: 'Verified Targets', value: String(stats.totalVerified), icon: Anchor },
+    { label: 'Latest Risk Tier', value: stats.latestRiskTier, icon: TrendingUp },
+  ];
 
   return (
     <div className={styles.container}>
       <header className={styles.header}>
         <div className={styles.vesselInfo}>
-          <span>VESSEL <strong>RV-Explorer</strong></span>
-          <span className={styles.divider}>|</span>
-          <span>SURVEY <strong>S-2023-11A</strong></span>
+          <span>MARINESCAN</span>
         </div>
         <div className={styles.statusBadges}>
-          <span className={styles.badgeSuccess}><Radio size={13} /> SONAR ONLINE</span>
-          <span className={styles.badgeSuccess}><MapPin size={13} /> GPS FIX</span>
-          <span className={styles.badgeDanger}>EDGE MODE</span>
+          {backendReachable === null ? (
+            <span className={styles.badgeSuccess}>CHECKING…</span>
+          ) : backendReachable ? (
+            <span className={styles.badgeSuccess}><Activity size={13} /> BACKEND REACHABLE</span>
+          ) : (
+            <span className={styles.badgeDanger}>BACKEND UNREACHABLE</span>
+          )}
         </div>
       </header>
 
       <div className={styles.scrollArea}>
-        <Hero onLaunchAnalysis={() => onNavigate?.('Sonar Analysis')} />
         <div className={styles.body}>
+          <Hero onLaunchAnalysis={() => onNavigate?.('Sonar Analysis')} />
 
           <div className={styles.sectionTitle}>
-            <h2>Live Survey Metrics</h2>
-            <p>Real-time summary of the current side-scan sonar survey</p>
+            <h2>Analysis History</h2>
+            <p>Real aggregate stats computed from every analysis actually run on this backend</p>
           </div>
 
           <div className={styles.statsGrid}>
-            {STATS.map(({ label, value, delta, icon: Icon }) => (
+            {STATS.map(({ label, value, icon: Icon }) => (
               <div className={styles.statCard} key={label}>
                 <div className={styles.statIcon}><Icon size={18} /></div>
                 <div className={styles.statBody}>
                   <span className={styles.statLabel}>{label}</span>
                   <h2>{value}</h2>
-                  {delta && <span className={styles.statDelta}><ArrowUpRight size={12} /> {delta}</span>}
                 </div>
               </div>
             ))}
           </div>
 
           <div className={styles.sectionTitle}>
-            <h2>Detected Targets</h2>
-            <p>Browse and review objects flagged by the detection pipeline</p>
+            <h2>Recent Analyses</h2>
+            <p>Every image actually run through the detection pipeline, most recent first</p>
           </div>
 
-          {/* Search + filter bar */}
-          <div className={styles.filterBar}>
-            <div className={styles.searchBox}>
-              <Search size={16} />
-              <input
-                type="text"
-                placeholder="Search detections by name or type..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-
-            <div className={styles.pillGroup}>
-              {TYPE_FILTERS.map((f) => (
-                <button
-                  key={f}
-                  className={`${styles.pill} ${typeFilter === f ? styles.pillActive : ''}`}
-                  onClick={() => setTypeFilter(f)}
-                >
-                  {f}
-                </button>
-              ))}
-            </div>
-
-            <div className={styles.pillGroup}>
-              {STATUS_FILTERS.map((f) => (
-                <button
-                  key={f}
-                  className={`${styles.pill} ${statusFilter === f ? styles.pillActiveDark : ''}`}
-                  onClick={() => setStatusFilter(f)}
-                >
-                  {f}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Detection cards grid */}
           <div className={styles.detectionsGrid}>
-            {filteredDetections.map((d) => (
-              <DetectionCard key={d.id} data={d} onView={() => onNavigate?.('Sonar Analysis')} />
-            ))}
-            {filteredDetections.length === 0 && (
-              <div className={styles.emptyState}>No detections match your filters.</div>
+            {history === null ? (
+              <div className={styles.emptyState}>Loading…</div>
+            ) : historyError ? (
+              <div className={styles.emptyState}>{historyError}</div>
+            ) : history.length === 0 ? (
+              <div className={styles.emptyState}>
+                No analyses yet — <a onClick={() => onNavigate?.('Sonar Analysis')} style={{ cursor: 'pointer', textDecoration: 'underline' }}>upload a sonar image</a> to get started.
+              </div>
+            ) : (
+              history.slice(0, 8).map((h) => (
+                <div className={styles.statCard} key={h.mission_id} style={{ alignItems: 'flex-start' }}>
+                  <div className={styles.statIcon}><ArrowUpRight size={18} /></div>
+                  <div className={styles.statBody}>
+                    <span className={styles.statLabel}>{h.filename}</span>
+                    <h2 style={{ fontSize: 18 }}>{h.total_targets} target{h.total_targets === 1 ? '' : 's'}</h2>
+                    <span className={styles.statDelta}>
+                      {new Date(h.created_at).toLocaleString()} · {h.verified_targets} verified · {h.max_risk_tier ?? 'no risk'}
+                    </span>
+                  </div>
+                </div>
+              ))
             )}
           </div>
 
@@ -144,40 +154,40 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               <div className={styles.blockHeader}><span>SYSTEM STATUS</span></div>
               <div className={styles.statusList}>
                 <div className={styles.statusRow}>
-                  <span><Activity size={14} /> Sonar Sensor</span>
-                  <span className={styles.dotGreen}>Online</span>
+                  <span><Activity size={14} /> Backend API</span>
+                  <span className={backendReachable ? styles.dotGreen : styles.dotAmber}>
+                    {backendReachable === null ? 'Checking…' : backendReachable ? 'Reachable' : 'Unreachable'}
+                  </span>
                 </div>
                 <div className={styles.statusRow}>
-                  <span><MapPin size={14} /> GPS Module</span>
-                  <span className={styles.dotGreen}>Fixed</span>
+                  <span><Cpu size={14} /> Detection Model</span>
+                  <span className={modelInfo?.is_loaded ? styles.dotGreen : styles.dotAmber}>
+                    {modelInfo ? `Loaded (${modelInfo.total_classes} classes)` : 'Unknown'}
+                  </span>
                 </div>
                 <div className={styles.statusRow}>
-                  <span><Radio size={14} /> Telemetry Link</span>
-                  <span className={styles.dotGreen}>Stable</span>
+                  <span><Database size={14} /> Analysis History DB</span>
+                  <span className={historyError ? styles.dotAmber : styles.dotGreen}>
+                    {historyError ? 'Unreachable' : `${history?.length ?? 0} records`}
+                  </span>
                 </div>
-                <div className={styles.statusRow}>
-                  <span><ShieldAlert size={14} /> Edge Inference</span>
-                  <span className={styles.dotAmber}>Edge Mode</span>
-                </div>
-              </div>
-
-              <div className={styles.blockTitle}>SURVEY PROGRESS</div>
-              <div className={styles.progressBar}>
-                <div className={styles.progressFill} style={{ width: '42%' }}></div>
-              </div>
-              <div className={styles.progressLabel}>
-                <span>42% coverage</span>
-                <span>14,204 frames</span>
               </div>
             </div>
 
             <div className={styles.panelBlockDark}>
-              <div className={styles.blockHeaderDark}><span>NEXT SURVEY WINDOW</span></div>
-              <p className={styles.darkText}>
-                RV-Explorer is scheduled to resume the S-2023-11B transect at 06:00 UTC,
-                continuing coverage of the northern reef corridor.
-              </p>
-              <button className={styles.darkBtn}>View Survey Plan</button>
+              <div className={styles.blockHeaderDark}><span>DETECTED CLASSES (ALL TIME)</span></div>
+              {Object.keys(classBreakdownAllTime).length === 0 ? (
+                <p className={styles.darkText}>No targets detected yet across any analysis.</p>
+              ) : (
+                <div className={styles.statusList}>
+                  {Object.entries(classBreakdownAllTime).map(([cls, count]) => (
+                    <div className={styles.statusRow} key={cls}>
+                      <span style={{ color: '#eef2ff' }}>{cls}</span>
+                      <span style={{ color: '#eef2ff' }}>{count}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -70,24 +70,28 @@ class ModelLoader:
         """
         search_paths = []
         target = candidate_path or settings.MODEL_PATH
+        # Use the configured filename (not a hardcoded "best.pt") so switching
+        # settings.MODEL_PATH to a different weights file actually takes effect
+        # across every fallback candidate, not just the first one.
+        weight_filename = Path(target).name if target else "best.pt"
 
         if target:
             search_paths.append(Path(target))
 
-        # Check relative to backend/app/ml/weights/best.pt
+        # Check relative to backend/app/ml/weights/<weight_filename>
         ml_dir = Path(__file__).resolve().parent
-        search_paths.append(ml_dir / "weights" / "best.pt")
+        search_paths.append(ml_dir / "weights" / weight_filename)
 
-        # Check relative to repository root (ml/weights/best.pt)
+        # Check relative to repository root (ml/weights/<weight_filename>)
         repo_root = ml_dir.parents[2]  # backend/app/ml -> app -> backend -> repo root
-        search_paths.append(repo_root / "ml" / "weights" / "best.pt")
-        search_paths.append(repo_root / "backend" / "app" / "ml" / "weights" / "best.pt")
+        search_paths.append(repo_root / "ml" / "weights" / weight_filename)
+        search_paths.append(repo_root / "backend" / "app" / "ml" / "weights" / weight_filename)
 
         # Current working directory
         cwd = Path.cwd()
-        search_paths.append(cwd / "ml" / "weights" / "best.pt")
-        search_paths.append(cwd / "backend" / "app" / "ml" / "weights" / "best.pt")
-        search_paths.append(cwd / "weights" / "best.pt")
+        search_paths.append(cwd / "ml" / "weights" / weight_filename)
+        search_paths.append(cwd / "backend" / "app" / "ml" / "weights" / weight_filename)
+        search_paths.append(cwd / "weights" / weight_filename)
 
         for path in search_paths:
             if path.is_file():

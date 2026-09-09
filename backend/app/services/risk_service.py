@@ -115,7 +115,21 @@ class RiskService:
                 base += 15.0
             return min(95.0, base)
 
-        else:  # other
+        elif c == "ghost_net":
+            # The target IS the entanglement hazard — highest trawl/snag risk of any class
+            base = 90.0
+            if length_m >= 20.0:
+                base += 10.0
+            return min(100.0, base)
+
+        elif c == "pipe":
+            # Rigid raised cylinder can snag bottom trawl gear, though often a known/marked corridor
+            base = 55.0
+            if object_height_m >= 1.0:
+                base += 10.0
+            return min(90.0, base)
+
+        else:  # other, marine_debris
             base = 35.0
             if object_height_m >= 2.0:
                 base += 20.0
@@ -175,8 +189,16 @@ class RiskService:
             # Hydraulic fluid, fuel residues, lithium battery packs
             return 50.0
 
-        else:  # other
-            # Ghost nets, plastics, containers
+        elif c == "ghost_net":
+            # Continuous "ghost fishing" of marine life plus synthetic polymer degradation
+            return 65.0
+
+        elif c == "pipe":
+            # Potential leak of transported product plus coating/corrosion byproducts
+            return 50.0
+
+        else:  # other, marine_debris
+            # Plastics, containers, miscellaneous discarded material
             return 35.0
 
     def evaluate_mobility_risk(
