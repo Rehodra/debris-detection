@@ -110,18 +110,28 @@ export const SonarAnalysis: React.FC = () => {
               <div style={{ display: 'flex', gap: 12, padding: '10px 16px 0', fontSize: 12, color: '#6b7490' }}>
                 <label>
                   Vessel Lat{' '}
-                  <input type="number" step="0.0001" value={vesselLat} onChange={(e) => setVesselLat(parseFloat(e.target.value))} style={{ width: 90 }} />
+                  <input
+                    type="number" step="0.0001" min={-90} max={90} value={vesselLat}
+                    onChange={(e) => setVesselLat(Math.max(-90, Math.min(90, parseFloat(e.target.value) || 0)))}
+                    style={{ width: 90 }} />
                 </label>
                 <label>
                   Vessel Lon{' '}
-                  <input type="number" step="0.0001" value={vesselLon} onChange={(e) => setVesselLon(parseFloat(e.target.value))} style={{ width: 90 }} />
+                  <input
+                    type="number" step="0.0001" min={-180} max={180} value={vesselLon}
+                    onChange={(e) => setVesselLon(Math.max(-180, Math.min(180, parseFloat(e.target.value) || 0)))}
+                    style={{ width: 90 }} />
                 </label>
                 <label>
                   Heading (°){' '}
-                  <input type="number" step="1" value={vesselHeading} onChange={(e) => setVesselHeading(parseFloat(e.target.value))} style={{ width: 70 }} />
+                  <input
+                    type="number" step="1" min={0} max={359} value={vesselHeading}
+                    onChange={(e) => setVesselHeading(Math.max(0, Math.min(359, parseFloat(e.target.value) || 0)))}
+                    style={{ width: 70 }} />
                 </label>
               </div>
             )}
+
 
             <div className={styles.imageCanvas}>
               {!imageSrc ? (
