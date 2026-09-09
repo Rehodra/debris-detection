@@ -1,7 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import HowItWorks from "./Howitworks";
 
-type Page = "home" | "dashboard" | "map" | "reports" | "how-it-works" | "sonar-analysis";
+import type { Page } from "../App";
 
 interface HomeProps {
   onNavigate: (page: Page) => void;

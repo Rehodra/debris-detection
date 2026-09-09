@@ -62,22 +62,21 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertTrue(data["is_loaded"])
-        self.assertEqual(data["total_classes"], 4)
+        self.assertEqual(data["total_classes"], 3)
         self.assertEqual(data["task"], "detect")
         self.assertIn("classes", data)
-        self.assertIn("aircraft", list(data["classes"].values()))
-        self.assertIn("shipwreck", list(data["classes"].values()))
+        self.assertIn("ghost_net", list(data["classes"].values()))
+        self.assertIn("pipe", list(data["classes"].values()))
 
     def test_get_model_classes(self):
         response = self.client.get(f"{settings.API_V1_STR}/models/classes")
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(len(data), 4)
+        self.assertEqual(len(data), 3)
         class_names = [c["name"] for c in data]
-        self.assertIn("aircraft", class_names)
-        self.assertIn("fish", class_names)
-        self.assertIn("other", class_names)
-        self.assertIn("shipwreck", class_names)
+        self.assertIn("ghost_net", class_names)
+        self.assertIn("pipe", class_names)
+        self.assertIn("marine_debris", class_names)
 
         for item in data:
             self.assertIn("display_name", item)
@@ -90,7 +89,7 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertTrue(data["is_loaded"])
-        self.assertEqual(data["total_classes"], 4)
+        self.assertEqual(data["total_classes"], 3)
 
     def test_predict_detections_endpoint(self):
         img_buf = self._create_sample_jpeg()
@@ -115,14 +114,14 @@ class TestAPI(unittest.TestCase):
         img_buf = self._create_sample_jpeg()
         files = {"file": ("test_sonar.jpg", img_buf.getvalue(), "image/jpeg")}
         response = self.client.post(
-            f"{settings.API_V1_STR}/detections/predict?classes=shipwreck&classes=aircraft",
+            f"{settings.API_V1_STR}/detections/predict?classes=ghost_net&classes=pipe",
             files=files,
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data["status"], "success")
         for det in data["detections"]:
-            self.assertIn(det["class_name"], ["shipwreck", "aircraft"])
+            self.assertIn(det["class_name"], ["ghost_net", "pipe"])
 
     def test_visualize_endpoint(self):
         img_buf = self._create_sample_jpeg()

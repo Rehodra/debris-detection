@@ -1,6 +1,6 @@
 """
 Class mapping and metadata for MarineScan Debris Detection model.
-Model trained on 4 classes: aircraft, fish, other, shipwreck.
+Model trained on 3 classes: ghost_net, pipe, marine_debris.
 """
 
 from typing import Dict, Any, Optional
@@ -22,43 +22,33 @@ class ClassMetadata:
 CLASS_MAP: Dict[int, ClassMetadata] = {
     0: ClassMetadata(
         class_id=0,
-        name="aircraft",
-        display_name="Aircraft Wreckage",
-        category="Aerospace Debris",
+        name="ghost_net",
+        display_name="Ghost Fishing Net",
+        category="Derelict Fishing Gear",
         risk_level="Critical",
         color_hex="#E63946",
         color_rgb=(230, 57, 70),
-        description="Downed aircraft wreckage, airframe fragments, or aerospace equipment submerged on the seabed."
+        description="Abandoned, lost, or discarded fishing net actively entangling marine life and snagging vessel gear."
     ),
     1: ClassMetadata(
         class_id=1,
-        name="fish",
-        display_name="Marine Organism",
-        category="Marine Fauna",
-        risk_level="Low",
-        color_hex="#2A9D8F",
-        color_rgb=(42, 157, 143),
-        description="Biological marine life (fish school or individual organism), non-hazardous."
+        name="pipe",
+        display_name="Subsea Pipeline / Cylinder",
+        category="Submerged Infrastructure",
+        risk_level="High",
+        color_hex="#F4A261",
+        color_rgb=(244, 162, 97),
+        description="Rigid cylindrical infrastructure such as a subsea pipeline segment, conduit, or cable casing."
     ),
     2: ClassMetadata(
         class_id=2,
-        name="other",
-        display_name="Unidentified Debris",
+        name="marine_debris",
+        display_name="Marine Debris",
         category="Anthropogenic Debris",
         risk_level="Moderate",
-        color_hex="#F4A261",
-        color_rgb=(244, 162, 97),
-        description="Miscellaneous submerged object, discarded maritime gear, container or seafloor anomaly."
-    ),
-    3: ClassMetadata(
-        class_id=3,
-        name="shipwreck",
-        display_name="Shipwreck",
-        category="Maritime Vessel",
-        risk_level="High",
-        color_hex="#FF2D2D",
-        color_rgb=(255, 45, 45),
-        description="Submerged vessel hull, superstructure or derelict wreck presenting navigation or environmental hazards."
+        color_hex="#2A9D8F",
+        color_rgb=(42, 157, 143),
+        description="Miscellaneous man-made debris such as containers, drums, tires, or other discarded material on the seabed."
     ),
 }
 

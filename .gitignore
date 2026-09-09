@@ -71,6 +71,24 @@ backend/app/storage/reports/*
 *.swo
 
 
+models/*.pt
+models/*.onnx
+models/*.engine
+
+# ML model weights (trained artefacts - never commit these)
 *.pt
 *.onnx
 *.engine
+backend/app/ml/weights/*.pt
+ml/weights/*.pt
+runs/
+weights/
+
+# Runtime-generated prediction image dumps (safe to delete at any time)
+backend/pred_img/
+
+# SQLite databases created at runtime
+*.db
+
+# Realtime detection result JSON exports
+real_detections_our_data.json

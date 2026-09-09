@@ -1,11 +1,18 @@
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import {
-  Upload, Download, Radio, MapPin, RefreshCw, ScanLine,
+  Upload, Download, RefreshCw, ScanLine,
   ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize, Layers,
   CheckCircle2, Circle, FileJson
 } from 'lucide-react';
 import styles from './SonarAnalysis.module.scss';
-import { AnalysisTarget, MasterAnalysisResult, analyzeSonarImage, downloadAnalysisReport, resolveApiAssetUrl } from '../api/client';
+import { AnalysisTarget, MasterAnalysisResult, VesselParams, analyzeSonarImage, downloadAnalysisReport, resolveApiAssetUrl } from '../api/client';
+import { SurveyMap, SensorPosition } from '../components/SurveyMap';
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000';
+
+const DEFAULT_VESSEL_LAT = 13.05;
+const DEFAULT_VESSEL_LON = 80.42;
+const DEFAULT_VESSEL_HEADING = 90;
 
 export const SonarAnalysis: React.FC = () => {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -15,6 +22,18 @@ export const SonarAnalysis: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [zoom, setZoom] = useState(1);
+  const [vesselLat, setVesselLat] = useState<number>(DEFAULT_VESSEL_LAT);
+  const [vesselLon, setVesselLon] = useState<number>(DEFAULT_VESSEL_LON);
+  const [vesselHeading, setVesselHeading] = useState<number>(DEFAULT_VESSEL_HEADING);
+  const [backendReachable, setBackendReachable] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/api/v1/health`)
+      .then((r) => setBackendReachable(r.ok))
+      .catch(() => setBackendReachable(false));
+  }, []);
+
+  const vesselParams: VesselParams = { vesselLat, vesselLon, vesselHeadingDeg: vesselHeading };
 
   const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -28,7 +47,7 @@ export const SonarAnalysis: React.FC = () => {
     setZoom(1);
     setIsAnalyzing(true);
 
-    analyzeSonarImage(file)
+    analyzeSonarImage(file, vesselParams)
       .then(setAnalysis)
       .catch((err: Error) => setError(err.message))
       .finally(() => setIsAnalyzing(false));
@@ -37,12 +56,13 @@ export const SonarAnalysis: React.FC = () => {
   const analysisDone = analysis !== null;
   const targets = analysis?.targets ?? [];
   const displayImage = resolveApiAssetUrl(analysis?.prediction_image_url) || analysis?.annotated_image_base64 || imageSrc;
+  const sensorPosition: SensorPosition | null = analysisDone ? { latitude: vesselLat, longitude: vesselLon } : null;
 
   const handleExport = async (format: 'json' | 'csv') => {
     if (!selectedFile) return;
     setIsExporting(true);
     try {
-      await downloadAnalysisReport(selectedFile, format);
+      await downloadAnalysisReport(selectedFile, format, vesselParams);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Report export failed');
     } finally {
@@ -58,14 +78,16 @@ export const SonarAnalysis: React.FC = () => {
     <div className={`${styles.container} sonar-page page-enter`}>
       <header className={styles.header}>
         <div className={styles.vesselInfo}>
-          <span>VESSEL <strong>RV-Explorer</strong></span>
-          <span className={styles.divider}>|</span>
-          <span>SURVEY <strong>S-2023-11A</strong></span>
+          <span>MISSION <strong>{analysis?.mission_id ?? '—'}</strong></span>
         </div>
         <div className={styles.statusBadges}>
-          <span className={styles.statusDot}><i className={styles.dotGreen}></i> SONAR ONLINE</span>
-          <span className={styles.statusDot}><i className={styles.dotGreen}></i> GPS FIX</span>
-          <span className={styles.badgeDanger}>EDGE MODE</span>
+          {backendReachable === null ? (
+            <span className={styles.statusDot}><i className={styles.dotAmber}></i> CHECKING BACKEND…</span>
+          ) : backendReachable ? (
+            <span className={styles.statusDot}><i className={styles.dotGreen}></i> BACKEND REACHABLE</span>
+          ) : (
+            <span className={styles.badgeDanger}>BACKEND UNREACHABLE</span>
+          )}
         </div>
       </header>
 
@@ -83,6 +105,33 @@ export const SonarAnalysis: React.FC = () => {
                 <button className={styles.layerToggle}><Layers size={13} /> ON</button>
               </div>
             </div>
+
+            {!imageSrc && (
+              <div style={{ display: 'flex', gap: 12, padding: '10px 16px 0', fontSize: 12, color: '#6b7490' }}>
+                <label>
+                  Vessel Lat{' '}
+                  <input
+                    type="number" step="0.0001" min={-90} max={90} value={vesselLat}
+                    onChange={(e) => setVesselLat(Math.max(-90, Math.min(90, parseFloat(e.target.value) || 0)))}
+                    style={{ width: 90 }} />
+                </label>
+                <label>
+                  Vessel Lon{' '}
+                  <input
+                    type="number" step="0.0001" min={-180} max={180} value={vesselLon}
+                    onChange={(e) => setVesselLon(Math.max(-180, Math.min(180, parseFloat(e.target.value) || 0)))}
+                    style={{ width: 90 }} />
+                </label>
+                <label>
+                  Heading (°){' '}
+                  <input
+                    type="number" step="1" min={0} max={359} value={vesselHeading}
+                    onChange={(e) => setVesselHeading(Math.max(0, Math.min(359, parseFloat(e.target.value) || 0)))}
+                    style={{ width: 70 }} />
+                </label>
+              </div>
+            )}
+
 
             <div className={styles.imageCanvas}>
               {!imageSrc ? (
@@ -120,14 +169,10 @@ export const SonarAnalysis: React.FC = () => {
 
                   <div className={styles.imageMetaFooter}>
                     <div className={styles.metaLeft}>
-                      <span>LAT <strong>{targets[0]?.coordinates.latitude.toFixed(5) ?? '—'}</strong></span>
-                      <span>LON <strong>{targets[0]?.coordinates.longitude.toFixed(5) ?? '—'}</strong></span>
+                      <span>VESSEL LAT <strong>{vesselLat.toFixed(4)}</strong></span>
+                      <span>VESSEL LON <strong>{vesselLon.toFixed(4)}</strong></span>
+                      <span>HDG <strong>{vesselHeading}°</strong></span>
                       <span>QUALITY <strong>{analysis?.quality_assessment.quality_tier ?? '—'}</strong></span>
-                      <span>CONF <strong>{analysis ? `${Math.round((targets[0]?.calibrated_confidence ?? 0) * 100)}%` : '—'}</strong></span>
-                    </div>
-                    <div className={styles.metaRight}>
-                      <div><span>FRM</span><strong>0042</strong></div>
-                      <div><span>PNG</span><strong>1284</strong></div>
                     </div>
                     <label htmlFor="reupload-btn" className={styles.changeImgBtn}>
                       <RefreshCw size={12} /> Replace
@@ -141,7 +186,7 @@ export const SonarAnalysis: React.FC = () => {
             {imageSrc && (
               <div className={styles.pipelineBar}>
                 <span className={styles.pipelineLabel}>PIPELINE:</span>
-                {['INPUT', 'PREPROCESS', 'YOLO', 'SHADOW', 'ANOMALY'].map((step) => (
+                {['INPUT', 'PREPROCESS', 'YOLO', 'SHADOW', 'PHYSICS', 'CONFIDENCE'].map((step) => (
                   <span key={step} className={analysisDone ? styles.stepDone : styles.stepPending}>
                     {analysisDone ? <CheckCircle2 size={12} /> : <Circle size={12} />} {step}
                   </span>
@@ -171,7 +216,9 @@ export const SonarAnalysis: React.FC = () => {
                 </div>
 
                 <div className={styles.panelBlockBody}>
-                  {!analysisDone ? (
+                  {error ? (
+                    <div className={styles.detectionCardAlert}><div className={styles.cardMain}><span className={styles.targetTitle}>{error}</span></div></div>
+                  ) : !analysisDone ? (
                     <>
                       <div className={styles.skeletonRow}></div>
                       <div className={styles.skeletonRow}></div>
@@ -229,6 +276,18 @@ export const SonarAnalysis: React.FC = () => {
 
               {analysisDone && (
                 <div className={styles.panelBlock}>
+                  <div className={styles.panelBlockHeader}>
+                    <span>SURVEY MAP</span>
+                    <span className={styles.countBadge}>{analysis.geojson?.features?.length ?? 0} pinned</span>
+                  </div>
+                  <div className={styles.panelBlockBody}>
+                    <SurveyMap geojson={(analysis.geojson ?? null) as any} sensorPosition={sensorPosition} />
+                  </div>
+                </div>
+              )}
+
+              {analysisDone && targets.length > 0 && (
+                <div className={styles.panelBlock}>
                   <div className={styles.panelBlockHeader}><span>TARGET CLASSIFICATION</span></div>
                   <div className={styles.panelBlockBody}>
                     <p className={styles.classificationSubtitle}>
@@ -256,17 +315,6 @@ export const SonarAnalysis: React.FC = () => {
                         ))}
                       </tbody>
                     </table>
-                  </div>
-                </div>
-              )}
-
-              {analysisDone && (
-                <div className={styles.panelBlock}>
-                  <div className={styles.panelBlockHeader}><span>SURVEY MAP</span></div>
-                  <div className={styles.panelBlockBody}>
-                    <div className={styles.mapMock}>
-                      <img src="/surveymap.jpeg" alt="Survey Map" className={styles.mapImage} />
-                    </div>
                   </div>
                 </div>
               )}
