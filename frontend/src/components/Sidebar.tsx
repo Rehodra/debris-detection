@@ -1,4 +1,4 @@
-import { FileText, Home, Map, ScanLine, Settings2, Workflow } from "lucide-react";
+import { Clock, FileText, Home, Map, ScanLine, Settings2, Workflow } from "lucide-react";
 import type { Page } from "../App";
 
 interface SidebarProps {
@@ -11,6 +11,7 @@ const items: { id: Page; label: string; icon: typeof Home }[] = [
   { id: "sonar-analysis", label: "Sonar analysis", icon: ScanLine },
   { id: "map", label: "Detection map", icon: Map },
   { id: "reports", label: "Mission reports", icon: FileText },
+  { id: "history", label: "Analysis history", icon: Clock },
   { id: "how-it-works", label: "How AquaTrace works", icon: Workflow },
 ];
 

@@ -435,6 +435,8 @@ class MasterPipelineService:
             rendered_bgr = render_detections_overlay(rendered_bgr, candidates)
             annotated_b64 = encode_image_to_base64(rendered_bgr)
             rendered_jpeg_bytes = encode_image_to_jpeg_bytes(rendered_bgr)
+            # Inline base64 for direct browser consumption (used by tests + frontend)
+            annotated_b64 = image_output_service.as_data_url(rendered_jpeg_bytes)
             rendered_jpeg = image_output_service.save_and_upload(
                 rendered_jpeg_bytes, prefix="master_analysis"
             )

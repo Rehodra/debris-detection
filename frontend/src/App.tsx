@@ -1,3 +1,4 @@
+import History from "./pages/History";
 import { useState } from "react";
 import Nav from "./components/Nav";
 import Footer from "./components/Footer";
@@ -9,7 +10,7 @@ import SonarAnalysis from "./pages/SonarAnalysis";
 import HowItWorks from "./pages/Howitworks";
 import Sidebar from "./components/Sidebar";
 
-export type Page = "home" | "dashboard" | "map" | "reports" | "how-it-works" | "sonar-analysis";
+export type Page = "home" | "dashboard" | "map" | "reports" | "how-it-works" | "sonar-analysis" | "history";
 
 export default function App() {
   const [page, setPage] = useState<Page>("home");
@@ -31,6 +32,7 @@ export default function App() {
         {page === "map" && <MapPage />}
         {page === "reports" && <Reports />}
         {page === "how-it-works" && <HowItWorks onNavigate={navigate} />}
+        {page === "history" && <History />}
       </main>
 
       {page !== "map" && page !== "dashboard" && page !== "sonar-analysis" && (

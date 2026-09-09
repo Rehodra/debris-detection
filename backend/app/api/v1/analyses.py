@@ -5,8 +5,11 @@ and generating annotated visual overlay images for UI components.
 """
 
 import logging
-from typing import Optional
-from fastapi import APIRouter, UploadFile, File, Query, HTTPException, status, Response
+from typing import Optional, List
+from datetime import datetime
+from fastapi import APIRouter, UploadFile, File, Query, HTTPException, status, Response, Depends
+from sqlalchemy.orm import Session
+from sqlalchemy import desc
 import cv2
 
 from app.services.master_pipeline_service import master_pipeline_service
@@ -16,10 +19,49 @@ from app.ml.postprocess import render_detections_overlay, encode_image_to_jpeg_b
 from app.services.image_output_service import image_output_service
 from app.schemas.analysis import MasterAnalysisResult
 from app.schemas.common import ErrorResponse
+from app.db.session import get_db
+from app.db.models import AnalysisRecord
 
 logger = logging.getLogger("marinescan.api.analyses")
 
 router = APIRouter()
+
+
+def _persist_analysis(
+    db: Session,
+    result: MasterAnalysisResult,
+    filename: str,
+    vessel_lat: float,
+    vessel_lon: float,
+    vessel_heading_deg: float,
+) -> None:
+    """Best-effort persistence — a DB hiccup must never break the analysis response."""
+    try:
+        record = AnalysisRecord(
+            mission_id=result.mission_id,
+            filename=filename,
+            vessel_lat=vessel_lat,
+            vessel_lon=vessel_lon,
+            vessel_heading_deg=vessel_heading_deg,
+            total_targets=result.summary.total_targets_detected,
+            verified_targets=result.summary.verified_targets,
+            max_risk_tier=(
+                max(
+                    (t for t, c in result.summary.risk_tier_breakdown.items() if c > 0),
+                    key=lambda t: result.summary.risk_tier_breakdown[t],
+                    default=None,
+                )
+                if result.summary.total_targets_detected > 0
+                else None
+            ),
+            class_breakdown=result.summary.class_breakdown,
+            result_json=result.model_dump(mode="json"),
+        )
+        db.add(record)
+        db.commit()
+    except Exception as exc:
+        logger.warning("Failed to persist analysis record %s: %s", result.mission_id, exc)
+        db.rollback()
 
 
 @router.post(
@@ -53,6 +95,7 @@ async def analyze_sonar_survey(
     preprocessing_preset: Optional[str] = Query("sonar_acoustic", description="Acoustic enhancement preset"),
     use_tiling: bool = Query(False, description="Enable high-resolution sliding-window tiling"),
     mission_id: Optional[str] = Query(None, description="Optional mission or survey identifier"),
+    db: Session = Depends(get_db),
 ) -> MasterAnalysisResult:
     try:
         image_bytes = await file.read()
@@ -79,6 +122,9 @@ async def analyze_sonar_survey(
             use_tiling=use_tiling,
             return_visualization=True,
             mission_id=mission_id,
+        )
+        _persist_analysis(
+            db, result, file.filename or "unknown", vessel_lat, vessel_lon, vessel_heading_deg
         )
         return result
 
@@ -195,7 +241,15 @@ async def visualize_sonar_survey(
             headers={
                 "Content-Disposition": "inline; filename=master_analysis_overlay.jpg",
                 "X-Targets-Detected": str(len(analysis.targets)),
-                "X-Max-Risk-Tier": analysis.summary.risk_tier_breakdown and max(analysis.summary.risk_tier_breakdown, key=analysis.summary.risk_tier_breakdown.get) or "NONE",
+                "X-Max-Risk-Tier": (
+                    max(
+                        (t for t, c in analysis.summary.risk_tier_breakdown.items() if c > 0),
+                        key=lambda t: analysis.summary.risk_tier_breakdown[t],
+                        default="NONE",
+                    )
+                    if analysis.summary.total_targets_detected > 0
+                    else "NONE"
+                ),
             },
         )
 
@@ -209,3 +263,56 @@ async def visualize_sonar_survey(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Visualization failed: {str(exc)}",
         )
+
+
+# -----------------------------------------------------------------------------
+# History — real persisted analysis records (backs Dashboard aggregates and
+# the History page). Every field here was actually computed by a real
+# /analyses/analyze run; nothing here is synthesized.
+# -----------------------------------------------------------------------------
+
+@router.get(
+    "/history",
+    summary="List recent persisted analyses",
+    description="Returns summary fields for the most recent analysis records, newest first.",
+)
+async def list_analysis_history(
+    limit: int = Query(20, ge=1, le=200),
+    db: Session = Depends(get_db),
+) -> List[dict]:
+    records = (
+        db.query(AnalysisRecord)
+        .order_by(desc(AnalysisRecord.created_at))
+        .limit(limit)
+        .all()
+    )
+    return [
+        {
+            "mission_id": r.mission_id,
+            "created_at": r.created_at.isoformat() if isinstance(r.created_at, datetime) else r.created_at,
+            "filename": r.filename,
+            "vessel_lat": r.vessel_lat,
+            "vessel_lon": r.vessel_lon,
+            "vessel_heading_deg": r.vessel_heading_deg,
+            "total_targets": r.total_targets,
+            "verified_targets": r.verified_targets,
+            "max_risk_tier": r.max_risk_tier,
+            "class_breakdown": r.class_breakdown,
+        }
+        for r in records
+    ]
+
+
+@router.get(
+    "/history/{mission_id}",
+    summary="Get the full stored result for one past analysis",
+    responses={404: {"model": ErrorResponse, "description": "No record with that mission_id"}},
+)
+async def get_analysis_history_detail(
+    mission_id: str,
+    db: Session = Depends(get_db),
+) -> dict:
+    record = db.query(AnalysisRecord).filter(AnalysisRecord.mission_id == mission_id).first()
+    if record is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No analysis found for mission_id={mission_id}")
+    return record.result_json

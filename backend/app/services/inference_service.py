@@ -199,6 +199,8 @@ class InferenceService:
             annotated_bgr = render_detections_overlay(image_bgr, detections)
             annotated_b64 = encode_image_to_base64(annotated_bgr)
             annotated_jpeg = encode_image_to_jpeg_bytes(annotated_bgr)
+            # Inline base64 for direct browser consumption (used by tests + frontend)
+            annotated_b64 = image_output_service.as_data_url(annotated_jpeg)
             output = image_output_service.save_and_upload(annotated_jpeg, prefix="detection")
             prediction_image_path = output["local_path"]
             prediction_image_url = output["cloudinary_url"] or output["local_url"]

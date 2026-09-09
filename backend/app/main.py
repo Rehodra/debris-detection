@@ -7,6 +7,9 @@ from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.api.v1 import api_v1_router
 from app.ml.model_loader import model_loader
+from app.db.base import Base
+from app.db.session import engine
+from app.db import models  # noqa: F401 — registers AnalysisRecord on Base.metadata
 
 
 
@@ -28,6 +31,11 @@ async def lifespan(app: FastAPI):
             "Could not load ML model on startup: %s. Model will be loaded on demand.",
             exc,
         )
+    try:
+        Base.metadata.create_all(bind=engine)
+        logger.info("Database tables verified/created.")
+    except Exception as exc:
+        logger.warning("Could not initialize database tables: %s", exc)
     yield
     logger.info("Shutting down MarineScan API...")
 

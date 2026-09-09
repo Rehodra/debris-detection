@@ -1,5 +1,11 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
 
+export interface VesselParams {
+    vesselLat: number;
+    vesselLon: number;
+    vesselHeadingDeg: number;
+}
+
 export function resolveApiAssetUrl(assetUrl: string | null | undefined): string | null {
     if (!assetUrl) return null;
     if (assetUrl.startsWith('data:') || assetUrl.startsWith('blob:')) return assetUrl;
@@ -57,15 +63,42 @@ export interface MasterAnalysisResult {
         max_hazard_score: number;
         primary_alert_message: string;
     };
+    geojson?: { type: 'FeatureCollection'; features: Array<{ type: 'Feature'; geometry: { type: 'Point'; coordinates: number[] }; properties: Record<string, unknown> }> } | null;
     prediction_image_url?: string | null;
     annotated_image_base64?: string | null;
 }
 
-export async function analyzeSonarImage(file: File): Promise<MasterAnalysisResult> {
+export interface AnalysisHistoryItem {
+    id: number;
+    mission_id: string;
+    created_at: string;
+    total_targets: number;
+    verified_targets: number;
+    risk_tier: string;
+    class_breakdown: Record<string, number>;
+    vessel_lat?: number | null;
+    vessel_lon?: number | null;
+    vessel_heading?: number | null;
+    filename?: string | null;
+}
+
+function vesselParamString(vessel?: VesselParams): string {
+    if (!vessel) return '';
+    return new URLSearchParams({
+        vessel_lat: String(vessel.vesselLat),
+        vessel_lon: String(vessel.vesselLon),
+        vessel_heading_deg: String(vessel.vesselHeadingDeg),
+    }).toString();
+}
+
+export async function analyzeSonarImage(file: File, vessel?: VesselParams): Promise<MasterAnalysisResult> {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch(`${API_BASE_URL}/api/v1/analyses/analyze`, {
+    const query = vesselParamString(vessel);
+    const url = query ? `${API_BASE_URL}/api/v1/analyses/analyze?${query}` : `${API_BASE_URL}/api/v1/analyses/analyze`;
+
+    const response = await fetch(url, {
         method: 'POST',
         body: formData,
     });
@@ -78,11 +111,18 @@ export async function analyzeSonarImage(file: File): Promise<MasterAnalysisResul
     return response.json() as Promise<MasterAnalysisResult>;
 }
 
-export async function downloadAnalysisReport(file: File, format: 'json' | 'csv'): Promise<void> {
+export async function downloadAnalysisReport(file: File, format: 'json' | 'csv', vessel?: VesselParams): Promise<void> {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch(`${API_BASE_URL}/api/v1/exports/report?report_format=${format}`, {
+    const queryParams = new URLSearchParams({ report_format: format });
+    if (vessel) {
+        queryParams.set('vessel_lat', String(vessel.vesselLat));
+        queryParams.set('vessel_lon', String(vessel.vesselLon));
+        queryParams.set('vessel_heading_deg', String(vessel.vesselHeadingDeg));
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/v1/exports/report?${queryParams.toString()}`, {
         method: 'POST',
         body: formData,
     });
@@ -99,4 +139,10 @@ export async function downloadAnalysisReport(file: File, format: 'json' | 'csv')
     link.download = `marinescan-report.${format}`;
     link.click();
     URL.revokeObjectURL(url);
+}
+
+export async function getAnalysisHistory(): Promise<AnalysisHistoryItem[]> {
+    const response = await fetch(`${API_BASE_URL}/api/v1/analyses/history`);
+    if (!response.ok) return [];
+    return response.json();
 }
