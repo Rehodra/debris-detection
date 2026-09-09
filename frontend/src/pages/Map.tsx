@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
-import { MapContainer, TileLayer, WMSTileLayer, CircleMarker, Tooltip, useMap, useMapEvent } from "react-leaflet";
+import { MapContainer, TileLayer, WMSTileLayer, CircleMarker, Tooltip, ZoomControl, useMap, useMapEvent } from "react-leaflet";
 import L, { type LatLngBoundsExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Upload, Crosshair, Loader2, Download } from "lucide-react";
@@ -211,8 +211,13 @@ function DetectionMap({
       center={[vessel.vesselLat, vessel.vesselLon]}
       zoom={13}
       scrollWheelZoom
+      zoomControl={false}
       style={{ height: "100%", width: "100%", background: THEME.deepNavy }}
     >
+      {/* Leaflet's default zoom control sits top-left, the same corner as
+          the Filter panel — moved to bottom-left (empty since the separate
+          Class-legend panel was folded into Filter) so they don't overlap. */}
+      <ZoomControl position="bottomleft" />
       {/* Reliable base layer — always renders even if INCOIS is unreachable. */}
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
