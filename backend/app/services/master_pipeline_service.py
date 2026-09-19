@@ -47,6 +47,7 @@ from app.services.sonar_ingestion_service import sonar_ingestion_service, SonarI
 from app.services.quality_service import quality_service
 from app.services.preprocessing_service import preprocessing_service
 from app.services.inference_service import inference_service
+from app.services.anomaly_service import anomaly_service
 from app.services.shadow_service import shadow_service
 from app.services.physics_service import physics_service
 from app.services.confidence_service import confidence_service
@@ -224,10 +225,12 @@ class MasterPipelineService:
         t_inference = (time.perf_counter() - t0) * 1000.0
 
         # =====================================================================
-        # STAGE 5: Candidate List Extraction
+        # STAGE 5: Candidate List Extraction (YOLO + open-set anomaly branch)
         # =====================================================================
         t0 = time.perf_counter()
         candidates = [d.model_dump() for d in det_response.detections]
+        # Branch 2: merge feature-space anomaly candidates (P_CAE) not covered by YOLO.
+        candidates = anomaly_service.merge_with(candidates, processed_bgr)
         t_candidate = (time.perf_counter() - t0) * 1000.0
 
         # Default nadir coordinate to center of image if not provided

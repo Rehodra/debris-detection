@@ -76,3 +76,10 @@ backend/app/storage/reports/*
 *.engine
 backend/pred_img/*
 !backend/pred_img/.gitkeep
+
+# Anomaly-branch working tree: local venv, heavy run artifacts, standard ImageNet weights.
+# (backend/app/ml/anomaly/seabed_bank.npz IS committed; the 45MB resnet .pth is not — it
+#  auto-downloads via torch.hub, or drop it in / use Git LFS for offline deploys.)
+.venv-cae/
+ml/cae/runs/
+*.pth

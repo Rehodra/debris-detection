@@ -1,0 +1,67 @@
+{
+  "auroc": {
+    "CAE (reconstruction)": {
+      "auroc": 0.6641765137773478,
+      "ci95": [
+        0.6075732360103651,
+        0.7215909703001461
+      ]
+    },
+    "PatchCore (SCTD+KLSG)": {
+      "auroc": 0.6662579991527734,
+      "ci95": [
+        0.6140200731102252,
+        0.7142494549341165
+      ]
+    },
+    "PatchCore (SCTD only)": {
+      "auroc": 0.6869941507978945,
+      "ci95": [
+        0.6314932187311048,
+        0.7393039992403818
+      ]
+    }
+  },
+  "detection_ops_patchcore": {
+    "p95": {
+      "recall": 1.0,
+      "fp_per_image": 3.259259259259259,
+      "boxes": 56,
+      "images": 54
+    },
+    "p99": {
+      "recall": 1.0,
+      "fp_per_image": 5.166666666666667,
+      "boxes": 56,
+      "images": 54
+    },
+    "p999": {
+      "recall": 0.9464285714285714,
+      "fp_per_image": 4.185185185185185,
+      "boxes": 56,
+      "images": 54
+    }
+  },
+  "detection_ops_cae": {
+    "p95": {
+      "recall": 0.5,
+      "fp_per_image": 0.5740740740740741,
+      "boxes": 56,
+      "images": 54
+    },
+    "p99": {
+      "recall": 0.44642857142857145,
+      "fp_per_image": 0.6851851851851852,
+      "boxes": 56,
+      "images": 54
+    },
+    "p999": {
+      "recall": 0.39285714285714285,
+      "fp_per_image": 0.5185185185185185,
+      "boxes": 56,
+      "images": 54
+    }
+  },
+  "test_images": 54,
+  "bootstrap_iters": 1000
+}
