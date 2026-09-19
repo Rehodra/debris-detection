@@ -39,9 +39,9 @@ class AnomalyService:
         self._loaded = False          # load attempted
         self.available = False        # detector ready
 
-    def _resolve_bank(self) -> Path:
-        """Find the seabed bank independent of the current working directory."""
-        configured = Path(settings.ANOMALY_BANK_PATH)
+    def _resolve_asset(self, configured_path: str) -> Path:
+        """Find a bundled asset independent of the current working directory."""
+        configured = Path(configured_path)
         pkg_local = Path(__file__).resolve().parent.parent / "ml" / "anomaly" / configured.name
         for cand in (configured, Path.cwd() / configured, pkg_local):
             if cand.exists():
@@ -55,16 +55,25 @@ class AnomalyService:
         if not settings.ANOMALY_ENABLED:
             logger.info("Anomaly branch disabled via ANOMALY_ENABLED=False.")
             return
-        bank = self._resolve_bank()
-        if not bank.exists():
-            logger.warning("Anomaly bank not found at %s; open-set branch disabled.", bank)
-            return
+        method = (settings.ANOMALY_METHOD or "patchcore").lower()
         try:
-            from app.ml.anomaly.patchcore import PatchCoreDetector
-            self._detector = PatchCoreDetector(bank)
+            if method == "feature_ae":
+                asset = self._resolve_asset(settings.ANOMALY_FEATAE_PATH)
+                if not asset.exists():
+                    logger.warning("Feature-AE checkpoint not found at %s; branch disabled.", asset)
+                    return
+                from app.ml.anomaly.feature_ae import FeatureAEDetector
+                self._detector = FeatureAEDetector(asset)
+            else:
+                asset = self._resolve_asset(settings.ANOMALY_BANK_PATH)
+                if not asset.exists():
+                    logger.warning("Anomaly bank not found at %s; branch disabled.", asset)
+                    return
+                from app.ml.anomaly.patchcore import PatchCoreDetector
+                self._detector = PatchCoreDetector(asset)
             self.available = True
-            logger.info("Anomaly branch loaded (PatchCore, device=%s).", self._detector.device)
-        except Exception as exc:  # torch/backbone/bank problems must not break the pipeline
+            logger.info("Anomaly branch loaded (%s, device=%s).", method, self._detector.device)
+        except Exception as exc:  # torch/backbone/asset problems must not break the pipeline
             logger.warning("Anomaly branch failed to load (%s); disabled.", exc)
 
     def detect_candidates(self, image_bgr: np.ndarray) -> List[Dict]:
