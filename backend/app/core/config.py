@@ -15,6 +15,12 @@ class Settings(BaseSettings):
     DEMO_MODE: bool = True
     CONFIDENCE_THRESHOLD: float = 0.50
 
+    # Open-set anomaly branch (PatchCore feature-space detector)
+    ANOMALY_ENABLED: bool = True
+    ANOMALY_BANK_PATH: str = "backend/app/ml/anomaly/seabed_bank.npz"
+    ANOMALY_THRESHOLD_KEY: str = "p95"   # p95 (100% recall, ~3.7 FP/img) | p99 | p999 (fewest FP)
+    ANOMALY_MIN_AREA: int = 300
+
     # Optional Cloudinary delivery for generated prediction images.
     CLOUDINARY_CLOUD_NAME: str = ""
     CLOUDINARY_API_KEY: str = ""
