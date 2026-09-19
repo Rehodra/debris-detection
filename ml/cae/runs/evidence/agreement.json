@@ -1,0 +1,42 @@
+{
+  "operating_point": "p95",
+  "detection": {
+    "fae": {
+      "recall": 1.0,
+      "fp_per_image": 2.3518518518518516
+    },
+    "pc": {
+      "recall": 1.0,
+      "fp_per_image": 3.259259259259259
+    },
+    "inter": {
+      "recall": 1.0,
+      "fp_per_image": 3.185185185185185
+    },
+    "union": {
+      "recall": 1.0,
+      "fp_per_image": 3.2962962962962963
+    }
+  },
+  "target_consensus": {
+    "both": 56,
+    "fae_only": 0,
+    "pc_only": 0,
+    "none": 0
+  },
+  "false_positives": {
+    "shared": 75,
+    "fae_only": 52,
+    "pc_only": 76
+  },
+  "intersection_vs_best_single": {
+    "fp_reduction_ci95": [
+      -2.462962962962963,
+      -0.37037037037037046
+    ],
+    "intersection_recall_ci95": [
+      1.0,
+      1.0
+    ]
+  }
+}

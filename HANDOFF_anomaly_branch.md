@@ -54,18 +54,33 @@ Benchmark: **SCTD**, 54 held-out test images, 56 boxes, 1000-sample bootstrap.
 - **Honest note:** on the diluted *pixel* AUROC metric the two are statistically tied (overlapping
   CIs). The separation is real at the detection level and on object-centric data (KLSG), where the
   CAE inverts. This is stated openly in `EVIDENCE.md`.
-- Artifacts: `EVIDENCE.md`, `roc.png`, `pr.png`, `evidence.json`.
+- Artifacts: `EVIDENCE.md`, `roc.png`, `pr.png`, `evidence.json`, `agreement.json`.
+
+**Agreement analysis (EVIDENCE.md Section 5):** PatchCore and the feature-AE are two
+*independent* detectors. On the SCTD test set both catch **100% of targets (56/56)** —
+perfect consensus, strong cross-verification that detections are real, not a single-method
+artifact. Ensembling them (union or intersection) does **not** reduce false positives
+(tested; their false alarms are co-located), so the second detector's value is
+cross-verification and the controlled pixel-vs-feature result, not extra accuracy.
 
 ## 5. Backend integration (Branch 2)
 
 | File | Role |
 |---|---|
-| `backend/app/ml/anomaly/patchcore.py` | Inference detector: `score_map()` + `detect()` (emits candidate dicts, class 5) |
-| `backend/app/ml/anomaly/resnet.py` | Pure-torch ResNet18 (torchvision native ops fail on Windows; weights loaded by file/URL) |
-| `backend/app/ml/anomaly/seabed_bank.npz` | Trained seabed memory bank (committed) |
-| `backend/app/services/anomaly_service.py` | Lazy singleton `anomaly_service`; graceful disable if torch/bank missing |
-| `backend/app/core/config.py` | `ANOMALY_ENABLED`, `ANOMALY_BANK_PATH`, `ANOMALY_THRESHOLD_KEY` (p95/p99/p999), `ANOMALY_MIN_AREA` |
+| `backend/app/ml/anomaly/patchcore.py` | PatchCore detector (default): `score_map()` + `detect()` (candidate dicts, class 5) |
+| `backend/app/ml/anomaly/feature_ae.py` | Feature-reconstruction CAE detector (alternative), same `detect()` shape |
+| `backend/app/ml/anomaly/resnet.py` | Pure-torch ResNet18 (torchvision native ops fail on Windows; weights by file/URL) |
+| `backend/app/ml/anomaly/seabed_bank.npz` | Trained seabed memory bank for PatchCore (committed) |
+| `backend/app/ml/anomaly/featae.pt` | Trained feature-AE checkpoint (~0.9 MB, committed) |
+| `backend/app/services/anomaly_service.py` | Lazy singleton; picks detector by `ANOMALY_METHOD`; graceful disable |
+| `backend/app/core/config.py` | `ANOMALY_ENABLED`, `ANOMALY_METHOD` (`patchcore`\|`feature_ae`), `ANOMALY_BANK_PATH`, `ANOMALY_FEATAE_PATH`, `ANOMALY_THRESHOLD_KEY`, `ANOMALY_MIN_AREA` |
 | `backend/app/services/master_pipeline_service.py` | Stage 5 merges anomaly candidates with YOLO (IoU dedup) |
+
+**Two selectable detectors (set `ANOMALY_METHOD`):** PatchCore (memory bank) is the default;
+`feature_ae` is a feature-reconstruction autoencoder — a *real* CAE that reconstructs deep
+features instead of pixels, so it does not invert. On SCTD they are **statistically tied**
+(both 100% recall, false-positive difference CI includes 0), so the choice is engineering
+preference: feature_ae is lighter (no memory bank), PatchCore is the validated default.
 
 Flow: anomaly candidates carry `confidence = p_cae`, so they ride the existing
 shadow -> physics -> confidence-fusion path unchanged (the diagram's `alpha*(P_YOLO or P_CAE)` term).
