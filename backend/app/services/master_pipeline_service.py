@@ -539,6 +539,7 @@ class MasterPipelineService:
         if return_visualization:
             # Composite rendering: shadow contours + projection rays + detection boxes with risk/dimension tags
             overlay_candidates = []
+            target_map = {t.detection_id: t for t in master_targets}
             for cand in candidates:
                 c_copy = dict(cand)
                 tid = cand.get("detection_id")
@@ -549,9 +550,19 @@ class MasterPipelineService:
                 if tid in geo_map:
                     c_copy["georeference"] = geo_map[tid].georeference
                     c_copy["coordinates"] = geo_map[tid].coordinates
+                # Trust tier + fused confidence so the overlay reflects the decision, not raw scores
+                if tid in target_map:
+                    c_copy["trust_tier"] = target_map[tid].trust_tier
+                    c_copy["calibrated_confidence"] = target_map[tid].calibrated_confidence
                 overlay_candidates.append(c_copy)
 
-            rendered_bgr = shadow_service.render_shadow_overlay(img_bgr, shadow_response.results)
+            rejected_ids = {
+                t.detection_id for t in master_targets
+                if str(getattr(t.trust_tier, "value", t.trust_tier)) == "SUSPECTED_FALSE_ALARM"
+            }
+            rendered_bgr = shadow_service.render_shadow_overlay(
+                img_bgr, shadow_response.results, skip_detection_ids=rejected_ids
+            )
             rendered_bgr = render_detections_overlay(rendered_bgr, overlay_candidates)
             rendered_jpeg_bytes = encode_image_to_jpeg_bytes(rendered_bgr)
             # Inline base64 for direct browser consumption (used by tests + frontend)

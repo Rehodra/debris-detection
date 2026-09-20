@@ -511,14 +511,20 @@ class ShadowService:
         self,
         image_bgr: np.ndarray,
         shadow_results: List[ShadowAnalysisResult],
+        skip_detection_ids: Optional[set] = None,
     ) -> np.ndarray:
         """
         Draw highlight boxes (yellow), shadow polygons (cyan/blue), and projection arrows.
+        Shadow evidence for detections in `skip_detection_ids` (e.g. rejected false alarms)
+        is omitted so the overlay only shows corroboration for kept targets.
         """
         annotated = image_bgr.copy()
+        skip_detection_ids = skip_detection_ids or set()
 
         for res in shadow_results:
             if not res.has_shadow or not res.candidate:
+                continue
+            if getattr(res, "detection_id", None) in skip_detection_ids:
                 continue
 
             cand = res.candidate
@@ -530,7 +536,15 @@ class ShadowService:
                 x, y, width, height = cv2.boundingRect(pts)
                 image_height, image_width = annotated.shape[:2]
                 oversized = width > image_width * 0.75 or height > image_height * 0.75
-                if not oversized:
+                # Tall, thin strip near the image center = nadir / water-column artifact,
+                # not a real object shadow — don't draw it.
+                cx = x + width / 2.0
+                nadir_like = (
+                    height > image_height * 0.30
+                    and width < image_width * 0.12
+                    and abs(cx - image_width / 2.0) < image_width * 0.15
+                )
+                if not oversized and not nadir_like:
                     cv2.polylines(annotated, [pts], True, (255, 255, 0), 2)  # Cyan outline
 
             # Draw acoustic projection vector arrow from highlight to shadow

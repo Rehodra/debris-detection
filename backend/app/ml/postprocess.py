@@ -169,10 +169,28 @@ def render_detections_overlay(
         else:
             continue
 
-        # Determine color: prioritize risk_tier, then color_rgb, default to blue
+        # Trust-tier styling (present once confidence fusion has run): color and label by
+        # the operational verdict, not the raw detector score, and dim rejected candidates.
+        _TRUST_COLORS = {
+            "VERIFIED_TARGET": (80, 200, 0),          # green
+            "PROBABLE_DEBRIS": (0, 190, 246),         # amber
+            "AMBIGUOUS_ANOMALY": (0, 140, 255),       # orange
+            "SUSPECTED_FALSE_ALARM": (150, 150, 150),  # grey (dimmed)
+        }
+        _TRUST_SHORT = {
+            "VERIFIED_TARGET": "VERIFIED", "PROBABLE_DEBRIS": "PROBABLE",
+            "AMBIGUOUS_ANOMALY": "REVIEW", "SUSPECTED_FALSE_ALARM": "REJECTED",
+        }
+        trust_raw = det.get("trust_tier")
+        trust_key = (trust_raw.value if hasattr(trust_raw, "value") else str(trust_raw or "")).upper()
+        is_false_alarm = trust_key == "SUSPECTED_FALSE_ALARM"
+
+        # Determine color: prioritize trust_tier, then risk_tier, then color_rgb, default to blue
         risk_raw = det.get("risk_tier") or det.get("risk_level")
         risk_key = (risk_raw.value if hasattr(risk_raw, "value") else str(risk_raw or "")).upper()
-        if risk_key in OVERLAY_RISK_COLORS:
+        if trust_key in _TRUST_COLORS:
+            bgr_color = _TRUST_COLORS[trust_key]
+        elif risk_key in OVERLAY_RISK_COLORS:
             bgr_color = OVERLAY_RISK_COLORS[risk_key]
         elif "color_rgb" in det and det["color_rgb"]:
             rgb = det["color_rgb"]
@@ -180,13 +198,17 @@ def render_detections_overlay(
         else:
             bgr_color = (246, 130, 59)  # Default MarineScan Blue
 
-        # Draw bounding box outline
-        cv2.rectangle(annotated, (x1, y1), (x2, y2), bgr_color, line_thickness)
+        # Draw bounding box outline (thin for rejected candidates so verified targets stand out)
+        cv2.rectangle(annotated, (x1, y1), (x2, y2), bgr_color, 1 if is_false_alarm else line_thickness)
 
-        # Label content
-        conf = float(det.get("confidence") or det.get("calibrated_confidence") or det.get("ai_confidence") or 0.5)
+        # Label content — fused (calibrated) confidence + verdict when available, else raw score
         display_name = det.get("display_name") or det.get("class_name") or "Debris"
-        label = f"{display_name} {int(conf * 100)}%"
+        if trust_key in _TRUST_SHORT:
+            conf = float(det.get("calibrated_confidence") or det.get("confidence") or 0.5)
+            label = f"{display_name} - {_TRUST_SHORT[trust_key]} {int(conf * 100)}%"
+        else:
+            conf = float(det.get("confidence") or det.get("calibrated_confidence") or det.get("ai_confidence") or 0.5)
+            label = f"{display_name} {int(conf * 100)}%"
 
         # Format metric dimensions if present
         dims = det.get("dimensions")
