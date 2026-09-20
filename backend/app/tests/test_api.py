@@ -184,6 +184,62 @@ class TestAPI(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 400)
 
+    def test_exports_report_json(self):
+        img_buf = self._create_sample_jpeg()
+        files = {"file": ("test_survey.jpg", img_buf.getvalue(), "image/jpeg")}
+        response = self.client.post(
+            f"{settings.API_V1_STR}/exports/report?report_format=json",
+            files=files,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["content-type"], "application/json")
+        data = response.json()
+        self.assertIn("mission_id", data)
+        self.assertIn("targets", data)
+        self.assertIn("summary", data)
+
+    def test_exports_report_csv(self):
+        img_buf = self._create_sample_jpeg()
+        files = {"file": ("test_survey.jpg", img_buf.getvalue(), "image/jpeg")}
+        response = self.client.post(
+            f"{settings.API_V1_STR}/exports/report?report_format=csv",
+            files=files,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("text/csv", response.headers["content-type"])
+        content = response.text
+        self.assertIn("mission_id", content)
+        self.assertIn("detection_id", content)
+        self.assertIn("class_name", content)
+
+    def test_exports_target_csv_null_handling(self):
+        """Verify _target_csv handles targets with None coordinates/clearance/dimensions without crashing."""
+        from types import SimpleNamespace
+        from app.api.v1.exports import _target_csv
+
+        mock_target = SimpleNamespace(
+            detection_id="mock_01",
+            class_name="pipe",
+            ai_confidence=0.85,
+            calibrated_confidence=0.82,
+            trust_tier="VERIFIED",
+            coordinates=None,  # Null coordinates as in sonar without GPS fix
+            dimensions=None,
+            clearance=None,
+            risk_score=45.0,
+            risk_tier="MODERATE",
+            action_recommendations=[],
+        )
+        mock_result = SimpleNamespace(
+            mission_id="msn_test_null",
+            targets=[mock_target],
+        )
+
+        csv_text = _target_csv(mock_result)
+        self.assertIn("msn_test_null", csv_text)
+        self.assertIn("pipe", csv_text)
+        self.assertIn("mock_01", csv_text)
+
 
 if __name__ == "__main__":
     unittest.main()

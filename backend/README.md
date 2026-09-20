@@ -3,11 +3,11 @@
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.14-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com)
 [![PyTorch](https://img.shields.io/badge/PyTorch-YOLO11%20%7C%20MPS%20%7C%20CUDA-EE4C2C.svg)](https://pytorch.org/)
-[![Tests](https://img.shields.io/badge/tests-83%2F83%20passing-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-160%2F163%20passing%20(3%20skips)-brightgreen.svg)]()
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey.svg)]()
 [![License](https://img.shields.io/badge/license-MIT-green.svg)]()
 
-Production-grade subsea computer vision, acoustic shadow corroboration, ocean physics modeling, WGS84 geodesy, and maritime risk assessment engine for sidescan sonar (SSS) and ROV optical imagery.
+Production-grade subsea computer vision, acoustic shadow corroboration, ocean physics modeling, WGS84 geodesy, and maritime risk assessment engine for sidescan sonar (SSS) waterfall records and ROV optical imagery. Natively ingests raw hydrographic survey files (**`.xtf`**, **`.jsf`**) and high-resolution imagery (**JPEG**, **PNG**, **TIFF**, **BMP**, **WEBP**).
 
 ---
 
@@ -29,36 +29,37 @@ MarineScan detects and analyzes 7 underwater target classes using a fine-tuned *
 
 ## Architecture Overview
 
-The backend is architected around an autonomous **12-Stage Master Intelligence Pipeline** that transforms raw sonar waterfall files into geolocated, physically validated, and risk-classified marine intelligence reports:
+The backend is architected around an autonomous **12-Stage Master Intelligence Pipeline** that transforms raw sonar recordings and waterfall images into geolocated, physically validated, and risk-classified marine intelligence reports:
 
 ```
-                          ┌───────────────┐
-                          │ Uploaded File │
-                          └───────┬───────┘
-                                  ↓
-                        1. Input Validation
-                                  ↓
-                          2. Quality Check
-                                  ↓
-                          3. Preprocessing
-                                  ↓
-                        4. YOLO11 Detection
-                                  ↓
-                        5. Candidate List
-                                  ↓
-                        6. Shadow Evidence
-                                  ↓
-                       7. Physics Validation
-                                  ↓
-                       8. Confidence Fusion
-                                  ↓
-                          9. Geolocation
-                                  ↓
-                       10. Dimension Scaling
-                                  ↓
-                       11. Risk Classification
-                                  ↓
-                         12. Final Result
+                          ┌──────────────────────────────────────┐
+                          │ Raw Sonar (.xtf / .jsf) or Image File │
+                          └──────────────────┬───────────────────┘
+                                             ↓
+                          1. Input Validation & Sonar Ingestion
+                             (XTF/JSF -> Waterfall Raster -> BGR)
+                                             ↓
+                                   2. Quality Check
+                                             ↓
+                                   3. Preprocessing
+                                             ↓
+                                 4. YOLO11 Detection
+                                             ↓
+                                  5. Candidate List
+                                             ↓
+                                  6. Shadow Evidence
+                                             ↓
+                                7. Physics Validation
+                                             ↓
+                                8. Confidence Fusion
+                                             ↓
+                                   9. Geolocation
+                                             ↓
+                                10. Dimension Scaling
+                                             ↓
+                                11. Risk Classification
+                                             ↓
+                                  12. Final Result
 ```
 
 ---
@@ -77,8 +78,9 @@ Every subsystem is documented in detail in the [`docs/`](./docs/) directory to a
 | **Confidence Fusion**| [`docs/06_confidence_calibration.md`](./docs/06_confidence_calibration.md) | Multi-pillar fusion (AI + Physics + Quality), dynamic gating, 4 trust tiers |
 | **Geolocation** | [`docs/07_geolocation_service.md`](./docs/07_geolocation_service.md) | WGS84 geodesy, catenary towfish layback, gyro rotation, UTM, RFC 7946 GeoJSON |
 | **Maritime Risk** | [`docs/08_maritime_risk_service.md`](./docs/08_maritime_risk_service.md) | Under-keel draft clearance, trawl snag risk, pipeline threats, USCG/IMO NOTMAR |
-| **API Reference** | [`docs/09_api_reference.md`](./docs/09_api_reference.md) | Complete OpenAPI catalog of all 25 endpoints, parameter schemas, curl/PowerShell examples |
-| **Testing Guide** | [`docs/10_developer_testing_guide.md`](./docs/10_developer_testing_guide.md) | Running 82 unit tests, validation runners, cross-platform deployment |
+| **API Reference** | [`docs/09_api_reference.md`](./docs/09_api_reference.md) | Complete OpenAPI catalog of all 28 endpoints, parameter schemas, curl/PowerShell examples |
+| **Testing Guide** | [`docs/10_developer_testing_guide.md`](./docs/10_developer_testing_guide.md) | Running all 163 unit tests, validation runners, cross-platform deployment |
+| **Raw Sonar Ingestion** | [`docs/11_raw_sonar_ingestion.md`](./docs/11_raw_sonar_ingestion.md) | XTF & EdgeTech JSF parsing, normalized waterfall rasters, pipeline integration |
 
 ---
 
@@ -89,7 +91,7 @@ backend/
 ├── app/
 │   ├── api/                    # API Route Handlers
 │   │   └── v1/
-│   │       ├── analyses.py      # Master Pipeline (/analyses)
+│   │       ├── analyses.py      # Master Pipeline (/analyses & /analyses/sonar)
 │   │       ├── confidence.py    # Confidence Fusion (/confidence)
 │   │       ├── detections.py    # YOLO11 Inference (/detections)
 │   │       ├── geolocation.py   # Geodesy & Layback (/geolocation)
@@ -99,6 +101,7 @@ backend/
 │   │       ├── preprocessing.py # Denoising & CLAHE (/preprocessing)
 │   │       ├── risk.py          # Maritime Hazard & NOTMAR (/risk)
 │   │       ├── shadows.py       # Acoustic Shadows (/shadows)
+│   │       ├── sonar.py         # Raw Sonar Inspection & Rasters (/sonar)
 │   │       └── __init__.py      # Router aggregation
 │   ├── core/                    # App configuration & settings
 │   │   └── config.py            # Pydantic Settings (env variables, model paths)
@@ -108,7 +111,7 @@ backend/
 │   │   ├── postprocess.py       # Box normalization & visual overlay rendering
 │   │   └── weights/             # Model weights (yolo11_sonar_best.pt)
 │   ├── schemas/                 # Pydantic Data Contracts (Input/Output validation)
-│   │   ├── analysis.py          # Master analysis & target schemas
+│   │   ├── analysis.py          # Master analysis, sonar context & target schemas
 │   │   ├── common.py            # Generic API & error responses
 │   │   ├── confidence.py        # Trust tiers & multi-source fusion schemas
 │   │   ├── detection.py         # Bounding boxes, image metadata, tiling config
@@ -116,7 +119,8 @@ backend/
 │   │   ├── physics.py           # Volume, mass, buoyancy, stability schemas
 │   │   ├── preprocessing.py     # Preset configs, colormaps, quality telemetry
 │   │   ├── risk.py              # Under-keel clearance, risk factors, directives
-│   │   └── shadow.py            # Shadow candidate, direction, extent schemas
+│   │   ├── shadow.py            # Shadow candidate, direction, extent schemas
+│   │   └── sonar.py             # XTF/JSF metadata, ping navigation, channel schemas
 │   ├── services/                # Pure Business Logic Layer
 │   │   ├── confidence_service.py
 │   │   ├── geolocation_service.py
@@ -127,17 +131,31 @@ backend/
 │   │   ├── preprocessing_service.py
 │   │   ├── quality_service.py
 │   │   ├── risk_service.py
-│   │   └── shadow_service.py
-│   └── tests/                   # Automated Unit & Integration Test Suites (82 Tests)
+│   │   ├── shadow_service.py
+│   │   └── sonar_ingestion_service.py # Upstream raw sonar to image pipeline adapter
+│   ├── sonar/                   # Raw Sonar Ingestion Engine (XTF & JSF)
+│   │   ├── base.py              # BaseSonarParser interface & domain exceptions
+│   │   ├── xtf_reader.py        # Extended Triton Format (.xtf) binary parser
+│   │   ├── jsf_reader.py        # EdgeTech JSF binary parser
+│   │   ├── raster_reader.py     # SonarRasterBuilder acoustic waterfall engine
+│   │   ├── inspect_xtf.py       # Diagnostic XTF CLI tool
+│   │   └── inspect_jsf.py       # Diagnostic JSF CLI tool
+│   └── tests/                   # Automated Unit & Integration Test Suites (163 Tests)
 │       ├── test_api.py
 │       ├── test_confidence.py
 │       ├── test_geolocation.py
 │       ├── test_inference.py    # Includes YOLO11 standalone model verification
+│       ├── test_jsf_parser.py   # EdgeTech JSF binary parser tests
 │       ├── test_master_pipeline.py
 │       ├── test_physics.py
 │       ├── test_preprocessing.py
 │       ├── test_risk.py
-│       └── test_shadow.py
+│       ├── test_shadow.py
+│       ├── test_sonar_api.py    # Sonar inspection and raster API tests
+│       ├── test_sonar_base.py   # Schema validation & error handling
+│       ├── test_sonar_pipeline_integration.py # End-to-end raw sonar pipeline tests
+│       ├── test_sonar_raster.py # Acoustic normalization & waterfall tests
+│       └── test_xtf_parser.py   # Triton XTF binary parser tests
 ├── docs/                        # Subsystem Architectural Documentation
 ├── requirements.txt             # Python dependencies
 ├── sample_sidescan.png          # Real sidescan sonar benchmark image
@@ -198,8 +216,8 @@ uvicorn app.main:app --reload --port 8000
 
 ## Running Verification & Tests
 
-### Automated Test Suite (83 Tests)
-Execute all 83 automated tests across all 9 test suites:
+### Automated Test Suite (163 Tests)
+Execute all 163 automated tests across all 15 test suites:
 
 #### macOS / Linux
 ```bash
@@ -210,7 +228,7 @@ python -m unittest discover -s app/tests -p "test_*.py" -v
 ```powershell
 python -m unittest discover -s app/tests -p "test_*.py" -v
 ```
-*(All 83 tests pass with 100% success)*
+*(160 tests pass, 3 expected skips due to pending real-world field survey recordings, 0 failures, 0 errors)*
 
 ---
 
@@ -274,12 +292,15 @@ python test_sonar.py sample_sidescan.png
 
 ---
 
-## Active API Endpoints (25 Endpoints)
+## Active API Endpoints (28 Endpoints)
 
 | Router | Method | Endpoint | Description |
 |---|---|---|---|
-| **Master Analysis** | `POST` | `/api/v1/analyses/analyze` | Execute complete 12-stage Master Pipeline |
+| **Master Analysis** | `POST` | `/api/v1/analyses/analyze` | Execute complete 12-stage Master Pipeline (Images, XTF, JSF) |
+| | `POST` | `/api/v1/analyses/sonar` | Ingest raw `.xtf`/`.jsf` recording with `max_pings` & channel controls |
 | | `POST` | `/api/v1/analyses/visualize` | Stream annotated JPEG with boxes and shadow rays |
+| **Raw Sonar** | `POST` | `/api/v1/sonar/inspect` | Extract metadata, ping counts, channels, & navigation summary |
+| | `POST` | `/api/v1/sonar/raster` | Generate & stream normalized acoustic waterfall raster (PNG/base64) |
 | **Detections** | `POST` | `/api/v1/detections/predict` | Single-image YOLO11 inference with optional tiling |
 | | `POST` | `/api/v1/detections/predict-batch` | Multi-image parallel batched detection |
 | | `POST` | `/api/v1/detections/visualize` | Render detection boxes and confidence badges |

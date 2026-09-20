@@ -43,12 +43,21 @@ class ActionRecommendation(BaseModel):
 class TargetRiskAssessment(BaseModel):
     detection_id: str = Field(..., description="Debris target identifier")
     class_name: str = Field(..., description="Target class (shipwreck, aircraft, fish, other)")
+    target_type: str = Field("unknown", description="Target classification type")
     composite_risk_score: float = Field(..., ge=0.0, le=100.0, description="Composite maritime hazard score [0 - 100]")
     risk_tier: RiskTier = Field(..., description="Categorical risk classification")
     color_hex: str = Field(..., description="UI hex color code for risk badge")
     clearance: NavigationalClearance = Field(..., description="Water clearance and vessel draft vulnerability")
     factors: RiskFactors = Field(..., description="Individual hazard component breakdown")
     recommendations: List[ActionRecommendation] = Field(default_factory=list, description="Actionable directives")
+    
+    # Phase 11 NOTMAR Directives & Telemetry State
+    geolocation_available: bool = Field(False, description="True if target has verified geographic coordinates")
+    dimensions_available: bool = Field(False, description="True if target has verified physical dimensions")
+    notmar_required: bool = Field(False, description="True if target requires Notice to Mariners broadcast")
+    notmar_status: str = Field("NONE", description="NOTMAR status: 'RECOMMENDED', 'NONE', 'UNKNOWN_INSUFFICIENT_DATA', 'MONITOR'")
+    notmar_reason: Optional[str] = Field(None, description="Explanation for NOTMAR decision")
+    warnings: List[str] = Field(default_factory=list, description="Risk assessment warnings or data caveats")
 
 
 class BatchRiskResponse(BaseModel):

@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     CLOUDINARY_API_KEY: str = ""
     CLOUDINARY_API_SECRET: str = ""
 
+    # Sonar waterfall raster artifact storage
+    SONAR_ARTIFACT_DIR: str = "pred_img/sonar_artifacts"
+
     # Server & Debug settings
     DEBUG: bool = False
     HOST: str = "0.0.0.0"

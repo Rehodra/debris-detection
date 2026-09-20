@@ -20,7 +20,8 @@ graph TD
     end
 
     subgraph API["Backend API Gateway (FastAPI 0.115+)"]
-        V1_Analyses["/api/v1/analyses (Master Pipeline)"]
+        V1_Analyses["/api/v1/analyses (Master Pipeline & Sonar)"]
+        V1_Sonar["/api/v1/sonar (Raw XTF/JSF Parser & Waterfall)"]
         V1_Detections["/api/v1/detections (YOLO11 Inference)"]
         V1_Preprocess["/api/v1/preprocessing (Denoising & CLAHE)"]
         V1_Shadows["/api/v1/shadows (Acoustic Corroboration)"]
@@ -32,6 +33,7 @@ graph TD
     end
 
     subgraph Core["Modular Pure-Logic Services"]
+        S_Sonar[Sonar Ingestion & Parser Engine (XTF / JSF)]
         S_Input[Input Validation Service]
         S_Quality[Quality Telemetry Service]
         S_Pre[Preprocessing Service]
@@ -78,36 +80,37 @@ MarineScan utilizes a fine-tuned **YOLO11** deep neural network (`weights/yolo11
 The engine executes sequentially with sub-millisecond stage telemetry:
 
 ```
-                  ┌───────────────┐
-                  │ Uploaded File │
-                  └───────┬───────┘
-                          ↓
-                  1. Input validation
-                          ↓
-                    2. Quality check
-                          ↓
-                    3. Preprocessing
-                          ↓
-                     4. YOLO11 Inference
-                          ↓
-                   5. Candidate list
-                          ↓
-                  6. Shadow evidence
-                          ↓
-                 7. Physics validation
-                          ↓
-                 8. Confidence fusion
-                          ↓
-                    9. Geolocation
-                          ↓
-                  10. Dimension estimate
-                          ↓
-                  11. Risk classification
-                          ↓
-                     12. Final result
+                  ┌──────────────────────────────────────┐
+                  │ Raw Sonar (.xtf / .jsf) or Image File │
+                  └──────────────────┬───────────────────┘
+                                     ↓
+                  1. Input Validation & Sonar Ingestion
+                     (XTF/JSF -> Waterfall Raster -> BGR)
+                                     ↓
+                            2. Quality check
+                                     ↓
+                            3. Preprocessing
+                                     ↓
+                             4. YOLO11 Inference
+                                     ↓
+                            5. Candidate list
+                                     ↓
+                            6. Shadow evidence
+                                     ↓
+                           7. Physics validation
+                                     ↓
+                           8. Confidence fusion
+                                     ↓
+                             9. Geolocation
+                                     ↓
+                           10. Dimension estimate
+                                     ↓
+                           11. Risk classification
+                                     ↓
+                              12. Final result
 ```
 
-1. **Input Validation**: Magic-byte MIME verification (JPEG, PNG, WEBP, BMP, TIFF), zero-byte rejection, memory-buffered OpenCV decoding.
+1. **Input Validation & Sonar Ingestion**: Dual-path architecture. Standard images (JPEG, PNG, WEBP, BMP, TIFF) pass through `input_service.py` magic-byte verification and OpenCV decoding. Raw sonar recordings (`.xtf`, `.jsf`) pass through `sonar_ingestion_service.py`, parse via format-specific binary readers (`XtfSonarParser`, `JsfSonarParser`), assemble into normalized along-track acoustic waterfall rasters via `SonarRasterBuilder`, convert to 3-channel BGR image representations, and inject calibrated sonar telemetry (`SonarMetadataContext`).
 2. **Quality Check**: Laplacian focus variance ($\sigma^2$), RMS contrast, Signal-to-Noise Ratio (SNR dB), dynamic exposure clipping.
 3. **Preprocessing**: Bilateral/median acoustic speckle denoising, CLAHE in LAB color space, precomputed gamma lookup tables (LUT), and false colormapping (`sonar_acoustic`, `turbid_water`, etc.).
 4. **YOLO11 Inference**: Batched neural inference with sliding-window tiling (`predict_tiled`) and Global Non-Maximum Suppression (NMS) for extreme aspect-ratio waterfall strips.
@@ -119,7 +122,7 @@ The engine executes sequentially with sub-millisecond stage telemetry:
 9. **Geolocation & Layback**: Towfish catenary layback correction ($\sqrt{L^2 - D^2} \cdot k_{\text{catenary}}$), vessel gyro rotation, WGS84 ellipsoidal projection, Nautical DMS, UTM easting/northing, and RFC 7946 GeoJSON FeatureCollections.
 10. **Dimension Scaling**: Metric length, width, shadow height, seabed footprint area, and displacement volume.
 11. **Maritime Risk Assessment**: Under-keel clearance calculation ($\text{Depth} - H_{\text{object}}$) across shallow ($\le 3.5\text{m}$), medium ($\le 7.5\text{m}$), and deep ($\le 15.0\text{m}$) draft vessels; trawl net snag hazard; subsea pipeline proximity; USCG/IMO NOTMAR alerts and IHO S-57 charting directives.
-12. **Result Synthesis**: Consolidates `MasterAnalysisResult`, stage latency timings, GeoJSON features, and rendered multi-layer JPEG overlays.
+12. **Result Synthesis**: Consolidates `MasterAnalysisResult` with stage latency timings, GeoJSON features, rendered multi-layer JPEG overlays, and raw sonar provenance (`SonarMetadataContext`) when available.
 
 ---
 
@@ -150,7 +153,7 @@ else:
 | **Activate venv** | `source venv/bin/activate` | `.\venv\Scripts\Activate.ps1` | `venv\Scripts\activate.bat` |
 | **Install deps** | `pip install -r requirements.txt` | `pip install -r requirements.txt` | `pip install -r requirements.txt` |
 | **Dev Server** | `uvicorn app.main:app --reload --port 8000` | `uvicorn app.main:app --reload --port 8000` | `uvicorn app.main:app --reload --port 8000` |
-| **Run All 82 Tests** | `python -m unittest discover -s app/tests -p "test_*.py" -v` | `python -m unittest discover -s app/tests -p "test_*.py" -v` | `python -m unittest discover -s app/tests -p "test_*.py" -v` |
+| **Run All 163 Tests** | `python -m unittest discover -s app/tests -p "test_*.py" -v` | `python -m unittest discover -s app/tests -p "test_*.py" -v` | `python -m unittest discover -s app/tests -p "test_*.py" -v` |
 | **Model Validation** | `./venv/bin/python test_yolo11_model.py "..."` | `.\venv\Scripts\python.exe test_yolo11_model.py "..."` | `venv\Scripts\python.exe test_yolo11_model.py "..."` |
 | **Pipeline CLI** | `python test_sonar.py sample_sidescan.png` | `python test_sonar.py sample_sidescan.png` | `python test_sonar.py sample_sidescan.png` |
 | **Frontend Dev** | `npm run dev` | `npm run dev` | `npm run dev` |

@@ -19,6 +19,9 @@ from app.schemas.detection import DetectionItem
 from app.schemas.shadow import ShadowAnalysisResult
 from app.schemas.physics import TargetPhysicsAnalysis
 from app.schemas.confidence import TargetConfidenceProfile, TrustTier
+from app.schemas.analysis import MasterPhysicalDimensions
+from app.schemas.geolocation import GeoCoordinates
+from app.schemas.sonar import SonarTargetGeoreference
 
 logger = logging.getLogger("marinescan.services.risk")
 
@@ -235,6 +238,7 @@ class RiskService:
         clearance: NavigationalClearance,
         factors: RiskFactors,
         class_name: str,
+        notmar_status: Optional[str] = None,
     ) -> List[ActionRecommendation]:
         """Generate standardized maritime action directives (NOTMAR, IHO, Salvage)."""
         recs: List[ActionRecommendation] = []
@@ -251,13 +255,18 @@ class RiskService:
             )
             return recs
 
-        # 1. Navigational Collision Advisories
-        if clearance.threatens_shallow_draft or factors.navigational_risk >= 80.0:
+        # 1. Navigational Collision Advisories & NOTMAR
+        if clearance.threatens_shallow_draft or factors.navigational_risk >= 80.0 or notmar_status == "RECOMMENDED":
+            if notmar_status == "UNKNOWN_INSUFFICIENT_DATA":
+                action_text = f"Broadcast urgent Notice to Mariners (NOTMAR) warning of shallow obstruction hazard ({clearance.clearance_m}m clearance); establish local survey boundary and verify exact WGS84 coordinates."
+            else:
+                action_text = "Broadcast urgent Notice to Mariners (NOTMAR) warning of shallow obstruction hazard."
+
             recs.append(
                 ActionRecommendation(
                     category="NAVIGATION",
                     priority="IMMEDIATE",
-                    action_text="Broadcast urgent Notice to Mariners (NOTMAR) warning of shallow obstruction hazard.",
+                    action_text=action_text,
                     authority_standard="USCG / IMO NOTMAR Advisory",
                 )
             )
@@ -267,6 +276,15 @@ class RiskService:
                     priority="HIGH",
                     action_text=f"Issue urgent S-57 Electronic Navigational Chart (ENC) update: chart obstruction with least depth {clearance.clearance_m}m.",
                     authority_standard="IHO S-57 / S-52 Standards",
+                )
+            )
+        elif notmar_status == "MONITOR":
+            recs.append(
+                ActionRecommendation(
+                    category="NAVIGATION",
+                    priority="STANDARD",
+                    action_text="Maintain acoustic monitoring of candidate anomaly; verify with high-frequency pass prior to NOTMAR broadcast.",
+                    authority_standard="IHO Hydrographic Survey Practice",
                 )
             )
         elif clearance.threatens_deep_draft:
@@ -333,29 +351,47 @@ class RiskService:
         self,
         detection_id: str,
         class_name: str,
-        length_m: float,
-        width_m: float,
-        height_m: float,
+        length_m: Optional[float] = None,
+        width_m: Optional[float] = None,
+        height_m: Optional[float] = None,
         water_depth_m: float = 30.0,
         distance_to_cable_m: Optional[float] = None,
         physics_analysis: Optional[TargetPhysicsAnalysis] = None,
         confidence_profile: Optional[TargetConfidenceProfile] = None,
+        coordinates: Optional[Any] = None,
+        georeference: Optional[Any] = None,
+        dimensions: Optional[Any] = None,
+        target_type: Optional[str] = None,
     ) -> TargetRiskAssessment:
         """
-        Compute full multi-factor hazard assessment for a debris target.
+        Compute full multi-factor hazard assessment for a debris target,
+        evaluating telemetry availability and NOTMAR broadcast directives.
         """
         c_lower = class_name.lower()
 
+        # Extract dimension values from dimensions object if present
+        if dimensions is not None:
+            if length_m is None and getattr(dimensions, "length_m", None) is not None:
+                length_m = dimensions.length_m
+            if width_m is None and getattr(dimensions, "width_m", None) is not None:
+                width_m = dimensions.width_m
+            if height_m is None and getattr(dimensions, "height_m", None) is not None:
+                height_m = dimensions.height_m
+
+        eff_len = float(length_m) if length_m is not None else 5.0
+        eff_wid = float(width_m) if width_m is not None else 2.0
+        eff_hgt = float(height_m) if height_m is not None else 0.5
+
         # 1. Navigational Clearance
-        clearance, nav_risk = self.calculate_navigational_clearance(water_depth_m, height_m)
+        clearance, nav_risk = self.calculate_navigational_clearance(water_depth_m, eff_hgt)
 
         # 2. Trawl Snag Risk
-        trawl_risk = self.evaluate_trawl_risk(class_name, height_m, length_m)
+        trawl_risk = self.evaluate_trawl_risk(class_name, eff_hgt, eff_len)
 
         # 3. Infrastructure Risk (integrating physics stability)
         mob_status = "Settled / Stable in Sediment"
         stab_idx = None
-        vol_m3 = length_m * width_m * height_m * 0.5
+        vol_m3 = eff_len * eff_wid * eff_hgt * 0.5
 
         if physics_analysis:
             mob_status = physics_analysis.hydrodynamic_stability.mobility_status
@@ -407,17 +443,75 @@ class RiskService:
             mobility_risk=round(mob_risk, 1),
         )
 
-        recs = self.generate_recommendations(tier, clearance, factors, class_name)
+        # Geolocation & Dimensions availability check
+        geo_available = False
+        if coordinates is not None:
+            lat = getattr(coordinates, "latitude", None) or (coordinates.get("latitude") if isinstance(coordinates, dict) else None)
+            lon = getattr(coordinates, "longitude", None) or (coordinates.get("longitude") if isinstance(coordinates, dict) else None)
+            if lat is not None and lon is not None:
+                geo_available = True
+        if not geo_available and georeference is not None:
+            lat = getattr(georeference, "latitude", None) or (georeference.get("latitude") if isinstance(georeference, dict) else None)
+            lon = getattr(georeference, "longitude", None) or (georeference.get("longitude") if isinstance(georeference, dict) else None)
+            if lat is not None and lon is not None:
+                geo_available = True
+
+        dim_available = False
+        if dimensions is not None:
+            status = getattr(dimensions, "measurement_status", None) or (dimensions.get("measurement_status") if isinstance(dimensions, dict) else None)
+            if status in ("verified_complete", "partial_across_only"):
+                dim_available = True
+            elif getattr(dimensions, "length_m", None) is not None or getattr(dimensions, "across_track_m", None) is not None:
+                dim_available = True
+        elif length_m is not None and width_m is not None:
+            dim_available = True
+
+        # Phase 11: NOTMAR Broadcast Decision Logic
+        warnings: List[str] = []
+        is_threat = clearance.threatens_shallow_draft or (tier == RiskTier.CRITICAL)
+
+        if c_lower == "fish":
+            notmar_req = False
+            notmar_stat = "NONE"
+            notmar_rsn = "Natural marine biomass; no navigational hazard."
+        elif is_threat:
+            if confidence_profile and confidence_profile.trust_tier == TrustTier.SUSPECTED_FALSE_ALARM:
+                notmar_req = False
+                notmar_stat = "MONITOR"
+                notmar_rsn = "Candidate anomaly flagged as suspected false alarm; acoustic verification required before NOTMAR broadcast."
+                warnings.append("Target poses potential collision hazard but is flagged as suspected false alarm; monitoring recommended.")
+            elif not geo_available:
+                notmar_req = False
+                notmar_stat = "UNKNOWN_INSUFFICIENT_DATA"
+                notmar_rsn = "Obstruction detected threatening surface navigation, but exact geographic coordinates are unrecorded; cannot issue targeted NOTMAR broadcast."
+                warnings.append("Target poses shallow collision hazard but lacks verified geographic coordinates for NOTMAR broadcast.")
+            else:
+                notmar_req = True
+                notmar_stat = "RECOMMENDED"
+                notmar_rsn = f"Shallow submerged obstruction ({clearance.clearance_m}m clearance in {clearance.water_depth_m}m water) hazardous to surface navigation."
+        else:
+            notmar_req = False
+            notmar_stat = "NONE"
+            notmar_rsn = f"Adequate navigational clearance maintained ({clearance.clearance_m}m clearance in {clearance.water_depth_m}m water)."
+
+        recs = self.generate_recommendations(tier, clearance, factors, class_name, notmar_status=notmar_stat)
 
         return TargetRiskAssessment(
             detection_id=detection_id,
             class_name=class_name,
+            target_type=target_type or class_name,
             composite_risk_score=round(composite, 1),
             risk_tier=tier,
             color_hex=color,
             clearance=clearance,
             factors=factors,
             recommendations=recs,
+            geolocation_available=geo_available,
+            dimensions_available=dim_available,
+            notmar_required=notmar_req,
+            notmar_status=notmar_stat,
+            notmar_reason=notmar_rsn,
+            warnings=warnings,
         )
 
     # -------------------------------------------------------------------------
@@ -431,9 +525,12 @@ class RiskService:
         physics_analyses: Optional[List[TargetPhysicsAnalysis]] = None,
         confidence_profiles: Optional[List[TargetConfidenceProfile]] = None,
         meters_per_pixel: float = 0.05,
+        geo_map: Optional[Dict[str, Any]] = None,
+        dim_map: Optional[Dict[str, Any]] = None,
     ) -> BatchRiskResponse:
         """
-        Evaluate maritime hazard across all detections from an inspection mission.
+        Evaluate maritime hazard across all detections from an inspection mission,
+        integrating geospatial fixes and physical dimensions.
         """
         phys_map = {p.detection_id: p for p in (physics_analyses or [])}
         conf_map = {c.detection_id: c for c in (confidence_profiles or [])}
@@ -446,9 +543,20 @@ class RiskService:
             det_id = det.get("detection_id", "unknown")
             cname = det.get("class_name", "other")
 
+            # Extract associated geolocation and dimensions if available
+            geo_info = geo_map.get(det_id) if geo_map else None
+            coords = getattr(geo_info, "coordinates", None) or (geo_info.get("coordinates") if isinstance(geo_info, dict) else None)
+            georef = getattr(geo_info, "georeference", None) or (geo_info.get("georeference") if isinstance(geo_info, dict) else None)
+
+            dim_info = dim_map.get(det_id) if dim_map else None
+
             # Extract dimensions
             phys = phys_map.get(det_id)
-            if phys:
+            if dim_info is not None and getattr(dim_info, "length_m", None) is not None:
+                l_m = dim_info.length_m
+                w_m = dim_info.width_m or dim_info.across_track_m or l_m
+                h_m = dim_info.height_m or 0.5
+            elif phys:
                 l_m = phys.physical_properties.length_m
                 w_m = phys.physical_properties.width_m
                 h_m = phys.physical_properties.height_m
@@ -471,11 +579,15 @@ class RiskService:
                 water_depth_m=water_depth_m,
                 physics_analysis=phys,
                 confidence_profile=conf_prof,
+                coordinates=coords,
+                georeference=georef,
+                dimensions=dim_info,
+                target_type=det.get("category", cname),
             )
             results.append(risk_assessment)
             counts[risk_assessment.risk_tier] += 1
 
-            if risk_assessment.risk_tier == RiskTier.CRITICAL or risk_assessment.clearance.threatens_shallow_draft:
+            if risk_assessment.notmar_required or risk_assessment.notmar_status == "RECOMMENDED":
                 immediate_notmar = True
 
         return BatchRiskResponse(

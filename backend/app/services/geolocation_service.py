@@ -20,6 +20,7 @@ from app.schemas.geolocation import (
     BatchGeolocationResponse,
 )
 from app.schemas.detection import BoundingBox, DetectionItem
+from app.schemas.sonar import SonarNavigationTrack, SonarPingTelemetry, SonarTargetGeoreference
 
 logger = logging.getLogger("marinescan.services.geolocation")
 
@@ -396,6 +397,230 @@ class GeolocationService:
             geojson=feature_collection,
         )
 
+    # -------------------------------------------------------------------------
+    # 7. Sonar Ping-Track Detection Georeferencing (Phase 9)
+    # -------------------------------------------------------------------------
+
+    def geolocate_sonar_detections(
+        self,
+        detections: List[Dict[str, Any]],
+        navigation_track: Optional[SonarNavigationTrack],
+        nadir_pixel_x: Optional[float],
+        meters_per_pixel: Optional[float],
+        slant_range_m: Optional[float] = None,
+        towfish_cfg: Optional[TowfishConfig] = None,
+        default_heading_deg: float = 0.0,
+    ) -> BatchGeolocationResponse:
+        """
+        Correlates each sonar detection to its corresponding ping in the ordered
+        SonarNavigationTrack, calculates metric across-track offset from nadir,
+        applies towfish layback if configured, and computes precision WGS84 coordinates.
+
+        Strict Ground Truth:
+        - If ping navigation is unlogged/missing: target coordinates remain null.
+          Under NO circumstances is (0, 0) or default fallback coordinates used.
+        - If meters_per_pixel is missing/None: across-track offset cannot be computed;
+          target coordinates remain null with an explicit warning.
+        - GeoJSON coordinates strictly adhere to RFC 7946 [longitude, latitude] standard.
+        - Detections with missing coordinates are omitted from the GeoJSON FeatureCollection.
+        """
+        geolocated_targets: List[GeolocatedTarget] = []
+        geojson_features: List[GeoJSONFeature] = []
+
+        # Identify representative/first valid ping for batch sensor/vessel positions
+        vessel_coords: Optional[GeoCoordinates] = None
+        sensor_coords: Optional[GeoCoordinates] = None
+        if navigation_track and navigation_track.points:
+            for p in navigation_track.points:
+                if p.latitude is not None and p.longitude is not None:
+                    vessel_coords = self.to_geo_coordinates(p.latitude, p.longitude, depth_m=p.depth)
+                    if towfish_cfg is not None and towfish_cfg.cable_payout_m > 0.0:
+                        hdg = p.heading if p.heading is not None else default_heading_deg
+                        v_fix = NavigationalFix(
+                            latitude=p.latitude,
+                            longitude=p.longitude,
+                            heading_degrees=hdg,
+                        )
+                        sensor_coords, _ = self.calculate_towfish_position(v_fix, towfish_cfg)
+                    else:
+                        sensor_coords = vessel_coords
+                    break
+
+        points = navigation_track.points if navigation_track else []
+
+        for det in detections:
+            det_id = det.get("detection_id", "unknown")
+            cname = det.get("class_name", "other")
+            conf = float(det.get("confidence", 0.5))
+
+            bbox = det.get("bbox", {})
+            if hasattr(bbox, "model_dump"):
+                bbox = bbox.model_dump()
+            elif not isinstance(bbox, dict):
+                bbox = {}
+
+            x_min = float(bbox.get("x_min", 0.0))
+            y_min = float(bbox.get("y_min", 0.0))
+            width = float(bbox.get("width", 0.0))
+            height = float(bbox.get("height", 0.0))
+            center_x = x_min + width / 2.0
+            center_y = y_min + height / 2.0
+
+            # Map center_y to waterfall_row and ping_index (1:1 identity mapping)
+            row = int(round(center_y))
+            if points:
+                bounded_row = max(0, min(row, len(points) - 1))
+                ping = points[bounded_row]
+                ping_idx = ping.ping_index
+            else:
+                bounded_row = row
+                ping = None
+                ping_idx = row
+
+            warnings: List[str] = []
+            across_offset_m: Optional[float] = None
+
+            # Across-track offset: positive = Starboard, negative = Port
+            if nadir_pixel_x is not None and meters_per_pixel is not None and meters_per_pixel > 0:
+                offset_pixels = center_x - nadir_pixel_x
+                across_offset_m = round(offset_pixels * meters_per_pixel, 3)
+            else:
+                if nadir_pixel_x is None:
+                    warnings.append("Nadir pixel column unrecorded; across-track offset unavailable.")
+                if meters_per_pixel is None or meters_per_pixel <= 0:
+                    warnings.append("Meters per pixel resolution unavailable; physical ground offset cannot be calculated.")
+
+            target_coords: Optional[GeoCoordinates] = None
+            dist_m: Optional[float] = None
+            bearing_deg: Optional[float] = None
+            sensor_lat: Optional[float] = None
+            sensor_lon: Optional[float] = None
+            vessel_lat: Optional[float] = None
+            vessel_lon: Optional[float] = None
+            layback_applied = False
+            layback_distance_m: Optional[float] = None
+            hdg_used: Optional[float] = None
+
+            if ping is None:
+                status = "unavailable_missing_nav"
+                warnings.append("No navigation track available for ping lookup.")
+            elif ping.latitude is None or ping.longitude is None:
+                status = "unavailable_missing_nav"
+                warnings.append(f"Ping {ping_idx} at waterfall row {bounded_row} contains missing / unrecorded geographic coordinates.")
+                hdg_used = ping.heading
+            elif across_offset_m is None:
+                status = "unavailable_missing_gsd"
+                vessel_lat = ping.latitude
+                vessel_lon = ping.longitude
+                hdg_used = ping.heading if ping.heading is not None else default_heading_deg
+            else:
+                # Deterministic calculation: valid navigation and valid resolution
+                status = "calculated"
+                vessel_lat = ping.latitude
+                vessel_lon = ping.longitude
+                hdg_used = ping.heading if ping.heading is not None else default_heading_deg
+
+                if towfish_cfg is not None and towfish_cfg.cable_payout_m > 0.0:
+                    v_fix = NavigationalFix(
+                        latitude=ping.latitude,
+                        longitude=ping.longitude,
+                        heading_degrees=hdg_used,
+                    )
+                    fish_coords, layback_dist = self.calculate_towfish_position(v_fix, towfish_cfg)
+                    sensor_lat = fish_coords.latitude
+                    sensor_lon = fish_coords.longitude
+                    layback_applied = True
+                    layback_distance_m = layback_dist
+                else:
+                    sensor_lat = ping.latitude
+                    sensor_lon = ping.longitude
+                    layback_applied = False
+                    layback_distance_m = None
+
+                target_coords, dist_m, bearing_deg = self.track_offsets_to_geo(
+                    sensor_lat=sensor_lat,
+                    sensor_lon=sensor_lon,
+                    heading_deg=hdg_used,
+                    across_offset_m=across_offset_m,
+                    along_offset_m=0.0,
+                    target_depth_m=ping.depth,
+                )
+
+            georef = SonarTargetGeoreference(
+                status=status,
+                coordinate_reference="WGS84",
+                latitude=target_coords.latitude if target_coords else None,
+                longitude=target_coords.longitude if target_coords else None,
+                source_ping_index=ping_idx,
+                waterfall_row=bounded_row,
+                across_track_pixel=round(center_x, 1),
+                across_track_offset_m=across_offset_m,
+                slant_range_m=slant_range_m,
+                heading_deg=hdg_used,
+                layback_applied=layback_applied,
+                layback_distance_m=layback_distance_m,
+                vessel_latitude=vessel_lat,
+                vessel_longitude=vessel_lon,
+                sensor_latitude=sensor_lat,
+                sensor_longitude=sensor_lon,
+                warnings=warnings,
+            )
+
+            geo_target = GeolocatedTarget(
+                target_id=det_id,
+                class_name=cname,
+                confidence=round(conf, 3),
+                pixel_centroid=(round(center_x, 1), round(center_y, 1)),
+                across_track_offset_m=across_offset_m if across_offset_m is not None else 0.0,
+                along_track_offset_m=0.0,
+                coordinates=target_coords,
+                distance_from_sensor_m=dist_m,
+                bearing_degrees=bearing_deg,
+                georeference=georef,
+            )
+            geolocated_targets.append(geo_target)
+
+            # Build RFC 7946 GeoJSON Feature (strictly [longitude, latitude], omit if missing)
+            if target_coords is not None and target_coords.latitude is not None and target_coords.longitude is not None:
+                feat = GeoJSONFeature(
+                    geometry=GeoJSONGeometry(
+                        type="Point",
+                        coordinates=[target_coords.longitude, target_coords.latitude],
+                    ),
+                    properties={
+                        "target_id": geo_target.target_id,
+                        "class_name": geo_target.class_name,
+                        "confidence": geo_target.confidence,
+                        "dms": target_coords.dms_string,
+                        "utm_zone": target_coords.utm_zone,
+                        "utm_easting": target_coords.utm_easting_m,
+                        "utm_northing": target_coords.utm_northing_m,
+                        "distance_m": geo_target.distance_from_sensor_m,
+                        "bearing_deg": geo_target.bearing_degrees,
+                        "across_track_m": geo_target.across_track_offset_m,
+                        "along_track_m": geo_target.along_track_offset_m,
+                        "ping_index": ping_idx,
+                        "waterfall_row": bounded_row,
+                        "layback_applied": georef.layback_applied,
+                    },
+                )
+                geojson_features.append(feat)
+
+        feature_collection = GeoJSONFeatureCollection(
+            type="FeatureCollection",
+            features=geojson_features,
+        )
+
+        return BatchGeolocationResponse(
+            status="success",
+            total_targets_geolocated=len(geojson_features),
+            sensor_position=sensor_coords,
+            vessel_position=vessel_coords,
+            targets=geolocated_targets,
+            geojson=feature_collection,
+        )
+
 
 # Global service instance
 geolocation_service = GeolocationService()
+

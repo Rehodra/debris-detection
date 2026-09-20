@@ -126,6 +126,43 @@ python test_sonar.py sample_sidescan.png
 
 ---
 
+### D. Raw Sonar Recording Diagnostics (XTF & JSF)
+
+Inspect raw sonar survey files and stream acoustic waterfall rasters without manual preprocessing:
+
+#### macOS / Linux
+```bash
+# Diagnostic inspection of XTF survey header and channels:
+cd backend
+python -m app.sonar.inspect_xtf path/to/survey.xtf
+
+# Diagnostic inspection of EdgeTech JSF packets:
+python -m app.sonar.inspect_jsf path/to/survey.jsf
+
+# Quick REST API header inspection:
+curl -X POST "http://localhost:8000/api/v1/sonar/inspect" -F "file=@path/to/survey.xtf" | jq
+```
+
+#### Windows (PowerShell)
+```powershell
+# Diagnostic inspection of XTF survey header and channels:
+cd backend
+python -m app.sonar.inspect_xtf path\to\survey.xtf
+
+# Diagnostic inspection of EdgeTech JSF packets:
+python -m app.sonar.inspect_jsf path\to\survey.jsf
+
+# Quick REST API header inspection:
+$form = @{ file = Get-Item "path\to\survey.xtf" }
+Invoke-RestMethod -Uri "http://localhost:8000/api/v1/sonar/inspect" -Method Post -Form $form | ConvertTo-Json
+```
+
+*Highlights:*
+- Instant header extraction without decoding full acoustic rasters.
+- Verifies sample rates, channel layout, ping count, and valid navigation fixes.
+
+---
+
 ## 3. Interactive Web Dashboard Walkthrough
 
 Open **`http://localhost:8443`** in your browser.
@@ -153,12 +190,13 @@ Open **`http://localhost:8443`** in your browser.
 ```
 
 ### Flow 1: Uploading Imagery & Configuring Survey Mission
-1. Drag and drop `frontend/public/accident.jpg` or `backend/sample_sidescan.png` into the upload zone.
+1. Drag and drop `frontend/public/accident.jpg`, `backend/sample_sidescan.png`, or a raw survey file (`.xtf` / `.jsf`) into the upload zone.
+   - For raw sonar recordings, MarineScan automatically inspects headers, validates navigation fixes, and builds the normalized acoustic waterfall raster without external tooling.
 2. In the **Survey Parameters** panel:
-   - **Vessel Coordinates**: Latitude `24.8607° N`, Longitude `67.0011° E`.
+   - **Vessel Coordinates**: Latitude `24.8607° N`, Longitude `67.0011° E` (auto-populated if present in raw sonar navigation packets).
    - **Vessel Heading**: `45.0°` (North-East track).
    - **Water Depth**: `35.0 meters`.
-   - **Ground Sampling Distance (GSD)**: `0.05 meters/pixel` ($5\text{ cm/px}$).
+   - **Ground Sampling Distance (GSD)**: `0.05 meters/pixel` ($5\text{ cm/px}$, auto-calibrated from slant range if available).
    - **Towfish Layback**: Cable payout `60.0m`, sensor depth `18.0m`.
 
 ### Flow 2: Acoustic Image Preprocessing
@@ -205,7 +243,8 @@ Open **`http://localhost:8443`** in your browser.
 
 ## 4. Key Talking Points for Judges & Evaluators
 
-1. **Beyond Pure Computer Vision**: Standard AI models hallucinate on noisy underwater sonar. MarineScan enforces **Acoustic Shadow Corroboration** and **Ocean Physics Validation** to verify that a target is truly a 3D physical object.
-2. **Tripartite Confidence Fusion**: Dynamically balances AI softmax confidence ($45\%$), shadow and physical evidence ($35\%$), and local acoustic image quality ($20\%$).
-3. **Cross-Platform Engineering**: Zero vendor lock-in. Optimized natively for Apple Silicon Metal Performance Shaders (`mps`) on macOS, NVIDIA CUDA on Windows/Linux, and multi-threaded CPU fallback.
-4. **Complete Hydrographic Workflow**: Handles the entire mission lifecycle from raw waterfall ingestion, through physics and geodesy, to official NOTMAR maritime directives.
+1. **Native Raw Sonar Ingestion (XTF & JSF)**: Ingests raw Triton (`.xtf`) and EdgeTech (`.jsf`) survey recordings directly. Automatically parses headers, pings, multi-channel acoustic samples, and navigation coordinates into normalized waterfall rasters.
+2. **Beyond Pure Computer Vision**: Standard AI models hallucinate on noisy underwater sonar. MarineScan enforces **Acoustic Shadow Corroboration** and **Ocean Physics Validation** to verify that a target is truly a 3D physical object.
+3. **Tripartite Confidence Fusion**: Dynamically balances AI softmax confidence ($45\%$), shadow and physical evidence ($35\%$), and local acoustic image quality ($20\%$).
+4. **Cross-Platform Engineering**: Zero vendor lock-in. Optimized natively for Apple Silicon Metal Performance Shaders (`mps`) on macOS, NVIDIA CUDA on Windows/Linux, and multi-threaded CPU fallback.
+5. **Complete Hydrographic Workflow**: Handles the entire mission lifecycle from raw waterfall ingestion, through physics and geodesy, to official NOTMAR maritime directives.

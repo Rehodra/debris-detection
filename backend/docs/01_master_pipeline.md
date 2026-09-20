@@ -3,46 +3,46 @@
 The **Master Pipeline** ([`master_pipeline_service.py`](file:///Users/priyangshu/Desktop/Coding/debris/debris-detection/backend/app/services/master_pipeline_service.py)) orchestrates the full analytical workflow from raw sonar image file upload to a comprehensive maritime intelligence report.
 
 ```
-                 ┌───────────────┐
-                 │ Uploaded File │
-                 └───────┬───────┘
-                         ↓
-                 1. Input validation
-                         ↓
-                   2. Quality check
-                         ↓
-                   3. Preprocessing
-                         ↓
-                    4. YOLO11 Inference
-                         ↓
-                  5. Candidate list
-                         ↓
-                 6. Shadow evidence
-                         ↓
-                7. Physics validation
-                         ↓
-                8. Confidence fusion
-                         ↓
-                   9. Geolocation
-                         ↓
-                 10. Dimension estimate
-                         ↓
-                 11. Risk classification
-                         ↓
-                    12. Final result
+                 ┌──────────────────────────────────────┐
+                 │ Raw Sonar (.xtf / .jsf) or Image File │
+                 └──────────────────┬───────────────────┘
+                                    ↓
+                 1. Input Validation & Sonar Ingestion
+                    (XTF/JSF -> Waterfall Raster -> BGR)
+                                    ↓
+                           2. Quality check
+                                    ↓
+                           3. Preprocessing
+                                    ↓
+                         4. YOLO11 Inference
+                                    ↓
+                          5. Candidate list
+                                    ↓
+                         6. Shadow evidence
+                                    ↓
+                        7. Physics validation
+                                    ↓
+                        8. Confidence fusion
+                                    ↓
+                           9. Geolocation
+                                    ↓
+                         10. Dimension estimate
+                                    ↓
+                         11. Risk classification
+                                    ↓
+                            12. Final result
 ```
 
 ---
 
 ## The 12 Stages in Detail
 
-### Stage 1: Input Validation
-- **Engine**: [`input_service.py`](file:///Users/priyangshu/Desktop/Coding/debris/debris-detection/backend/app/services/input_service.py)
-- **Checks**:
-  - File size: enforces $\le 100\text{MB}$ limit, rejects 0-byte uploads.
-  - MIME magic byte signatures: verifies JPEG (`\xFF\xD8\xFF`), PNG (`\x89PNG`), WEBP (`RIFF....WEBP`), BMP (`BM`), or TIFF (`II*\x00` / `MM\x00*`).
-  - Dimensions: confirms width and height are between $32\text{px}$ and $12,000\text{px}$.
-  - Decoding: converts raw bytes to clean OpenCV BGR image array.
+### Stage 1: Input Validation & Sonar Ingestion
+- **Engines**: [`input_service.py`](file:///Users/priyangshu/Desktop/Coding/debris/debris-detection/backend/app/services/input_service.py) & [`sonar_ingestion_service.py`](file:///Users/priyangshu/Desktop/Coding/debris/debris-detection/backend/app/services/sonar_ingestion_service.py)
+- **Dual-Path Handling**:
+  - **Standard Image Path**: Verifies file size ($\le 100\text{MB}$), MIME magic bytes (JPEG, PNG, WEBP, BMP, TIFF), dimensions ($32\text{px}$ to $12,000\text{px}$), and decodes into a clean OpenCV BGR array.
+  - **Raw Sonar Path (`.xtf`, `.jsf`)**: Detects file signature, executes format parser ([`XtfSonarParser`](file:///Users/priyangshu/Desktop/Coding/debris/debris-detection/backend/app/sonar/xtf_reader.py) or [`JsfSonarParser`](file:///Users/priyangshu/Desktop/Coding/debris/debris-detection/backend/app/sonar/jsf_reader.py)), synthesizes a normalized 2D acoustic waterfall raster via [`SonarRasterBuilder`](file:///Users/priyangshu/Desktop/Coding/debris/debris-detection/backend/app/sonar/raster_reader.py), converts the `uint8` grayscale matrix to 3-channel BGR image format, and extracts [`SonarMetadataContext`](file:///Users/priyangshu/Desktop/Coding/debris/debris-detection/backend/app/schemas/analysis.py) (channels, nadir column, slant range, GSD, valid navigation fixes).
+
 
 ### Stage 2: Quality Check
 - **Engine**: [`quality_service.py`](file:///Users/priyangshu/Desktop/Coding/debris/debris-detection/backend/app/services/quality_service.py)
@@ -122,15 +122,66 @@ The **Master Pipeline** ([`master_pipeline_service.py`](file:///Users/priyangshu
   - RFC 7946 `GeoJSONFeatureCollection` ready for web maps (`MissionMap.jsx`).
   - Executive summary with hazard tier counts and primary alert message.
   - Optional composite visual overlay (boxes + cyan shadow contours + yellow projection rays).
+  - Raw sonar provenance context ([`SonarMetadataContext`](file:///Users/priyangshu/Desktop/Coding/debris/debris-detection/backend/app/schemas/analysis.py)) when ingesting `.xtf` or `.jsf` files.
+
+---
+
+## Dual Input Path Convergence & Unified Sonar Analysis Contract (Phase 6A)
+
+MarineScan supports two distinct ingestion workflows that seamlessly converge before the core analytical stages:
+
+```
+XTF / JSF Raw Sonar                     Standard Marine Imagery (PNG / JPG / TIFF)
+         │                                                  │
+         ▼                                                  ▼
+1. Format Parser (Xtf / Jsf)                     1. Input Service (MIME & Decode)
+         │                                                  │
+         ▼                                                  │
+2. Waterfall Raster Builder                                 │
+         │                                                  │
+         ▼                                                  │
+3. Sonar Ingestion Service                                  │
+         │                                                  │
+         └────────────────────────┬─────────────────────────┘
+                                  │
+                                  ▼
+                     12-Stage Master Pipeline
+              (Quality → Preprocessing → YOLO11 →
+               Shadows → Physics → Confidence →
+               Geolocation → Dimensions → Risk)
+                                  │
+                                  ▼
+                     SonarAnalysisResponse Contract
+```
+
+### `SonarAnalysisResponse` Schema Structure
+
+The unified contract is exposed through [`SonarAnalysisResponse`](file:///Users/priyangshu/Desktop/Coding/debris/debris-detection/backend/app/schemas/analysis.py):
+
+| Section | Model | Description |
+|---|---|---|
+| `source` | [`AnalysisSourceInfo`](file:///Users/priyangshu/Desktop/Coding/debris/debris-detection/backend/app/schemas/analysis.py) | Input provenance: `filename`, `format` (`XTF`, `JSF`, `PNG`, `JPEG`), `file_size` |
+| `sonar` | [`SonarRasterMetadata`](file:///Users/priyangshu/Desktop/Coding/debris/debris-detection/backend/app/schemas/analysis.py) | Acoustic raster metadata: `total_pings`, `waterfall_width`, `waterfall_height`, `nadir_pixel`, `meters_per_pixel`, `raster_reference` (`/api/v1/sonar/raster`), `coordinate_convention`. (`None` for standard images) |
+| `navigation` | [`SonarNavigation`](file:///Users/priyangshu/Desktop/Coding/debris/debris-detection/backend/app/schemas/sonar.py) | Normalized GPS & telemetry fix: `latitude`, `longitude`, `heading`, `depth`, `altitude`. Missing values strictly `null` (no `0.0, 0.0` fallbacks). (`None` for standard images) |
+| `analysis` | [`MasterAnalysisResult`](file:///Users/priyangshu/Desktop/Coding/debris/debris-detection/backend/app/schemas/analysis.py) | Full 12-stage intelligence report: `targets`, `geojson`, `summary`, `timings`, `quality_assessment`. Lightweight: `annotated_image_base64` is omitted by default |
+| `warnings` | `List[str]` | Non-fatal parser anomalies or pipeline warnings |
+
+### Pixel Coordinate Convention
+
+All pixel coordinates for detections, bounding boxes, and acoustic shadows align directly with the waterfall raster:
+- **Origin `(0, 0)`**: Top-left corner of the waterfall image.
+- **X Axis (Across-Track)**: Horizontal pixel column $x \in [0, \text{waterfall\_width} - 1]$. Center nadir ground-track is located at `nadir_pixel`.
+- **Y Axis (Along-Track)**: Vertical pixel row / ping index $y \in [0, \text{waterfall\_height} - 1]$, progressing chronologically along the survey track.
 
 ---
 
 ## API Endpoints & Cross-Platform Invocations
 
-- **`POST /api/v1/analyses/analyze`**: Run the complete 12-stage Master Pipeline.
+- **`POST /api/v1/analyses/analyze`**: Run the complete 12-stage Master Pipeline on image or raw sonar files (returns [`MasterAnalysisResult`](file:///Users/priyangshu/Desktop/Coding/debris/debris-detection/backend/app/schemas/analysis.py)).
+- **`POST /api/v1/analyses/sonar`**: Unified raw `.xtf` / `.jsf` sonar pipeline execution (returns [`SonarAnalysisResponse`](file:///Users/priyangshu/Desktop/Coding/debris/debris-detection/backend/app/schemas/analysis.py)).
 - **`POST /api/v1/analyses/visualize`**: Stream directly an annotated JPEG visual overlay.
 
-### Full Pipeline Analysis Example
+### Full Pipeline Analysis Example (Standard Image)
 
 #### macOS / Linux (cURL)
 ```bash
@@ -159,3 +210,23 @@ $form = @{
 }
 Invoke-RestMethod -Uri "http://localhost:8000/api/v1/analyses/analyze" -Method Post -Form $form
 ```
+
+### Raw Sonar Pipeline Execution (`.xtf` / `.jsf`)
+
+#### macOS / Linux (cURL)
+```bash
+curl -X POST "http://localhost:8000/api/v1/analyses/sonar?max_pings=1500&channels=0,1" \
+  -F "file=@survey_line_01.xtf" \
+  -F "confidence_threshold=0.25"
+```
+
+#### Windows (PowerShell)
+```powershell
+$form = @{
+    file = Get-Item "survey_line_01.xtf"
+    confidence_threshold = "0.25"
+}
+Invoke-RestMethod -Uri "http://localhost:8000/api/v1/analyses/sonar?max_pings=1500&channels=0,1" -Method Post -Form $form
+```
+
+

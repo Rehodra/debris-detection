@@ -40,6 +40,15 @@ def _target_csv(result) -> str:
 	writer.writeheader()
 
 	for target in result.targets:
+		coords = getattr(target, "coordinates", None)
+		dims = getattr(target, "dimensions", None)
+		clr = getattr(target, "clearance", None)
+		t_tier = getattr(target, "trust_tier", None)
+		trust_tier_str = t_tier.value if hasattr(t_tier, "value") else str(t_tier or "")
+		r_tier = getattr(target, "risk_tier", None)
+		risk_tier_str = r_tier.value if hasattr(r_tier, "value") else str(r_tier or "")
+		recs = getattr(target, "action_recommendations", []) or []
+
 		writer.writerow(
 			{
 				"mission_id": result.mission_id,
@@ -47,17 +56,17 @@ def _target_csv(result) -> str:
 				"class_name": target.class_name,
 				"ai_confidence": target.ai_confidence,
 				"calibrated_confidence": target.calibrated_confidence,
-				"trust_tier": target.trust_tier.value,
-				"latitude": target.coordinates.latitude,
-				"longitude": target.coordinates.longitude,
-				"length_m": target.dimensions.length_m,
-				"width_m": target.dimensions.width_m,
-				"height_m": target.dimensions.height_m,
+				"trust_tier": trust_tier_str,
+				"latitude": coords.latitude if coords else None,
+				"longitude": coords.longitude if coords else None,
+				"length_m": dims.length_m if dims else None,
+				"width_m": dims.width_m if dims else None,
+				"height_m": dims.height_m if dims else None,
 				"risk_score": target.risk_score,
-				"risk_tier": target.risk_tier.value,
-				"water_clearance_m": target.clearance.clearance_m,
+				"risk_tier": risk_tier_str,
+				"water_clearance_m": clr.clearance_m if clr else None,
 				"action_recommendations": " | ".join(
-					recommendation.action_text for recommendation in target.action_recommendations
+					getattr(recommendation, "action_text", str(recommendation)) for recommendation in recs
 				),
 			}
 		)

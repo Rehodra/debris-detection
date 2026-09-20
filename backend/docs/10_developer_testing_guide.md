@@ -6,9 +6,9 @@ This guide describes how to run automated test suites, execute standalone diagno
 
 ## 1. Running Automated Tests
 
-The automated test suite covers **83 test cases** across 9 test modules with $100\%$ pass rates.
+The automated test suite covers **163 test cases** across 15 test modules (160 passed, 3 expected skips due to pending real-world survey files, 0 failures, 0 errors).
 
-### Run All 83 Tests
+### Run All 163 Tests
 
 #### macOS / Linux
 ```bash
@@ -63,6 +63,24 @@ python -m unittest app.tests.test_preprocessing -v
 
 # 9. Health & Model Management API Tests (12 tests)
 python -m unittest app.tests.test_api -v
+
+# 10. Triton XTF Sonar Parser Tests (11 tests)
+python -m unittest app.tests.test_xtf_parser -v
+
+# 11. EdgeTech JSF Sonar Parser Tests (11 tests)
+python -m unittest app.tests.test_jsf_parser -v
+
+# 12. Acoustic Waterfall Raster Tests (16 tests)
+python -m unittest app.tests.test_sonar_raster -v
+
+# 13. Sonar Base Schemas & Contracts (17 tests)
+python -m unittest app.tests.test_sonar_base -v
+
+# 14. Sonar Inspection & Raster API Tests (11 tests)
+python -m unittest app.tests.test_sonar_api -v
+
+# 15. Raw Sonar End-to-End Pipeline Integration Tests (14 tests)
+python -m unittest app.tests.test_sonar_pipeline_integration -v
 ```
 
 #### Windows (PowerShell / CMD)
@@ -93,6 +111,24 @@ python -m unittest app.tests.test_preprocessing -v
 
 # 9. Health & Model Management API Tests (12 tests)
 python -m unittest app.tests.test_api -v
+
+# 10. Triton XTF Sonar Parser Tests (11 tests)
+python -m unittest app.tests.test_xtf_parser -v
+
+# 11. EdgeTech JSF Sonar Parser Tests (11 tests)
+python -m unittest app.tests.test_jsf_parser -v
+
+# 12. Acoustic Waterfall Raster Tests (16 tests)
+python -m unittest app.tests.test_sonar_raster -v
+
+# 13. Sonar Base Schemas & Contracts (17 tests)
+python -m unittest app.tests.test_sonar_base -v
+
+# 14. Sonar Inspection & Raster API Tests (11 tests)
+python -m unittest app.tests.test_sonar_api -v
+
+# 15. Raw Sonar End-to-End Pipeline Integration Tests (14 tests)
+python -m unittest app.tests.test_sonar_pipeline_integration -v
 ```
 
 ## 2. Command Line Diagnostic Runners
@@ -184,6 +220,37 @@ python test_sonar.py
 **Output**:
 - Comprehensive ASCII summary table (Image Quality, Detections, Acoustic Shadows, Ocean Physics, Geolocation, Maritime Risk Directives).
 - Saves full visual overlay to `sonar_test_result.jpg`.
+
+---
+
+### D. Standalone Sonar Survey Inspection Utilities (`inspect_xtf.py` & `inspect_jsf.py`)
+Inspect raw survey recordings directly from the terminal to evaluate packet structure, ping count, sample channels, and navigation fixes without launching the full web server:
+
+#### macOS / Linux
+```bash
+cd backend
+# Inspect Triton XTF survey recording:
+python -m app.sonar.inspect_xtf path/to/survey.xtf
+
+# Inspect EdgeTech JSF survey recording:
+python -m app.sonar.inspect_jsf path/to/survey.jsf
+```
+
+#### Windows (PowerShell / CMD)
+```powershell
+cd backend
+# Inspect Triton XTF survey recording:
+python -m app.sonar.inspect_xtf path\to\survey.xtf
+
+# Inspect EdgeTech JSF survey recording:
+python -m app.sonar.inspect_jsf path\to\survey.jsf
+```
+
+**Output**:
+- File format, header sizes, sonar frequencies, and sample rate.
+- Port / Starboard channel layout and max sample lengths.
+- Ping count and along-track duration.
+- Geodetic bounding box and representative GPS fix.
 
 ---
 

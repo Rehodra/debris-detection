@@ -12,6 +12,7 @@ from .geolocation import router as geolocation_router
 from .risk import router as risk_router
 from .analyses import router as analyses_router
 from .exports import router as exports_router
+from .sonar import router as sonar_router
 
 api_v1_router = APIRouter()
 
@@ -27,5 +28,6 @@ api_v1_router.include_router(geolocation_router, prefix="/geolocation", tags=["G
 api_v1_router.include_router(risk_router, prefix="/risk", tags=["Maritime Risk Assessment"])
 api_v1_router.include_router(analyses_router, prefix="/analyses", tags=["Master Survey Analysis Pipeline"])
 api_v1_router.include_router(exports_router, prefix="/exports", tags=["Report Exports"])
+api_v1_router.include_router(sonar_router, prefix="/sonar", tags=["Raw Sonar Ingestion"])
 
 __all__ = ["api_v1_router"]

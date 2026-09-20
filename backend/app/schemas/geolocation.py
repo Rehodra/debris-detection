@@ -7,6 +7,8 @@ WGS84 and UTM coordinates, DMS string formatting, and standard RFC 7946 GeoJSON.
 from typing import List, Optional, Dict, Any, Tuple
 from pydantic import BaseModel, Field
 
+from app.schemas.sonar import SonarTargetGeoreference
+
 
 class NavigationalFix(BaseModel):
     latitude: float = Field(..., ge=-90.0, le=90.0, description="WGS84 latitude in decimal degrees")
@@ -48,9 +50,12 @@ class GeolocatedTarget(BaseModel):
     pixel_centroid: Tuple[float, float] = Field(..., description="Target centroid in image pixel coordinates (x, y)")
     across_track_offset_m: float = Field(..., description="Offset perpendicular to heading (+ starboard, - port) in meters")
     along_track_offset_m: float = Field(..., description="Offset along heading (+ forward, - astern) in meters")
-    coordinates: GeoCoordinates = Field(..., description="Calculated geographic coordinates")
-    distance_from_sensor_m: float = Field(..., description="Straight-line horizontal distance from sensor/vessel (m)")
-    bearing_degrees: float = Field(..., description="True bearing from sensor/vessel to target in degrees [0 - 360)")
+    coordinates: Optional[GeoCoordinates] = Field(None, description="Calculated geographic coordinates")
+    distance_from_sensor_m: Optional[float] = Field(None, description="Straight-line horizontal distance from sensor/vessel (m)")
+    bearing_degrees: Optional[float] = Field(None, description="True bearing from sensor/vessel to target in degrees [0 - 360)")
+    georeference: Optional[SonarTargetGeoreference] = Field(
+        None, description="Sonar ping-track geospatial correlation and positioning telemetry"
+    )
 
 
 class GeoJSONGeometry(BaseModel):
@@ -72,7 +77,7 @@ class GeoJSONFeatureCollection(BaseModel):
 class BatchGeolocationResponse(BaseModel):
     status: str = Field("success", description="Execution status")
     total_targets_geolocated: int = Field(..., description="Total targets successfully positioned")
-    sensor_position: GeoCoordinates = Field(..., description="Estimated sonar sensor position (after layback if applied)")
+    sensor_position: Optional[GeoCoordinates] = Field(None, description="Estimated sonar sensor position (after layback if applied)")
     vessel_position: Optional[GeoCoordinates] = Field(None, description="Surface vessel position if layback was used")
     targets: List[GeolocatedTarget] = Field(default_factory=list, description="Per-target geolocated profiles")
     geojson: GeoJSONFeatureCollection = Field(..., description="RFC 7946 GeoJSON FeatureCollection for map rendering")

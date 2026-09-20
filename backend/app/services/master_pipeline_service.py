@@ -30,8 +30,10 @@ from app.schemas.analysis import (
     QualityAssessment,
     ShadowEvidence,
     MasterPhysicalDimensions,
+    SonarMetadataContext,
 )
 from app.schemas.detection import BoundingBox, TilingConfig
+from app.schemas.sonar import SonarNavigationTrack
 from app.schemas.preprocessing import PreprocessingConfig, PreprocessingPreset
 from app.schemas.geolocation import (
     NavigationalFix,
@@ -41,6 +43,7 @@ from app.schemas.geolocation import (
 )
 from app.schemas.risk import RiskTier
 from app.services.input_service import input_service, InputValidationError
+from app.services.sonar_ingestion_service import sonar_ingestion_service, SonarIngestionError
 from app.services.quality_service import quality_service
 from app.services.preprocessing_service import preprocessing_service
 from app.services.inference_service import inference_service
@@ -48,8 +51,10 @@ from app.services.shadow_service import shadow_service
 from app.services.physics_service import physics_service
 from app.services.confidence_service import confidence_service
 from app.services.geolocation_service import geolocation_service
+from app.services.dimension_service import dimension_service
 from app.services.risk_service import risk_service
 from app.services.image_output_service import image_output_service
+from app.services.sonar_artifact_service import sonar_artifact_service
 from app.ml.postprocess import render_detections_overlay, encode_image_to_jpeg_bytes, encode_image_to_base64
 
 logger = logging.getLogger("marinescan.services.master_pipeline")
@@ -79,18 +84,107 @@ class MasterPipelineService:
         tiling_config: Optional[TilingConfig] = None,
         return_visualization: bool = True,
         mission_id: Optional[str] = None,
+        # Phase 5: Optional raw sonar ingestion parameters
+        filename: Optional[str] = None,
+        max_pings: Optional[int] = None,
+        channels: Optional[List[int]] = None,
     ) -> MasterAnalysisResult:
         """
         Execute all 12 stages in sequence and return the synthesized intelligence result.
+        Supports both standard marine imagery (JPEG, PNG, etc.) and raw sonar files (.xtf, .jsf).
         """
         pipeline_start = time.perf_counter()
         m_id = mission_id or f"msn_{uuid.uuid4().hex[:10]}"
 
         # =====================================================================
-        # STAGE 1: Input Validation
+        # STAGE 1: Input Ingestion & Validation
         # =====================================================================
         t0 = time.perf_counter()
-        img_bgr, img_meta = input_service.validate_and_decode(image_bytes)
+        sonar_context: Optional[SonarMetadataContext] = None
+        navigation_track: Optional[SonarNavigationTrack] = None
+
+        if sonar_ingestion_service.is_sonar_file(image_bytes, filename=filename):
+            logger.info("Ingesting raw sonar stream (filename=%s)", filename)
+            ingest_res = sonar_ingestion_service.ingest_sonar(
+                image_bytes=image_bytes,
+                filename=filename,
+                max_pings=max_pings,
+                channels=channels,
+            )
+            img_bgr = ingest_res.image_bgr
+            img_meta = ingest_res.image_metadata
+            sonar_context = ingest_res.sonar_context
+            navigation_track = ingest_res.navigation_track
+
+            # Persist stable waterfall raster artifact linked to mission_id (analysis ID)
+            if ingest_res.waterfall_raster is not None:
+                try:
+                    artifact_meta = sonar_artifact_service.save_waterfall_artifact(
+                        analysis_id=m_id,
+                        raster=ingest_res.waterfall_raster,
+                        metadata={
+                            "sonar_format": sonar_context.format,
+                            "filename": filename or sonar_context.filename,
+                            "total_pings": sonar_context.total_pings,
+                            "waterfall_width": sonar_context.waterfall_width,
+                            "waterfall_height": sonar_context.waterfall_height,
+                            "channel_layout": sonar_context.channel_layout,
+                            "channels_included": sonar_context.channels_included,
+                            "nadir_pixel_x": sonar_context.nadir_pixel_x,
+                            "meters_per_pixel": sonar_context.meters_per_pixel,
+                            "slant_range_m": sonar_context.slant_range_m,
+                        },
+                    )
+                    sonar_context.artifact_id = artifact_meta["artifact_id"]
+                    sonar_context.raster_reference = artifact_meta["relative_url"]
+                    sonar_context.raster_path = artifact_meta["local_path"]
+                except Exception as exc:
+                    logger.warning("Failed to persist sonar waterfall artifact for %s: %s", m_id, exc)
+
+            # Persist stable navigation track artifact linked to mission_id (analysis ID)
+            if ingest_res.navigation_track is not None:
+                try:
+                    ingest_res.navigation_track.analysis_id = m_id
+                    track_meta = sonar_artifact_service.save_track_artifact(
+                        analysis_id=m_id,
+                        track=ingest_res.navigation_track,
+                        metadata={
+                            "sonar_format": sonar_context.format,
+                            "filename": filename or sonar_context.filename,
+                            "total_pings": ingest_res.navigation_track.total_pings,
+                            "available_navigation_pings": ingest_res.navigation_track.available_navigation_pings,
+                        },
+                    )
+                    sonar_context.track_artifact_id = track_meta["artifact_id"]
+                    sonar_context.track_reference = track_meta["relative_url"]
+                except Exception as exc:
+                    logger.warning("Failed to persist sonar navigation track artifact for %s: %s", m_id, exc)
+
+            # Use calibrated sonar physical parameters if not explicitly overridden by caller
+            if ingest_res.nadir_pixel_x is not None and nadir_x is None:
+                nadir_x = ingest_res.nadir_pixel_x
+
+            # If meters_per_pixel is recorded in sonar and caller used default 0.05
+            if ingest_res.meters_per_pixel is not None and meters_per_pixel == 0.05:
+                meters_per_pixel = ingest_res.meters_per_pixel
+
+            if ingest_res.slant_range_m is not None and slant_range_m is None:
+                slant_range_m = ingest_res.slant_range_m
+
+            # Connect validated sonar navigation if present
+            if ingest_res.navigation:
+                if ingest_res.navigation.latitude is not None and ingest_res.navigation.longitude is not None:
+                    vessel_lat = ingest_res.navigation.latitude
+                    vessel_lon = ingest_res.navigation.longitude
+                if ingest_res.navigation.heading_deg is not None:
+                    vessel_heading_deg = ingest_res.navigation.heading_deg
+                if ingest_res.navigation.altitude_m is not None and sensor_altitude_m is None:
+                    sensor_altitude_m = ingest_res.navigation.altitude_m
+                if ingest_res.navigation.depth_m is not None and fish_depth_m is None:
+                    fish_depth_m = ingest_res.navigation.depth_m
+        else:
+            img_bgr, img_meta = input_service.validate_and_decode(image_bytes)
+
         img_h, img_w = img_bgr.shape[:2]
         t_input_val = (time.perf_counter() - t0) * 1000.0
 
@@ -206,21 +300,45 @@ class MasterPipelineService:
             along_track_gsd_m=meters_per_pixel,
         )
 
-        geo_batch = geolocation_service.geolocate_batch(
-            detections=candidates,
-            nav_fix=vessel_fix,
-            sonar_origin=scan_origin,
-            towfish_cfg=towfish_cfg,
-        )
+        if sonar_context is not None:
+            geo_batch = geolocation_service.geolocate_sonar_detections(
+                detections=candidates,
+                navigation_track=navigation_track,
+                nadir_pixel_x=actual_nadir_x,
+                meters_per_pixel=meters_per_pixel,
+                slant_range_m=slant_range_m,
+                towfish_cfg=towfish_cfg,
+                default_heading_deg=vessel_heading_deg,
+            )
+        else:
+            geo_batch = geolocation_service.geolocate_batch(
+                detections=candidates,
+                nav_fix=vessel_fix,
+                sonar_origin=scan_origin,
+                towfish_cfg=towfish_cfg,
+            )
         geo_map = {g.target_id: g for g in geo_batch.targets}
         t_geolocation = (time.perf_counter() - t0) * 1000.0
 
         # =====================================================================
-        # STAGE 10 & 11: Dimension Estimation & Risk Classification
+        # STAGE 10: Dimension Estimation
         # =====================================================================
         t0_dim = time.perf_counter()
+        dim_map = dimension_service.estimate_batch_dimensions(
+            candidates=candidates,
+            meters_per_pixel=meters_per_pixel,
+            shadow_results=shadow_response.results,
+            physics_results=physics_response.results,
+            sonar_context=sonar_context,
+            navigation_track=navigation_track,
+            sensor_altitude_m=sensor_altitude_m,
+            slant_range_m=slant_range_m,
+        )
         t_dimension = (time.perf_counter() - t0_dim) * 1000.0
 
+        # =====================================================================
+        # STAGE 11: Risk Classification & NOTMAR Directives
+        # =====================================================================
         t0_risk = time.perf_counter()
         risk_batch = risk_service.assess_batch_risk(
             detections=candidates,
@@ -228,6 +346,8 @@ class MasterPipelineService:
             physics_analyses=physics_response.results,
             confidence_profiles=confidence_response.results,
             meters_per_pixel=meters_per_pixel,
+            geo_map=geo_map,
+            dim_map=dim_map,
         )
         risk_map = {r.detection_id: r for r in risk_batch.results}
         t_risk = (time.perf_counter() - t0_risk) * 1000.0
@@ -282,42 +402,17 @@ class MasterPipelineService:
                 )
 
             # Dimensions
-            if phy:
-                props = phy.physical_properties
-                stab = phy.hydrodynamic_stability
-                dim_obj = MasterPhysicalDimensions(
-                    length_m=props.length_m,
-                    width_m=props.width_m,
-                    height_m=props.height_m,
-                    area_sq_m=round(props.length_m * props.width_m, 2),
-                    estimated_volume_m3=props.estimated_volume_m3,
-                    dry_mass_metric_tons=props.dry_mass_metric_tons,
-                    submerged_weight_kn=props.submerged_weight_kn,
-                    recommended_crane_lift_tons=props.recommended_crane_lift_tons,
-                    seabed_stability_index=stab.stability_index,
-                    seabed_mobility_status=stab.mobility_status,
-                )
-            else:
-                raw_bbox_dict = cand.get("bbox")
-                if isinstance(raw_bbox_dict, BoundingBox):
-                    bbox_dict = raw_bbox_dict.model_dump()
-                elif isinstance(raw_bbox_dict, dict):
-                    bbox_dict = raw_bbox_dict
-                else:
-                    bbox_dict = {}
-                w_m = float(bbox_dict.get("width", 20)) * meters_per_pixel
-                h_m = float(bbox_dict.get("height", 20)) * meters_per_pixel
-                dim_obj = MasterPhysicalDimensions(
-                    length_m=round(max(w_m, h_m), 2),
-                    width_m=round(min(w_m, h_m), 2),
-                    height_m=0.5,
-                    area_sq_m=round(w_m * h_m, 2),
-                    estimated_volume_m3=round(w_m * h_m * 0.5 * 0.5, 2),
-                    dry_mass_metric_tons=1.0,
-                    submerged_weight_kn=5.0,
-                    recommended_crane_lift_tons=1.5,
-                    seabed_stability_index=10.0,
-                    seabed_mobility_status="Settled / Stable in Sediment",
+            dim_obj = dim_map.get(tid)
+            if dim_obj is None:
+                dim_obj = dimension_service.estimate_target_dimensions(
+                    candidate=cand,
+                    meters_per_pixel=meters_per_pixel,
+                    shadow_result=shd,
+                    physics_result=phy,
+                    sonar_context=sonar_context,
+                    navigation_track=navigation_track,
+                    sensor_altitude_m=sensor_altitude_m,
+                    slant_range_m=slant_range_m,
                 )
 
             # Confidence
@@ -340,10 +435,18 @@ class MasterPipelineService:
                 geo_coords = geo.coordinates
                 dist_m = geo.distance_from_sensor_m
                 bearing_deg = geo.bearing_degrees
+                georef = geo.georeference
             else:
-                geo_coords = geolocation_service.to_geo_coordinates(vessel_lat, vessel_lon)
-                dist_m = 0.0
-                bearing_deg = 0.0
+                if sonar_context is not None:
+                    geo_coords = None
+                    dist_m = None
+                    bearing_deg = None
+                    georef = None
+                else:
+                    geo_coords = geolocation_service.to_geo_coordinates(vessel_lat, vessel_lon)
+                    dist_m = 0.0
+                    bearing_deg = 0.0
+                    georef = None
 
             # Risk
             if rsk:
@@ -388,13 +491,14 @@ class MasterPipelineService:
                 shadow_evidence=shadow_ev,
                 dimensions=dim_obj,
                 coordinates=geo_coords,
-                distance_from_sensor_m=round(dist_m, 2),
-                bearing_degrees=round(bearing_deg, 1),
+                distance_from_sensor_m=round(dist_m, 2) if dist_m is not None else None,
+                bearing_degrees=round(bearing_deg, 1) if bearing_deg is not None else None,
                 risk_score=round(r_score, 1),
                 risk_tier=r_tier,
                 color_hex=r_color,
                 clearance=clearance_obj,
                 action_recommendations=recs,
+                georeference=georef,
             )
             master_targets.append(target_res)
 
@@ -430,10 +534,22 @@ class MasterPipelineService:
         prediction_image_path = None
         prediction_image_url = None
         if return_visualization:
-            # Composite rendering: shadow contours + projection rays + detection boxes
+            # Composite rendering: shadow contours + projection rays + detection boxes with risk/dimension tags
+            overlay_candidates = []
+            for cand in candidates:
+                c_copy = dict(cand)
+                tid = cand.get("detection_id")
+                if tid in risk_map:
+                    c_copy["risk_tier"] = risk_map[tid].risk_tier
+                if tid in dim_map:
+                    c_copy["dimensions"] = dim_map[tid]
+                if tid in geo_map:
+                    c_copy["georeference"] = geo_map[tid].georeference
+                    c_copy["coordinates"] = geo_map[tid].coordinates
+                overlay_candidates.append(c_copy)
+
             rendered_bgr = shadow_service.render_shadow_overlay(img_bgr, shadow_response.results)
-            rendered_bgr = render_detections_overlay(rendered_bgr, candidates)
-            annotated_b64 = encode_image_to_base64(rendered_bgr)
+            rendered_bgr = render_detections_overlay(rendered_bgr, overlay_candidates)
             rendered_jpeg_bytes = encode_image_to_jpeg_bytes(rendered_bgr)
             # Inline base64 for direct browser consumption (used by tests + frontend)
             annotated_b64 = image_output_service.as_data_url(rendered_jpeg_bytes)
@@ -472,6 +588,7 @@ class MasterPipelineService:
             annotated_image_base64=annotated_b64,
             prediction_image_path=prediction_image_path,
             prediction_image_url=prediction_image_url,
+            sonar_metadata=sonar_context,
         )
 
 
