@@ -538,9 +538,11 @@ export const SonarAnalysis: React.FC = () => {
                 style={{ cursor: 'pointer' }}
                 title="Click to load sample acoustic scan"
               >
-                <img src="/new.png" alt="MarineScan Sonar Preview" />
-                <span>SAMPLE RASTER VIEW</span>
-                <i>Click to load in workstation</i>
+                <div className={styles.previewImagePlaceholder}>
+                  <Radar size={32} />
+                  <span>SAMPLE RASTER VIEW</span>
+                  <i>Click to load in workstation</i>
+                </div>
               </div>
               <div className={styles.previewNote}>
                 <strong>ACOUSTIC ANALYSIS WORKSTATION</strong>

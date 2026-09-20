@@ -77,16 +77,26 @@ class AnomalyService:
             logger.warning("Anomaly branch failed to load (%s); disabled.", exc)
 
     def detect_candidates(self, image_bgr: np.ndarray) -> List[Dict]:
-        """Anomaly candidate dicts (empty list if the branch is unavailable)."""
+        """Anomaly candidate dicts (empty list if the branch is unavailable).
+
+        On a large/full-resolution image the detector can fire on many regions;
+        ANOMALY_MAX_CANDIDATES keeps only the strongest ones so downstream stages
+        (and the UI) see a manageable, high-confidence set rather than a flood.
+        """
         self._ensure_loaded()
         if not self.available:
             return []
         try:
-            return self._detector.detect(
+            candidates = self._detector.detect(
                 image_bgr,
                 thr_key=settings.ANOMALY_THRESHOLD_KEY,
                 min_area=settings.ANOMALY_MIN_AREA,
             )
+            cap = settings.ANOMALY_MAX_CANDIDATES
+            if cap and len(candidates) > cap:
+                candidates.sort(key=lambda c: c.get("p_cae", c.get("confidence", 0.0)), reverse=True)
+                candidates = candidates[:cap]
+            return candidates
         except Exception as exc:
             logger.warning("Anomaly detection failed (%s); returning no candidates.", exc)
             return []

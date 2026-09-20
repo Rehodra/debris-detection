@@ -23,8 +23,9 @@ class Settings(BaseSettings):
     ANOMALY_METHOD: str = "patchcore"
     ANOMALY_BANK_PATH: str = "backend/app/ml/anomaly/seabed_bank.npz"      # patchcore
     ANOMALY_FEATAE_PATH: str = "backend/app/ml/anomaly/featae.pt"          # feature_ae
-    ANOMALY_THRESHOLD_KEY: str = "p95"   # p95 (100% recall) | p99 | p999 (fewest FP)
-    ANOMALY_MIN_AREA: int = 300
+    ANOMALY_THRESHOLD_KEY: str = "p999"  # p95 (100% recall) | p99 | p999 (fewest FP, cleanest demo)
+    ANOMALY_MIN_AREA: int = 1200
+    ANOMALY_MAX_CANDIDATES: int = 5      # keep only the N strongest anomalies (0 = unlimited)
 
     # Optional Cloudinary delivery for generated prediction images.
     CLOUDINARY_CLOUD_NAME: str = ""

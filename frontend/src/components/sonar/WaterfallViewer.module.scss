@@ -341,10 +341,12 @@
   height: 100%;
   position: relative;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   user-select: none;
+  // NOTE: intentionally not flex-centered. .transformLayer is position:absolute
+  // and its own JS-computed `pan` already centers it (see clampPan / updateBaseSize
+  // in WaterfallViewer.tsx). Flex align-items/justify-content here would ALSO center
+  // the absolutely-positioned child via its static position, doubling the offset and
+  // pushing the sonar image off-center.
 }
 
 .canPan {
@@ -357,6 +359,8 @@
 
 .transformLayer {
   position: absolute;
+  top: 0;
+  left: 0;
   transform-origin: 0 0;
   will-change: transform;
 }

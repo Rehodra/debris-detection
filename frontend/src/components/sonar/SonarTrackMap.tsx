@@ -145,13 +145,16 @@ export const SonarTrackMap: React.FC<SonarTrackMapProps> = ({
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
-            {/* INCOIS GEBCO Bathymetry Layer */}
+            {/* INCOIS GEBCO Bathymetry Layer.
+                Low opacity is intentional: this WMS returns a solid-fill red/orange/yellow
+                depth-ramp raster (not a sparse contour overlay), so anything above ~0.15-0.2
+                visually drowns the OSM base map and survey markers underneath it. */}
             <WMSTileLayer
               url="https://incois.gov.in/geoserver/BathymteryImage/wms"
               layers="BathymteryImage:gebcobathymtery"
               format="image/png"
               transparent
-              opacity={0.45}
+              opacity={0.18}
               attribution="Bathymetry: INCOIS"
             />
 
