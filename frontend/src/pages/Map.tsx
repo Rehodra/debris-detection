@@ -94,17 +94,21 @@ interface MapDetection {
 }
 
 function toDetections(targets: AnalysisTarget[]): MapDetection[] {
-  return targets.map((t) => ({
-    id: t.detection_id,
-    cls: t.class_name,
-    label: classLabel(t),
-    conf: Math.round((t.calibrated_confidence ?? 0) * 100),
-    lat: t.coordinates.latitude,
-    lon: t.coordinates.longitude,
-    riskTier: t.risk_tier,
-    lengthM: t.dimensions?.length_m ?? 0,
-    heightM: t.dimensions?.height_m ?? 0,
-  }));
+  return targets
+    .filter((t): t is AnalysisTarget & { coordinates: { latitude: number; longitude: number } } =>
+      t.coordinates != null && typeof t.coordinates.latitude === 'number' && typeof t.coordinates.longitude === 'number'
+    )
+    .map((t) => ({
+      id: t.detection_id,
+      cls: t.class_name,
+      label: classLabel(t),
+      conf: Math.round((t.calibrated_confidence ?? 0) * 100),
+      lat: t.coordinates.latitude,
+      lon: t.coordinates.longitude,
+      riskTier: t.risk_tier,
+      lengthM: t.dimensions?.length_m ?? 0,
+      heightM: t.dimensions?.height_m ?? 0,
+    }));
 }
 
 /* ────────────────────────────────────────────────────────────

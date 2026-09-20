@@ -83,3 +83,11 @@ backend/pred_img/*
 .venv-cae/
 ml/cae/runs/
 *.pth
+
+# SQLite local runtime database
+AquaTrace.db
+
+# Heavy raw sonar survey recordings (>100MB exceeds GitHub file limits)
+validation/datasets/xtf/15CCT03_SSS_153_150602144500.xtf
+validation/datasets/xtf/15CCT03_SSS_153_150602151100.xtf
+validation/datasets/xtf/15CCT03_SSS_153_150602154200.xtf

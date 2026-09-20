@@ -1,0 +1,194 @@
+2026-09-20 15:07:34,777 [INFO] Initializing MarineScan Phase 15 Validation Runner...
+2026-09-20 15:07:34,777 [INFO] Timestamp: 2026-09-20T09:37:34.777661+00:00
+2026-09-20 15:07:34,777 [INFO] ======================================================================
+2026-09-20 15:07:34,777 [INFO] STARTING VALIDATION: Real XTF Small (15CCT03_SSS_153_150602154100) (Real Sonar (Small), 476,224 bytes)
+2026-09-20 15:07:34,777 [INFO] ======================================================================
+2026-09-20 15:07:34,853 [INFO] Ingesting raw sonar stream (filename=15CCT03_SSS_153_150602154100.xtf)
+2026-09-20 15:07:34,871 [INFO] Persisted sonar waterfall artifact art_msn_4d3cdd8b98 (8192x27, 179718 bytes) for analysis msn_4d3cdd8b98
+2026-09-20 15:07:34,872 [INFO] Persisted sonar navigation track artifact track_msn_4d3cdd8b98 (27 pings) for analysis msn_4d3cdd8b98
+2026-09-20 15:07:35,042 [INFO] Loading MarineScan YOLO model from backend/app/ml/weights/yolo11_sonar_best.pt on device mps...
+2026-09-20 15:07:36,743 [INFO] Model loaded successfully in 1701.20 ms (Classes: {0: 'shipwreck', 1: 'pipe', 2: 'ghost_net', 3: 'marine_debris', 4: 'aircraft', 5: 'other', 6: 'fish'})
+2026-09-20 15:07:37,013 [INFO] HTTP Request: POST http://testserver/api/v1/analyses/sonar?vessel_lat=24.8607&vessel_lon=67.0011&vessel_heading_deg=90.0&water_depth_m=30.0 "HTTP/1.1 200 OK"
+2026-09-20 15:07:37,014 [INFO] Pipeline executed successfully in 2235.46ms
+2026-09-20 15:07:37,014 [INFO] Assigned Mission ID: msn_4d3cdd8b98
+2026-09-20 15:07:37,021 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_4d3cdd8b98/sonar/raster "HTTP/1.1 200 OK"
+2026-09-20 15:07:37,024 [INFO] Acoustic waterfall raster verified: (27, 8192), dtype=uint8
+2026-09-20 15:07:37,024 [INFO] Targets detected: 0
+2026-09-20 15:07:37,025 [INFO] Verified SQLite persistence for msn_4d3cdd8b98: mission_id=msn_4d3cdd8b98, total_targets=0
+2026-09-20 15:07:37,028 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_4d3cdd8b98/export/json "HTTP/1.1 200 OK"
+2026-09-20 15:07:37,028 [INFO] Export format 'json' generated in 3.31ms (size: 1,453 bytes, status: 200)
+2026-09-20 15:07:37,031 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_4d3cdd8b98/export/csv "HTTP/1.1 200 OK"
+2026-09-20 15:07:37,031 [INFO] Export format 'csv' generated in 3.04ms (size: 804 bytes, status: 200)
+2026-09-20 15:07:37,035 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_4d3cdd8b98/export/geojson "HTTP/1.1 200 OK"
+2026-09-20 15:07:37,035 [INFO] Export format 'geojson' generated in 3.57ms (size: 113 bytes, status: 200)
+2026-09-20 15:07:37,039 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_4d3cdd8b98/export/track.geojson "HTTP/1.1 200 OK"
+2026-09-20 15:07:37,039 [INFO] Export format 'track.geojson' generated in 3.68ms (size: 113 bytes, status: 200)
+2026-09-20 15:07:37,042 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_4d3cdd8b98/export/track.csv "HTTP/1.1 200 OK"
+2026-09-20 15:07:37,043 [INFO] Export format 'track.csv' generated in 3.77ms (size: 1,759 bytes, status: 200)
+2026-09-20 15:07:37,043 [INFO] ======================================================================
+2026-09-20 15:07:37,043 [INFO] STARTING VALIDATION: Real XTF Medium (15CCT03_SSS_153_150602154200) (Real Sonar (Medium), 170,052,224 bytes)
+2026-09-20 15:07:37,043 [INFO] ======================================================================
+2026-09-20 15:07:37,471 [INFO] Ingesting raw sonar stream (filename=15CCT03_SSS_153_150602154200.xtf)
+2026-09-20 15:07:37,571 [INFO] Persisted sonar waterfall artifact art_msn_885849271d (8192x150, 1004913 bytes) for analysis msn_885849271d
+2026-09-20 15:07:37,573 [INFO] Persisted sonar navigation track artifact track_msn_885849271d (150 pings) for analysis msn_885849271d
+2026-09-20 15:07:37,751 [INFO] HTTP Request: POST http://testserver/api/v1/analyses/sonar?vessel_lat=24.8607&vessel_lon=67.0011&vessel_heading_deg=90.0&water_depth_m=30.0&max_pings=150 "HTTP/1.1 200 OK"
+2026-09-20 15:07:37,752 [INFO] Pipeline executed successfully in 652.98ms
+2026-09-20 15:07:37,752 [INFO] Assigned Mission ID: msn_885849271d
+2026-09-20 15:07:37,755 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_885849271d/sonar/raster "HTTP/1.1 200 OK"
+2026-09-20 15:07:37,770 [INFO] Acoustic waterfall raster verified: (150, 8192), dtype=uint8
+2026-09-20 15:07:37,770 [INFO] Targets detected: 0
+2026-09-20 15:07:37,771 [INFO] Verified SQLite persistence for msn_885849271d: mission_id=msn_885849271d, total_targets=0
+2026-09-20 15:07:37,773 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_885849271d/export/json "HTTP/1.1 200 OK"
+2026-09-20 15:07:37,774 [INFO] Export format 'json' generated in 2.72ms (size: 1,456 bytes, status: 200)
+2026-09-20 15:07:37,776 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_885849271d/export/csv "HTTP/1.1 200 OK"
+2026-09-20 15:07:37,776 [INFO] Export format 'csv' generated in 2.75ms (size: 804 bytes, status: 200)
+2026-09-20 15:07:37,779 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_885849271d/export/geojson "HTTP/1.1 200 OK"
+2026-09-20 15:07:37,780 [INFO] Export format 'geojson' generated in 3.05ms (size: 113 bytes, status: 200)
+2026-09-20 15:07:37,783 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_885849271d/export/track.geojson "HTTP/1.1 200 OK"
+2026-09-20 15:07:37,783 [INFO] Export format 'track.geojson' generated in 3.77ms (size: 113 bytes, status: 200)
+2026-09-20 15:07:37,788 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_885849271d/export/track.csv "HTTP/1.1 200 OK"
+2026-09-20 15:07:37,788 [INFO] Export format 'track.csv' generated in 4.31ms (size: 9,532 bytes, status: 200)
+2026-09-20 15:07:37,788 [INFO] ======================================================================
+2026-09-20 15:07:37,788 [INFO] STARTING VALIDATION: Real XTF Large (15CCT03_SSS_153_150602144500) (Real Sonar (Large), 204,953,024 bytes)
+2026-09-20 15:07:37,788 [INFO] ======================================================================
+2026-09-20 15:07:38,320 [INFO] Ingesting raw sonar stream (filename=15CCT03_SSS_153_150602144500.xtf)
+2026-09-20 15:07:38,391 [INFO] Persisted sonar waterfall artifact art_msn_9c312d395a (8192x100, 609781 bytes) for analysis msn_9c312d395a
+2026-09-20 15:07:38,393 [INFO] Persisted sonar navigation track artifact track_msn_9c312d395a (100 pings) for analysis msn_9c312d395a
+2026-09-20 15:07:38,525 [INFO] HTTP Request: POST http://testserver/api/v1/analyses/sonar?vessel_lat=24.8607&vessel_lon=67.0011&vessel_heading_deg=90.0&water_depth_m=30.0&max_pings=100 "HTTP/1.1 200 OK"
+2026-09-20 15:07:38,525 [INFO] Pipeline executed successfully in 647.55ms
+2026-09-20 15:07:38,525 [INFO] Assigned Mission ID: msn_9c312d395a
+2026-09-20 15:07:38,530 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_9c312d395a/sonar/raster "HTTP/1.1 200 OK"
+2026-09-20 15:07:38,540 [INFO] Acoustic waterfall raster verified: (100, 8192), dtype=uint8
+2026-09-20 15:07:38,541 [INFO] Targets detected: 0
+2026-09-20 15:07:38,543 [INFO] Verified SQLite persistence for msn_9c312d395a: mission_id=msn_9c312d395a, total_targets=0
+2026-09-20 15:07:38,546 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_9c312d395a/export/json "HTTP/1.1 200 OK"
+2026-09-20 15:07:38,546 [INFO] Export format 'json' generated in 2.81ms (size: 1,457 bytes, status: 200)
+2026-09-20 15:07:38,549 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_9c312d395a/export/csv "HTTP/1.1 200 OK"
+2026-09-20 15:07:38,549 [INFO] Export format 'csv' generated in 2.75ms (size: 804 bytes, status: 200)
+2026-09-20 15:07:38,552 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_9c312d395a/export/geojson "HTTP/1.1 200 OK"
+2026-09-20 15:07:38,552 [INFO] Export format 'geojson' generated in 3.16ms (size: 113 bytes, status: 200)
+2026-09-20 15:07:38,556 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_9c312d395a/export/track.geojson "HTTP/1.1 200 OK"
+2026-09-20 15:07:38,556 [INFO] Export format 'track.geojson' generated in 3.62ms (size: 113 bytes, status: 200)
+2026-09-20 15:07:38,559 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_9c312d395a/export/track.csv "HTTP/1.1 200 OK"
+2026-09-20 15:07:38,560 [INFO] Export format 'track.csv' generated in 3.83ms (size: 6,346 bytes, status: 200)
+2026-09-20 15:07:38,560 [INFO] ======================================================================
+2026-09-20 15:07:38,560 [INFO] STARTING VALIDATION: EdgeTech JSF Small (synthetic_small) (Synthetic JSF (Small), 10,001 bytes)
+2026-09-20 15:07:38,560 [INFO] ======================================================================
+2026-09-20 15:07:38,562 [INFO] Ingesting raw sonar stream (filename=synthetic_small.jsf)
+2026-09-20 15:07:38,565 [INFO] Persisted sonar waterfall artifact art_msn_ba9848e2d4 (240x10, 580 bytes) for analysis msn_ba9848e2d4
+2026-09-20 15:07:38,566 [INFO] Persisted sonar navigation track artifact track_msn_ba9848e2d4 (10 pings) for analysis msn_ba9848e2d4
+2026-09-20 15:07:39,035 [INFO] HTTP Request: POST http://testserver/api/v1/analyses/sonar?vessel_lat=24.8607&vessel_lon=67.0011&vessel_heading_deg=90.0&water_depth_m=30.0 "HTTP/1.1 200 OK"
+2026-09-20 15:07:39,035 [INFO] Pipeline executed successfully in 474.94ms
+2026-09-20 15:07:39,035 [INFO] Assigned Mission ID: msn_ba9848e2d4
+2026-09-20 15:07:39,038 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_ba9848e2d4/sonar/raster "HTTP/1.1 200 OK"
+2026-09-20 15:07:39,039 [INFO] Acoustic waterfall raster verified: (10, 240), dtype=uint8
+2026-09-20 15:07:39,039 [INFO] Targets detected: 0
+2026-09-20 15:07:39,039 [INFO] Verified SQLite persistence for msn_ba9848e2d4: mission_id=msn_ba9848e2d4, total_targets=0
+2026-09-20 15:07:39,042 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_ba9848e2d4/export/json "HTTP/1.1 200 OK"
+2026-09-20 15:07:39,042 [INFO] Export format 'json' generated in 2.84ms (size: 1,485 bytes, status: 200)
+2026-09-20 15:07:39,045 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_ba9848e2d4/export/csv "HTTP/1.1 200 OK"
+2026-09-20 15:07:39,046 [INFO] Export format 'csv' generated in 3.07ms (size: 804 bytes, status: 200)
+2026-09-20 15:07:39,049 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_ba9848e2d4/export/geojson "HTTP/1.1 200 OK"
+2026-09-20 15:07:39,049 [INFO] Export format 'geojson' generated in 3.21ms (size: 113 bytes, status: 200)
+2026-09-20 15:07:39,053 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_ba9848e2d4/export/track.geojson "HTTP/1.1 200 OK"
+2026-09-20 15:07:39,053 [INFO] Export format 'track.geojson' generated in 3.7ms (size: 1,201 bytes, status: 200)
+2026-09-20 15:07:39,056 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_ba9848e2d4/export/track.csv "HTTP/1.1 200 OK"
+2026-09-20 15:07:39,056 [INFO] Export format 'track.csv' generated in 3.17ms (size: 885 bytes, status: 200)
+2026-09-20 15:07:39,056 [INFO] ======================================================================
+2026-09-20 15:07:39,056 [INFO] STARTING VALIDATION: EdgeTech JSF Medium (synthetic_medium) (Synthetic JSF (Medium), 90,801 bytes)
+2026-09-20 15:07:39,056 [INFO] ======================================================================
+2026-09-20 15:07:39,058 [INFO] Ingesting raw sonar stream (filename=synthetic_medium.jsf)
+2026-09-20 15:07:39,064 [INFO] Persisted sonar waterfall artifact art_msn_c5fef1a317 (500x60, 5273 bytes) for analysis msn_c5fef1a317
+2026-09-20 15:07:39,064 [INFO] Persisted sonar navigation track artifact track_msn_c5fef1a317 (60 pings) for analysis msn_c5fef1a317
+2026-09-20 15:07:39,088 [INFO] HTTP Request: POST http://testserver/api/v1/analyses/sonar?vessel_lat=24.8607&vessel_lon=67.0011&vessel_heading_deg=90.0&water_depth_m=30.0 "HTTP/1.1 200 OK"
+2026-09-20 15:07:39,088 [INFO] Pipeline executed successfully in 31.12ms
+2026-09-20 15:07:39,088 [INFO] Assigned Mission ID: msn_c5fef1a317
+2026-09-20 15:07:39,091 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_c5fef1a317/sonar/raster "HTTP/1.1 200 OK"
+2026-09-20 15:07:39,092 [INFO] Acoustic waterfall raster verified: (60, 500), dtype=uint8
+2026-09-20 15:07:39,092 [INFO] Targets detected: 0
+2026-09-20 15:07:39,092 [INFO] Verified SQLite persistence for msn_c5fef1a317: mission_id=msn_c5fef1a317, total_targets=0
+2026-09-20 15:07:39,095 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_c5fef1a317/export/json "HTTP/1.1 200 OK"
+2026-09-20 15:07:39,095 [INFO] Export format 'json' generated in 2.74ms (size: 1,488 bytes, status: 200)
+2026-09-20 15:07:39,098 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_c5fef1a317/export/csv "HTTP/1.1 200 OK"
+2026-09-20 15:07:39,098 [INFO] Export format 'csv' generated in 2.76ms (size: 804 bytes, status: 200)
+2026-09-20 15:07:39,101 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_c5fef1a317/export/geojson "HTTP/1.1 200 OK"
+2026-09-20 15:07:39,101 [INFO] Export format 'geojson' generated in 2.9ms (size: 113 bytes, status: 200)
+2026-09-20 15:07:39,104 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_c5fef1a317/export/track.geojson "HTTP/1.1 200 OK"
+2026-09-20 15:07:39,104 [INFO] Export format 'track.geojson' generated in 3.06ms (size: 4,501 bytes, status: 200)
+2026-09-20 15:07:39,108 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_c5fef1a317/export/track.csv "HTTP/1.1 200 OK"
+2026-09-20 15:07:39,108 [INFO] Export format 'track.csv' generated in 3.23ms (size: 5,045 bytes, status: 200)
+2026-09-20 15:07:39,108 [INFO] ======================================================================
+2026-09-20 15:07:39,108 [INFO] STARTING VALIDATION: EdgeTech JSF Null Island (null_island) (Sentinel Coordinate Test, 7,377 bytes)
+2026-09-20 15:07:39,108 [INFO] ======================================================================
+2026-09-20 15:07:39,110 [INFO] Ingesting raw sonar stream (filename=null_island.jsf)
+2026-09-20 15:07:39,112 [INFO] Persisted sonar waterfall artifact art_msn_5d0d7c4285 (200x8, 440 bytes) for analysis msn_5d0d7c4285
+2026-09-20 15:07:39,113 [INFO] Persisted sonar navigation track artifact track_msn_5d0d7c4285 (8 pings) for analysis msn_5d0d7c4285
+2026-09-20 15:07:39,351 [INFO] HTTP Request: POST http://testserver/api/v1/analyses/sonar?vessel_lat=24.8607&vessel_lon=67.0011&vessel_heading_deg=90.0&water_depth_m=30.0 "HTTP/1.1 200 OK"
+2026-09-20 15:07:39,352 [INFO] Pipeline executed successfully in 243.1ms
+2026-09-20 15:07:39,352 [INFO] Assigned Mission ID: msn_5d0d7c4285
+2026-09-20 15:07:39,355 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_5d0d7c4285/sonar/raster "HTTP/1.1 200 OK"
+2026-09-20 15:07:39,355 [INFO] Acoustic waterfall raster verified: (8, 200), dtype=uint8
+2026-09-20 15:07:39,355 [INFO] Targets detected: 0
+2026-09-20 15:07:39,356 [INFO] Verified SQLite persistence for msn_5d0d7c4285: mission_id=msn_5d0d7c4285, total_targets=0
+2026-09-20 15:07:39,358 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_5d0d7c4285/export/json "HTTP/1.1 200 OK"
+2026-09-20 15:07:39,359 [INFO] Export format 'json' generated in 2.8ms (size: 1,473 bytes, status: 200)
+2026-09-20 15:07:39,361 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_5d0d7c4285/export/csv "HTTP/1.1 200 OK"
+2026-09-20 15:07:39,362 [INFO] Export format 'csv' generated in 2.8ms (size: 804 bytes, status: 200)
+2026-09-20 15:07:39,364 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_5d0d7c4285/export/geojson "HTTP/1.1 200 OK"
+2026-09-20 15:07:39,364 [INFO] Export format 'geojson' generated in 2.7ms (size: 113 bytes, status: 200)
+2026-09-20 15:07:39,368 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_5d0d7c4285/export/track.geojson "HTTP/1.1 200 OK"
+2026-09-20 15:07:39,368 [INFO] Export format 'track.geojson' generated in 3.35ms (size: 113 bytes, status: 200)
+2026-09-20 15:07:39,370 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_5d0d7c4285/export/track.csv "HTTP/1.1 200 OK"
+2026-09-20 15:07:39,371 [INFO] Export format 'track.csv' generated in 2.86ms (size: 611 bytes, status: 200)
+2026-09-20 15:07:39,371 [INFO] ======================================================================
+2026-09-20 15:07:39,371 [INFO] STARTING VALIDATION: Side-Scan Shipwreck (Lucinda van Valkenburg) (Real Sonar Image, 2,082,491 bytes)
+2026-09-20 15:07:39,371 [INFO] ======================================================================
+2026-09-20 15:07:40,034 [INFO] HTTP Request: POST http://testserver/api/v1/analyses/analyze?vessel_lat=24.8607&vessel_lon=67.0011&vessel_heading_deg=90.0&water_depth_m=30.0 "HTTP/1.1 200 OK"
+2026-09-20 15:07:40,037 [INFO] Pipeline executed successfully in 661.99ms
+2026-09-20 15:07:40,037 [INFO] Assigned Mission ID: msn_0b56bc5215
+2026-09-20 15:07:40,038 [INFO] Targets detected: 7
+2026-09-20 15:07:40,042 [INFO] Verified SQLite persistence for msn_0b56bc5215: mission_id=msn_0b56bc5215, total_targets=7
+2026-09-20 15:07:40,052 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_0b56bc5215/export/json "HTTP/1.1 200 OK"
+2026-09-20 15:07:40,052 [INFO] Export format 'json' generated in 9.42ms (size: 22,245 bytes, status: 200)
+2026-09-20 15:07:40,059 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_0b56bc5215/export/csv "HTTP/1.1 200 OK"
+2026-09-20 15:07:40,059 [INFO] Export format 'csv' generated in 6.79ms (size: 4,385 bytes, status: 200)
+2026-09-20 15:07:40,065 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_0b56bc5215/export/geojson "HTTP/1.1 200 OK"
+2026-09-20 15:07:40,066 [INFO] Export format 'geojson' generated in 6.34ms (size: 16,051 bytes, status: 200)
+2026-09-20 15:07:40,066 [INFO] ======================================================================
+2026-09-20 15:07:40,066 [INFO] STARTING VALIDATION: Side-Scan Shipwreck (Viator) (Real Sonar Image, 2,737,127 bytes)
+2026-09-20 15:07:40,066 [INFO] ======================================================================
+2026-09-20 15:07:40,906 [INFO] HTTP Request: POST http://testserver/api/v1/analyses/analyze?vessel_lat=24.8607&vessel_lon=67.0011&vessel_heading_deg=90.0&water_depth_m=30.0 "HTTP/1.1 200 OK"
+2026-09-20 15:07:40,909 [INFO] Pipeline executed successfully in 838.54ms
+2026-09-20 15:07:40,910 [INFO] Assigned Mission ID: msn_ed6c4ac362
+2026-09-20 15:07:40,910 [INFO] Targets detected: 1
+2026-09-20 15:07:40,914 [INFO] Verified SQLite persistence for msn_ed6c4ac362: mission_id=msn_ed6c4ac362, total_targets=1
+2026-09-20 15:07:40,922 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_ed6c4ac362/export/json "HTTP/1.1 200 OK"
+2026-09-20 15:07:40,922 [INFO] Export format 'json' generated in 7.32ms (size: 4,141 bytes, status: 200)
+2026-09-20 15:07:40,929 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_ed6c4ac362/export/csv "HTTP/1.1 200 OK"
+2026-09-20 15:07:40,929 [INFO] Export format 'csv' generated in 6.96ms (size: 1,439 bytes, status: 200)
+2026-09-20 15:07:40,936 [INFO] HTTP Request: GET http://testserver/api/v1/analyses/msn_ed6c4ac362/export/geojson "HTTP/1.1 200 OK"
+2026-09-20 15:07:40,936 [INFO] Export format 'geojson' generated in 6.99ms (size: 2,525 bytes, status: 200)
+2026-09-20 15:07:40,936 [INFO] ======================================================================
+2026-09-20 15:07:40,936 [INFO] STARTING FAILURE & CORRUPTION TESTING
+2026-09-20 15:07:40,936 [INFO] ======================================================================
+2026-09-20 15:07:40,936 [INFO] Testing failure scenario: Corrupt JSF Magic Marker
+2026-09-20 15:07:40,938 [WARNING] Unrecognized file signature; attempting OpenCV decode anyway.
+2026-09-20 15:07:40,939 [INFO] HTTP Request: POST http://testserver/api/v1/analyses/sonar "HTTP/1.1 400 Bad Request"
+2026-09-20 15:07:40,940 [INFO] [PASS] Corrupt JSF Magic Marker -> HTTP 400 (Could not decode image from provided data. Supported formats: JPEG, PNG, WEBP, BMP, TIFF.)
+2026-09-20 15:07:40,940 [INFO] Testing failure scenario: Corrupt XTF Header Signature
+2026-09-20 15:07:40,942 [WARNING] Unrecognized file signature; attempting OpenCV decode anyway.
+2026-09-20 15:07:40,943 [INFO] HTTP Request: POST http://testserver/api/v1/analyses/sonar "HTTP/1.1 400 Bad Request"
+2026-09-20 15:07:40,943 [INFO] [PASS] Corrupt XTF Header Signature -> HTTP 400 (Could not decode image from provided data. Supported formats: JPEG, PNG, WEBP, BMP, TIFF.)
+2026-09-20 15:07:40,943 [INFO] Testing failure scenario: Truncated Incomplete XTF File
+2026-09-20 15:07:40,945 [WARNING] Unrecognized file signature; attempting OpenCV decode anyway.
+2026-09-20 15:07:40,946 [INFO] HTTP Request: POST http://testserver/api/v1/analyses/sonar "HTTP/1.1 400 Bad Request"
+2026-09-20 15:07:40,947 [INFO] [PASS] Truncated Incomplete XTF File -> HTTP 400 (Could not decode image from provided data. Supported formats: JPEG, PNG, WEBP, BMP, TIFF.)
+2026-09-20 15:07:40,947 [INFO] Testing failure scenario: Empty 0-Byte Sonar Upload
+2026-09-20 15:07:40,949 [INFO] HTTP Request: POST http://testserver/api/v1/analyses/sonar "HTTP/1.1 400 Bad Request"
+2026-09-20 15:07:40,949 [INFO] [PASS] Empty 0-Byte Sonar Upload -> HTTP 400 (Uploaded file is empty (0 bytes).)
+2026-09-20 15:07:40,949 [INFO] Testing failure scenario: Unsupported Format (Text File)
+2026-09-20 15:07:40,951 [WARNING] Unrecognized file signature; attempting OpenCV decode anyway.
+2026-09-20 15:07:40,952 [INFO] HTTP Request: POST http://testserver/api/v1/analyses/sonar "HTTP/1.1 400 Bad Request"
+2026-09-20 15:07:40,952 [INFO] [PASS] Unsupported Format (Text File) -> HTTP 400 (Could not decode image from provided data. Supported formats: JPEG, PNG, WEBP, BMP, TIFF.)
+2026-09-20 15:07:40,952 [INFO] Generating reports and benchmark data...
+2026-09-20 15:07:40,954 [INFO] [+] Validation run completed. All reports compiled successfully.
