@@ -234,14 +234,14 @@ $border-light: #bfd7f4;
     transition: color 0.15s ease;
 
     &:hover {
-      color: #38bdf8;
+      color: #0284c7;
     }
   }
 
   .activeTab {
-    color: #38bdf8;
+    color: #0284c7;
     font-weight: 700;
-    border-bottom: 2px solid #38bdf8;
+    border-bottom: 2px solid #0284c7;
   }
 }
 
@@ -548,8 +548,8 @@ $border-light: #bfd7f4;
       align-items: center;
       gap: 4px;
       padding: 4px 10px;
-      background: rgba(239, 68, 68, 0.12);
-      color: #f87171;
+      background: rgba(239, 68, 68, 0.1);
+      color: #dc2626;
       border: 1px solid rgba(239, 68, 68, 0.35);
       border-radius: 20px;
       font-size: 10px;
@@ -647,25 +647,25 @@ $border-light: #bfd7f4;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(15, 30, 70, 0.6);
-        border: 1px solid rgba(56, 189, 248, 0.25);
-        color: #38bdf8;
+        background: #ffffff;
+        border: 1px solid #bfd7f4;
+        color: #0284c7;
         border-radius: 4px;
         cursor: pointer;
         transition: all 0.2s;
 
         &:hover {
-          background: rgba(14, 165, 233, 0.2);
-          border-color: #38bdf8;
-          color: #ffffff;
+          background: rgba(2, 132, 199, 0.08);
+          border-color: #0284c7;
+          color: #0369a1;
         }
 
         &.iconBtnActive, &.layerToggleActive {
           background: #0284c7;
-          border-color: #38bdf8;
+          border-color: #0284c7;
           color: #ffffff;
           font-weight: 700;
-          box-shadow: 0 0 10px rgba(2, 132, 199, 0.5);
+          box-shadow: 0 0 10px rgba(2, 132, 199, 0.35);
         }
       }
 
@@ -1129,45 +1129,45 @@ $border-light: #bfd7f4;
   }
 
   .badgeShipwreck {
-    background: rgba(99, 102, 241, 0.18);
-    color: #818cf8;
-    border: 1px solid rgba(99, 102, 241, 0.4);
+    background: rgba(99, 102, 241, 0.12);
+    color: #4338ca;
+    border: 1px solid rgba(99, 102, 241, 0.35);
   }
 
   .badgePipe {
-    background: rgba(14, 165, 233, 0.18);
-    color: #38bdf8;
-    border: 1px solid rgba(14, 165, 233, 0.4);
+    background: rgba(2, 132, 199, 0.1);
+    color: #0284c7;
+    border: 1px solid rgba(2, 132, 199, 0.35);
   }
 
   .badgeGhostNet {
-    background: rgba(245, 158, 11, 0.18);
-    color: #fbbf24;
-    border: 1px solid rgba(245, 158, 11, 0.4);
+    background: rgba(217, 119, 6, 0.1);
+    color: #d97706;
+    border: 1px solid rgba(217, 119, 6, 0.35);
   }
 
   .badgeDebris {
-    background: rgba(239, 68, 68, 0.18);
-    color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.4);
+    background: rgba(220, 38, 38, 0.1);
+    color: #dc2626;
+    border: 1px solid rgba(220, 38, 38, 0.35);
   }
 
   .badgeAircraft {
-    background: rgba(59, 130, 246, 0.18);
-    color: #60a5fa;
-    border: 1px solid rgba(59, 130, 246, 0.4);
+    background: rgba(37, 99, 235, 0.1);
+    color: #2563eb;
+    border: 1px solid rgba(37, 99, 235, 0.35);
   }
 
   .badgeFish {
-    background: rgba(16, 185, 129, 0.18);
-    color: #34d399;
-    border: 1px solid rgba(16, 185, 129, 0.4);
+    background: rgba(5, 150, 105, 0.1);
+    color: #059669;
+    border: 1px solid rgba(5, 150, 105, 0.35);
   }
 
   .badgeOther {
-    background: rgba(148, 163, 184, 0.18);
-    color: #cbd5e1;
-    border: 1px solid rgba(148, 163, 184, 0.4);
+    background: rgba(71, 85, 105, 0.1);
+    color: #334155;
+    border: 1px solid rgba(71, 85, 105, 0.28);
   }
 
   .targetConfRed {
@@ -1237,31 +1237,31 @@ $border-light: #bfd7f4;
   }
 
   .riskCritical {
-    background: rgba(239, 68, 68, 0.2);
-    color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.4);
+    background: rgba(239, 68, 68, 0.12);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.35);
   }
 
   .riskHigh {
-    background: rgba(249, 115, 22, 0.2);
-    color: #fb923c;
-    border: 1px solid rgba(249, 115, 22, 0.4);
+    background: rgba(249, 115, 22, 0.12);
+    color: #ea580c;
+    border: 1px solid rgba(249, 115, 22, 0.35);
   }
 
   .riskModerate {
-    background: rgba(234, 179, 8, 0.2);
-    color: #facc15;
-    border: 1px solid rgba(234, 179, 8, 0.4);
+    background: rgba(234, 179, 8, 0.12);
+    color: #d97706;
+    border: 1px solid rgba(234, 179, 8, 0.35);
   }
 
   .riskLow {
-    background: rgba(148, 163, 184, 0.2);
-    color: #cbd5e1;
-    border: 1px solid rgba(148, 163, 184, 0.4);
+    background: rgba(2, 132, 199, 0.1);
+    color: #0284c7;
+    border: 1px solid rgba(2, 132, 199, 0.28);
   }
 
   .statusVerified {
-    color: #4ade80;
+    color: #059669;
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -1269,7 +1269,7 @@ $border-light: #bfd7f4;
   }
 
   .statusReview {
-    color: #fbbf24;
+    color: #d97706;
     font-weight: 700;
   }
 
@@ -1284,17 +1284,17 @@ $border-light: #bfd7f4;
 
   .resetFilterBtn {
     padding: 5px 12px;
-    background: rgba(15, 30, 70, 0.6);
-    border: 1px solid rgba(56, 189, 248, 0.3);
+    background: rgba(2, 132, 199, 0.09);
+    border: 1px solid rgba(2, 132, 199, 0.3);
     border-radius: 6px;
     font-size: 11px;
     font-weight: 600;
-    color: #38bdf8;
+    color: #0284c7;
     cursor: pointer;
 
     &:hover {
-      background: rgba(14, 165, 233, 0.2);
-      border-color: #38bdf8;
+      background: rgba(2, 132, 199, 0.18);
+      border-color: #0284c7;
     }
   }
 
