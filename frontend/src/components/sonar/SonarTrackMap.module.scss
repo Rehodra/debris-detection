@@ -4,11 +4,11 @@
   height: 100%;
   width: 100%;
   min-height: 280px;
-  background: #040d1e;
+  background: #ffffff;
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid #142a5c;
-  box-shadow: 0 4px 16px rgba(2, 6, 23, 0.3);
+  border: 1px solid #bfd7f4;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.06);
 }
 
 .mapHeader {
@@ -16,9 +16,9 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 12px;
-  background: linear-gradient(90deg, #091738 0%, #0d2250 100%);
-  border-bottom: 1px solid #19356d;
-  color: #e2e8f0;
+  background: linear-gradient(90deg, #edf7ff 0%, #dfeefc 100%);
+  border-bottom: 1px solid #bfd7f4;
+  color: #06384b;
   font-size: 11px;
 }
 
@@ -27,11 +27,11 @@
   align-items: center;
   gap: 6px;
   font-weight: 700;
-  color: #38bdf8;
+  color: #06384b;
 }
 
 .navIcon {
-  color: #00f0ff;
+  color: #0284c7;
 }
 
 .headerRight {
@@ -41,23 +41,25 @@
 }
 
 .trackBadge {
-  background: rgba(0, 240, 255, 0.15);
-  color: #00f0ff;
-  border: 1px solid rgba(0, 240, 255, 0.3);
+  background: rgba(2, 132, 199, 0.1);
+  color: #0284c7;
+  border: 1px solid rgba(2, 132, 199, 0.3);
   padding: 1px 6px;
   border-radius: 3px;
   font-size: 9px;
   font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
 }
 
 .targetBadge {
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
   border: 1px solid rgba(16, 185, 129, 0.3);
   padding: 1px 6px;
   border-radius: 3px;
   font-size: 9px;
   font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
 }
 
 .mapWrap {
@@ -74,11 +76,11 @@
   height: 100%;
   padding: 24px;
   text-align: center;
-  background: #020713;
-  color: #94a3b8;
+  background: #f0f7fb;
+  color: #5b777e;
 
   h4 {
-    color: #f1f5f9;
+    color: #06384b;
     margin: 10px 0 6px;
     font-size: 14px;
   }
@@ -98,15 +100,15 @@
 
 .popupContent {
   font-size: 11px;
-  color: #0f172a;
+  color: #06384b;
   line-height: 1.4;
 
   strong {
     display: block;
-    color: #0369a1;
+    color: #0284c7;
     font-size: 12px;
     margin-bottom: 4px;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #bfd7f4;
     padding-bottom: 2px;
   }
 }
@@ -117,6 +119,6 @@
   gap: 2px;
 
   span {
-    color: #334155;
+    color: #475569;
   }
 }

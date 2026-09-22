@@ -1,11 +1,12 @@
 .telemetryPanel {
   display: flex;
   flex-direction: column;
-  background: #040d1e;
+  background: #ffffff;
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid #142a5c;
-  color: #e2e8f0;
+  border: 1px solid #bfd7f4;
+  color: #06384b;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.06);
 }
 
 .telemetryHeader {
@@ -13,8 +14,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 12px;
-  background: linear-gradient(90deg, #091738 0%, #0d2250 100%);
-  border-bottom: 1px solid #19356d;
+  background: linear-gradient(90deg, #edf7ff 0%, #dfeefc 100%);
+  border-bottom: 1px solid #bfd7f4;
 }
 
 .headerTitle {
@@ -23,22 +24,23 @@
   gap: 6px;
   font-size: 11px;
   font-weight: 700;
-  color: #38bdf8;
+  color: #06384b;
   letter-spacing: 0.04em;
 }
 
 .pulseIcon {
-  color: #00f0ff;
+  color: #0284c7;
 }
 
 .formatBadge {
-  background: rgba(0, 240, 255, 0.15);
-  color: #00f0ff;
-  border: 1px solid rgba(0, 240, 255, 0.3);
+  background: rgba(2, 132, 199, 0.1);
+  color: #0284c7;
+  border: 1px solid rgba(2, 132, 199, 0.3);
   padding: 1px 6px;
   border-radius: 3px;
   font-size: 9px;
   font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
 }
 
 .telemetryGrid {
@@ -49,8 +51,8 @@
 }
 
 .telemetryCard {
-  background: #07152d;
-  border: 1px solid #142a5c;
+  background: #f0f7ff;
+  border: 1px solid #bfd7f4;
   border-radius: 6px;
   padding: 8px 10px;
   display: flex;
@@ -60,7 +62,7 @@
   strong {
     font-size: 13px;
     font-family: 'IBM Plex Mono', monospace;
-    color: #f8fafc;
+    color: #06384b;
   }
 }
 
@@ -80,14 +82,14 @@
   align-items: center;
   gap: 12px;
   padding: 6px 12px;
-  background: #030a16;
-  border-top: 1px solid #0f2248;
+  background: #f3f9ff;
+  border-top: 1px solid #bfd7f4;
   font-size: 10px;
   color: #64748b;
   font-family: 'IBM Plex Mono', monospace;
 
   strong {
-    color: #93c5fd;
+    color: #0284c7;
   }
 }
 

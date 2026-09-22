@@ -1,11 +1,12 @@
 .exportContainer {
   display: flex;
   flex-direction: column;
-  background: #040d1e;
+  background: #ffffff;
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid #142a5c;
-  color: #e2e8f0;
+  border: 1px solid #bfd7f4;
+  color: #06384b;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.06);
 }
 
 .exportHeader {
@@ -13,8 +14,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 12px;
-  background: linear-gradient(90deg, #091738 0%, #0d2250 100%);
-  border-bottom: 1px solid #19356d;
+  background: linear-gradient(90deg, #edf7ff 0%, #dfeefc 100%);
+  border-bottom: 1px solid #bfd7f4;
 }
 
 .titleGroup {
@@ -23,22 +24,22 @@
   gap: 6px;
   font-size: 11px;
   font-weight: 700;
-  color: #38bdf8;
+  color: #06384b;
   letter-spacing: 0.04em;
 }
 
 .headerIcon {
-  color: #00f0ff;
+  color: #0284c7;
 }
 
 .missionPill {
   font-size: 9.5px;
   font-family: 'IBM Plex Mono', monospace;
-  color: #94a3b8;
-  background: #020713;
+  color: #475569;
+  background: #f0f7ff;
   padding: 2px 6px;
   border-radius: 3px;
-  border: 1px solid #1e293b;
+  border: 1px solid #bfd7f4;
 }
 
 .disabledNotice {
@@ -52,9 +53,9 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(239, 68, 68, 0.15);
-  border-bottom: 1px solid rgba(239, 68, 68, 0.3);
-  color: #f87171;
+  background: rgba(239, 68, 68, 0.1);
+  border-bottom: 1px solid rgba(239, 68, 68, 0.25);
+  color: #dc2626;
   padding: 6px 12px;
   font-size: 11px;
 }
@@ -67,8 +68,8 @@
 }
 
 .exportCard {
-  background: #07152d;
-  border: 1px solid #142a5c;
+  background: #f0f7ff;
+  border: 1px solid #bfd7f4;
   border-radius: 6px;
   padding: 8px 10px;
   display: flex;
@@ -77,61 +78,97 @@
   cursor: pointer;
   text-align: left;
   transition: all 0.15s ease;
-  color: #e2e8f0;
+  color: #06384b;
 
   &:hover:not(:disabled) {
-    background: #0d2250;
-    border-color: #38bdf8;
+    background: #e0f2fe;
+    border-color: #0284c7;
+    color: #0284c7;
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15);
   }
 
   &:disabled {
     cursor: not-allowed;
-    opacity: 0.6;
+    opacity: 0.5;
   }
 }
 
 .cardMuted {
   opacity: 0.45 !important;
-  background: #040c1a !important;
+  background: #f8fafc !important;
 }
 
 .iconWrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #00f0ff;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  background: rgba(2, 132, 199, 0.1);
+  color: #0284c7;
   flex-shrink: 0;
 }
 
-.exportText {
+.cardText {
   display: flex;
   flex-direction: column;
-  gap: 1px;
   min-width: 0;
 
   strong {
     font-size: 11px;
-    color: #f8fafc;
+    font-weight: 600;
+    line-height: 1.2;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   small {
-    font-size: 9px;
+    font-size: 8.5px;
     color: #64748b;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    margin-top: 1px;
   }
 }
 
-.spinner {
+.badgeJson {
+  color: #0284c7;
+}
+
+.badgeCsv {
+  color: #059669;
+}
+
+.badgePdf {
+  color: #dc2626;
+}
+
+.badgeGeo {
+  color: #7c3aed;
+}
+
+.exportStatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(2, 132, 199, 0.08);
+  border-top: 1px solid #bfd7f4;
+  font-size: 10px;
+  color: #0284c7;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.spinIcon {
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

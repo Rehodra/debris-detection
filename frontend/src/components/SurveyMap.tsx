@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, WMSTileLayer, GeoJSON, CircleMarker, Popup, us
 import L, { type Layer, type LatLngBoundsExpression, type LatLng } from 'leaflet';
 import type { Feature, FeatureCollection, Point } from 'geojson';
 import 'leaflet/dist/leaflet.css';
+import { createTargetPinIcon } from '../utils/mapPins';
 import styles from './SurveyMap.module.scss';
 
 export interface SensorPosition {
@@ -61,12 +62,8 @@ export const SurveyMap: React.FC<SurveyMapProps> = ({ geojson, sensorPosition })
   const pointToLayer = (feature: Feature<Point>, latlng: LatLng) => {
     const props = feature.properties ?? {};
     const color = colorForClass(props.class_name);
-    return L.circleMarker(latlng, {
-      radius: 8,
-      color,
-      weight: 2,
-      fillColor: color,
-      fillOpacity: 0.55,
+    return L.marker(latlng, {
+      icon: createTargetPinIcon(color, false),
     });
   };
 

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
-import { MapContainer, TileLayer, WMSTileLayer, CircleMarker, Tooltip, ZoomControl, useMap, useMapEvent } from "react-leaflet";
+import { MapContainer, TileLayer, WMSTileLayer, CircleMarker, Marker, Tooltip, ZoomControl, useMap, useMapEvent } from "react-leaflet";
 import L, { type LatLngBoundsExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { createTargetPinIcon } from "../utils/mapPins";
 import { Upload, Crosshair, Loader2, Download } from "lucide-react";
 import {
   analyzeSonarImage,
@@ -247,37 +248,50 @@ function DetectionMap({
         keepBuffer={4}
       />
 
-      {detections.map((d) => {
+      {detections.map((d, i) => {
         const color = classColor(d.cls);
         const isSel = selected === d.id;
-        const baseRadius = d.conf >= 90 ? 10 : d.conf >= 70 ? 8 : 6;
         // In heatmap mode each target becomes a large translucent blob whose
         // size scales with confidence — a real spatial density read, not an SVG trick.
-        const radius = viewMode === "heatmap" ? 14 + d.conf * 0.22 : baseRadius + (isSel ? 3 : 0);
+        if (viewMode === "heatmap") {
+          const radius = 14 + d.conf * 0.22;
+          return (
+            <CircleMarker
+              key={d.id}
+              center={[d.lat, d.lon]}
+              radius={radius}
+              pathOptions={{
+                color,
+                weight: isSel ? 3 : 2,
+                fillColor: color,
+                fillOpacity: 0.35,
+              }}
+              eventHandlers={{ click: () => onSelect(isSel ? null : d.id) }}
+            >
+              <Tooltip direction="top" offset={[0, -radius]} opacity={1}>
+                {d.label} · {d.conf}%
+                <br />
+                {d.lat.toFixed(5)}°, {d.lon.toFixed(5)}°
+              </Tooltip>
+            </CircleMarker>
+          );
+        }
+
+        const pinIcon = createTargetPinIcon(color, isSel, i + 1);
         return (
-          <CircleMarker
+          <Marker
             key={d.id}
-            center={[d.lat, d.lon]}
-            radius={radius}
-            pathOptions={{
-              color,
-              // Always keep a visible stroke, even in heatmap mode — a pure
-              // fill-only blob can disappear entirely against a bathymetry
-              // tile of a similar hue (e.g. a red ghost-net blob over red
-              // shallow-water tiles). The outline guarantees visibility
-              // regardless of what's underneath.
-              weight: isSel ? 3 : 2,
-              fillColor: color,
-              fillOpacity: viewMode === "heatmap" ? 0.35 : 0.6,
-            }}
+            position={[d.lat, d.lon]}
+            icon={pinIcon}
+            zIndexOffset={isSel ? 1000 : 100}
             eventHandlers={{ click: () => onSelect(isSel ? null : d.id) }}
           >
-            <Tooltip direction="top" offset={[0, -radius]} opacity={1}>
-              {d.label} · {d.conf}%
+            <Tooltip direction="top" offset={[0, isSel ? -42 : -34]} opacity={1}>
+              #{i + 1} {d.label} · {d.conf}%
               <br />
               {d.lat.toFixed(5)}°, {d.lon.toFixed(5)}°
             </Tooltip>
-          </CircleMarker>
+          </Marker>
         );
       })}
 

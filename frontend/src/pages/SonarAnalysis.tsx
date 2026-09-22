@@ -238,22 +238,35 @@ export const SonarAnalysis: React.FC = () => {
       setImageSrc(null); // Clear until backend raster is ready
       try {
         const resp = await analyzeSonarFile(file, vessel);
-        setSonarResponse(resp);
         const masterRes = resp.analysis;
-        setAnalysis(masterRes);
-
         const missionId = resp.mission_id || masterRes.mission_id;
         const rasterUrl = getSonarRasterUrl(missionId);
-        setImageSrc(rasterUrl);
 
-        // Fetch ordered navigation track
+        // Preload raster image so it renders immediately
+        await new Promise<void>((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve();
+          img.onerror = () => resolve();
+          img.src = rasterUrl;
+        });
+
+        // 1. Show the sonar raster image FIRST in the viewer!
+        setImageSrc(rasterUrl);
+        setSonarResponse(resp);
+
+        // Fetch ordered navigation track in parallel
         try {
           const track = await getSonarTrack(missionId);
           setNavigationTrack(track);
         } catch {
-          // Track might be unavailable if sonar file lacked GPS packets
+          // Track might be unavailable
         }
 
+        // 2. Allow user to watch the acoustic sweep scan over the sonar waterfall
+        await new Promise((resolve) => setTimeout(resolve, 1600));
+
+        // 3. ONLY AFTER the scan completes, reveal the detection results!
+        setAnalysis(masterRes);
         if (masterRes.targets?.length > 0) {
           setSelectedTargetId(masterRes.targets[0].detection_id);
         }
@@ -265,12 +278,18 @@ export const SonarAnalysis: React.FC = () => {
     } else {
       // Conventional image upload (.png, .jpg, .tiff, etc.)
       const localUrl = URL.createObjectURL(file);
+      // 1. Show the sonar image FIRST!
       setImageSrc(localUrl);
 
       try {
-        const masterRes = await analyzeSonarImage(file, vessel);
-        setAnalysis(masterRes);
+        // 2. Run API detection and minimum 1.6s scan animation in parallel
+        const [masterRes] = await Promise.all([
+          analyzeSonarImage(file, vessel),
+          new Promise((resolve) => setTimeout(resolve, 1600)),
+        ]);
 
+        // 3. ONLY AFTER the scan completes, reveal the detection results!
+        setAnalysis(masterRes);
         if (masterRes.targets?.length > 0) {
           setSelectedTargetId(masterRes.targets[0].detection_id);
         }
@@ -291,19 +310,30 @@ export const SonarAnalysis: React.FC = () => {
 
   const handleSelectSample = (index: number) => {
     setSampleIndex(index);
+    // 1. Show the sample sonar image FIRST!
     setImageSrc(sampleFrames[index]);
     setIsRawSonar(false);
     setSelectedFile(null);
     setAnalysis(null);
     setSonarResponse(null);
     setNavigationTrack(null);
-    setSelectedTargetId(defaultSampleTargets[0]?.detection_id ?? null);
+    setSelectedTargetId(null);
     setError(null);
+    setIsAnalyzing(true);
+
+    // 2. Let the acoustic scanline sweep across the image for 1.4s, then reveal results
+    setTimeout(() => {
+      setIsAnalyzing(false);
+      setSelectedTargetId(defaultSampleTargets[0]?.detection_id ?? null);
+    }, 1400);
   };
 
   const analysisDone = analysis !== null;
   const missionId = sonarResponse?.mission_id || analysis?.mission_id || (imageSrc ? 'MSN-LOCAL-01' : null);
-  const targets: MasterTargetResult[] = analysis?.targets ?? (imageSrc && !analysisDone ? defaultSampleTargets : []);
+  // While analyzing/scanning, suppress targets so results NEVER appear before the scan completes!
+  const targets: MasterTargetResult[] = isAnalyzing
+    ? []
+    : (analysis?.targets ?? (imageSrc && !analysisDone ? defaultSampleTargets : []));
   const hasTargets = targets.length > 0;
 
   const verifiedCount = targets.filter((t) => t.trust_tier === 'VERIFIED_TARGET').length;
@@ -630,18 +660,41 @@ export const SonarAnalysis: React.FC = () => {
                   <span className={styles.headerTitle}>
                     <Radar size={13} /> DETECTION TARGETS
                   </span>
-                  {hasTargets && (
+                  {hasTargets && !isAnalyzing && (
                     <span className={styles.countBadge}>
                       {filteredTargets.length === targets.length
                         ? `${targets.length} Targets`
                         : `${filteredTargets.length} / ${targets.length}`}
                     </span>
                   )}
+                  {isAnalyzing && (
+                    <span className={styles.scanningBadge}>
+                      ACOUSTIC SCAN ACTIVE
+                    </span>
+                  )}
                 </div>
 
                 <div className={styles.panelBlockBody}>
-                  {/* Filter Chips */}
-                  <div className={styles.filterRow}>
+                  {isAnalyzing ? (
+                    <div className={styles.scanningPanelState}>
+                      <div className={styles.scanningRadarWrap}>
+                        <Radar size={28} className={styles.scanRadarPulse} />
+                      </div>
+                      <h4>ANALYZING SONAR SCAN</h4>
+                      <p>Scanning acoustic waterfall and running neural debris detection...</p>
+                      <div className={styles.scanProgressTrack}>
+                        <div className={styles.scanProgressBar} />
+                      </div>
+                      <div className={styles.scanStepList}>
+                        <span>✓ Sonar Raster Loaded</span>
+                        <span className={styles.scanStepActive}>• YOLO11 Target Classification</span>
+                        <span>• 3D Shadow Corroboration</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Filter Chips */}
+                      <div className={styles.filterRow}>
                     <button
                       type="button"
                       className={`${styles.filterChip} ${filter === 'all' ? styles.filterChipActive : ''}`}
@@ -767,6 +820,8 @@ export const SonarAnalysis: React.FC = () => {
                       </div>
                     )}
                   </div>
+                    </>
+                  )}
                 </div>
               </div>
 

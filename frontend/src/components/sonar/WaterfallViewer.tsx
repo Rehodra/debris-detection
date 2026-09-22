@@ -578,7 +578,7 @@ export const WaterfallViewer: React.FC<WaterfallViewerProps> = ({
                 />
 
                 {/* SVG Detection Overlays */}
-                {showLayers && targets.length > 0 && (
+                {showLayers && !isLoading && targets.length > 0 && (
                   <svg className={styles.overlaySvg} viewBox={`0 0 ${natW} ${natH}`} preserveAspectRatio="none">
                     <defs>
                       <marker id="arrow-yellow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
@@ -628,9 +628,9 @@ export const WaterfallViewer: React.FC<WaterfallViewerProps> = ({
                             width={w}
                             height={h}
                             rx="3"
-                            stroke={isSelected ? '#00f0ff' : '#06b6d4'}
+                            stroke={isSelected ? '#38bdf8' : '#0284c7'}
                             strokeWidth={isSelected ? 3 : 2}
-                            fill={isSelected ? 'rgba(6, 182, 212, 0.25)' : 'rgba(6, 182, 212, 0.08)'}
+                            fill={isSelected ? 'rgba(14, 165, 233, 0.25)' : 'rgba(14, 165, 233, 0.08)'}
                             filter={isSelected ? 'url(#glow-cyan)' : undefined}
                           />
 
@@ -640,7 +640,7 @@ export const WaterfallViewer: React.FC<WaterfallViewerProps> = ({
                                 M ${x + w - cornerLen} ${y} L ${x + w} ${y} L ${x + w} ${y + cornerLen}
                                 M ${x + w} ${y + h - cornerLen} L ${x + w} ${y + h} L ${x + w - cornerLen} ${y + h}
                                 M ${x + cornerLen} ${y + h} L ${x} ${y + h} L ${x} ${y + h - cornerLen}`}
-                            stroke="#22d3ee"
+                            stroke={isSelected ? '#38bdf8' : '#0284c7'}
                             strokeWidth={isSelected ? 3.5 : 2.5}
                             fill="none"
                           />
@@ -666,13 +666,19 @@ export const WaterfallViewer: React.FC<WaterfallViewerProps> = ({
                             <rect
                               x="0"
                               y="0"
-                              width={Math.max(100, (target.display_name.length + 8) * 7.5)}
+                              width={Math.max(115, (target.display_name.length + 10) * 7.5)}
                               height="19"
                               rx="3"
                               fill={target.risk_tier === 'CRITICAL' ? '#ef4444' : target.risk_tier === 'HIGH' ? '#ea580c' : '#0284c7'}
                             />
+                            {/* Pin Icon */}
+                            <path
+                              d="M 9 4 C 7.3 4 6 5.3 6 7 C 6 9.3 9 12.8 9 12.8 C 9 12.8 12 9.3 12 7 C 12 5.3 10.7 4 9 4 Z"
+                              fill="#ffffff"
+                            />
+                            <circle cx="9" cy="6.8" r="1.2" fill={target.risk_tier === 'CRITICAL' ? '#ef4444' : target.risk_tier === 'HIGH' ? '#ea580c' : '#0284c7'} />
                             <text
-                              x="6"
+                              x="16"
                               y="13.5"
                               fill="#ffffff"
                               fontSize="10"
@@ -696,7 +702,11 @@ export const WaterfallViewer: React.FC<WaterfallViewerProps> = ({
                 <div className={styles.scanLine} />
                 <div className={styles.scanLabel}>
                   <ScanLine size={16} />
-                  <span>DECODING PINGS & ASSEMBLING WATERFALL RASTER…</span>
+                  <span>
+                    {isRawSonar && !imageSrc
+                      ? 'DECODING PINGS & ASSEMBLING WATERFALL RASTER…'
+                      : 'ACOUSTIC SWEEP IN PROGRESS · SCANNING SEABED TARGETS…'}
+                  </span>
                 </div>
               </div>
             )}

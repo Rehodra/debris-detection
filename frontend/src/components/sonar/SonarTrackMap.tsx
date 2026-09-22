@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, WMSTileLayer, Polyline, CircleMarker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, WMSTileLayer, Polyline, CircleMarker, Marker, Popup, useMap } from 'react-leaflet';
 import L, { type LatLngBoundsExpression } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { createTargetPinIcon } from '../../utils/mapPins';
 import { MapPin, Navigation, AlertTriangle, Crosshair } from 'lucide-react';
 import { MasterTargetResult, SonarNavigationTrack } from '../../api/client';
 import styles from './SonarTrackMap.module.scss';
@@ -26,7 +27,7 @@ const CLASS_COLORS: Record<string, string> = {
 };
 
 function getClassColor(className: string): string {
-  return CLASS_COLORS[className.toLowerCase()] ?? '#00f0ff';
+  return CLASS_COLORS[className.toLowerCase()] ?? '#0284c7';
 }
 
 const FitBounds: React.FC<{ bounds: LatLngBoundsExpression | null }> = ({ bounds }) => {
@@ -164,9 +165,9 @@ export const SonarTrackMap: React.FC<SonarTrackMapProps> = ({
                 <Polyline
                   positions={trackLatLngs}
                   pathOptions={{
-                    color: '#00f0ff',
+                    color: '#0284c7',
                     weight: 3,
-                    opacity: 0.85,
+                    opacity: 0.9,
                     dashArray: '6, 6',
                   }}
                 />
@@ -214,31 +215,27 @@ export const SonarTrackMap: React.FC<SonarTrackMapProps> = ({
               </CircleMarker>
             )}
 
-            {/* Geolocated Target Markers */}
-            {validTargets.map((target) => {
+            {/* Geolocated Target Pin Markers */}
+            {validTargets.map((target, idx) => {
               const lat = target.coordinates?.latitude ?? target.georeference?.latitude!;
               const lon = target.coordinates?.longitude ?? target.georeference?.longitude!;
               const color = getClassColor(target.class_name);
               const isSelected = selectedTargetId === target.detection_id;
+              const pinIcon = createTargetPinIcon(color, isSelected, idx + 1);
 
               return (
-                <CircleMarker
+                <Marker
                   key={target.detection_id}
-                  center={[lat, lon]}
-                  radius={isSelected ? 10 : 7}
-                  pathOptions={{
-                    color: isSelected ? '#ffffff' : color,
-                    weight: isSelected ? 3 : 2,
-                    fillColor: color,
-                    fillOpacity: 0.8,
-                  }}
+                  position={[lat, lon]}
+                  icon={pinIcon}
+                  zIndexOffset={isSelected ? 1000 : 100}
                   eventHandlers={{
                     click: () => onSelectTarget?.(target.detection_id),
                   }}
                 >
                   <Popup>
                     <div className={styles.popupContent}>
-                      <strong>{target.display_name.toUpperCase()}</strong>
+                      <strong>#{idx + 1} {target.display_name.toUpperCase()}</strong>
                       <div className={styles.popupMeta}>
                         <span>Class: {target.class_name}</span>
                         <span>Confidence: {Math.round((target.calibrated_confidence ?? target.ai_confidence ?? 0.9) * 100)}%</span>
@@ -253,7 +250,7 @@ export const SonarTrackMap: React.FC<SonarTrackMapProps> = ({
                       </div>
                     </div>
                   </Popup>
-                </CircleMarker>
+                </Marker>
               );
             })}
 

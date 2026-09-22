@@ -91,3 +91,9 @@ AquaTrace.db
 validation/datasets/xtf/15CCT03_SSS_153_150602144500.xtf
 validation/datasets/xtf/15CCT03_SSS_153_150602151100.xtf
 validation/datasets/xtf/15CCT03_SSS_153_150602154200.xtf
+
+# Local test outputs & validation artifacts
+yolo11_validation_result.*
+backend/sonar_test_result.jpg
+backend/test_output_*.jpg
+
