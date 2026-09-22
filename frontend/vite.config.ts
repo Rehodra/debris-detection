@@ -2,10 +2,8 @@ import { defineConfig, type HtmlTagDescriptor, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
-
 import siteConfiguration from './.figma/make/site.json' with { type: 'json' }
 
-// Vite config — https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   // .figma/make/deploy-preview passes `--mode development` for cached-preview builds.
   const emitSourcemaps = mode === 'development'
@@ -41,7 +39,6 @@ export default defineConfig(({ mode }) => {
     },
   }
 })
-
 type FigmaSiteConfiguration = {
   title?: string
   description?: string
@@ -122,7 +119,6 @@ function figmaSiteConfiguration(config: FigmaSiteConfiguration): Plugin {
         result = replaceHtmlCommentSlot(result, 'figma:head-end', headEnd)
         result = replaceHtmlCommentSlot(result, 'figma:body-start', bodyStart)
         result = replaceHtmlCommentSlot(result, 'figma:body-end', bodyEnd)
-
         const tags: HtmlTagDescriptor[] = []
         if (description) {
           tags.push({ tag: 'meta', attrs: { name: 'description', content: description }, injectTo: 'head' })

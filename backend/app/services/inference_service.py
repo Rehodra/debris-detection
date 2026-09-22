@@ -155,6 +155,53 @@ class InferenceService:
         conf = confidence_threshold if confidence_threshold is not None else settings.CONFIDENCE_THRESHOLD
         iou = iou_threshold if iou_threshold is not None else 0.45
 
+        # Keep the API usable for local demos when trained weights are not bundled.
+        model_path = self.loader.resolve_model_path()
+        if settings.DEMO_MODE and not model_path.exists():
+            infer_duration_ms = 0.0
+            post_duration_ms = 0.0
+            detections: List[Dict[str, Any]] = []
+            summary = {
+                "total_detections": 0,
+                "class_counts": {},
+                "max_confidence": 0.0,
+                "critical_detected": False,
+            }
+            annotated_b64 = None
+            prediction_image_path = None
+            prediction_image_url = None
+            if return_visualization:
+                annotated_jpeg = encode_image_to_jpeg_bytes(
+                    render_detections_overlay(image_bgr, detections)
+                )
+                output = image_output_service.save_and_upload(annotated_jpeg, prefix="detection")
+                prediction_image_path = output["local_path"]
+                prediction_image_url = output["cloudinary_url"] or output["local_url"]
+
+            total_duration_ms = (time.perf_counter() - total_start) * 1000.0 + decode_duration_ms
+            timing = TimingBreakdown(
+                decode_time_ms=round(decode_duration_ms, 2),
+                preprocessing_time_ms=round(prep_duration_ms, 2),
+                inference_time_ms=infer_duration_ms,
+                postprocess_time_ms=post_duration_ms,
+                total_time_ms=round(total_duration_ms, 2),
+            )
+            return DetectionResponse(
+                status="success",
+                model_name="MarineScan Demo Mode (trained weights unavailable)",
+                device=self.loader.device,
+                inference_time_ms=infer_duration_ms,
+                total_time_ms=round(total_duration_ms, 2),
+                timing_breakdown=timing,
+                image_info=img_meta,
+                detections=detections,
+                summary=summary,
+                tiling_applied=False,
+                annotated_image_base64=None,
+                prediction_image_path=prediction_image_path,
+                prediction_image_url=prediction_image_url,
+            )
+
         # Check if sliding-window tiling is requested or automatically beneficial
         if use_tiling:
             detections, summary, infer_duration_ms, post_duration_ms = self.predict_tiled(

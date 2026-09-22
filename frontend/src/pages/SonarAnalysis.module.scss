@@ -1,21 +1,21 @@
-$bg-page: #020713;
-$navy-950: #030a1c;
-$navy-900: #081636;
-$navy-800: #102454;
+$bg-page: #eef7ff;
+$navy-950: #f6fbff;
+$navy-900: #eaf3ff;
+$navy-800: #dfeefc;
 $white: #ffffff;
-$card-dark: #040d21;
-$border-dark: #142a5c;
-$text-dark: #f1f5f9;
-$text-muted: #94a3b8;
+$card-dark: #f8fbff;
+$border-dark: #bfd7f4;
+$text-dark: #0f172a;
+$text-muted: #475569;
 $text-dim: #64748b;
-$on-navy: #eef2ff;
-$on-navy-muted: #a9b6dc;
+$on-navy: #0f172a;
+$on-navy-muted: #334155;
 $accent-start: #0ea5e9;
-$accent-end: #00f0ff;
-$alert-red: #ef4444;
-$alert-amber: #f59e0b;
+$accent-end: #00c2ff;
+$alert-red: #dc2626;
+$alert-amber: #d97706;
 $alert-green: #10b981;
-$border-light: #162b58;
+$border-light: #d9eafc;
 
 @mixin accent-gradient($deg: 135deg) {
   background: linear-gradient($deg, $accent-start 0%, $accent-end 100%);
@@ -42,7 +42,7 @@ $border-light: #162b58;
   gap: 16px;
   align-items: stretch;
   padding: 20px;
-  background: radial-gradient(ellipse at 50% 15%, #081d48 0%, #030c1f 60%, #020713 100%);
+  background: radial-gradient(ellipse at 50% 15%, rgba(175, 220, 255, 0.8) 0%, rgba(232, 245, 255, 0.96) 46%, #edf6ff 100%);
   border: 0;
   box-shadow: none;
 }
@@ -64,10 +64,10 @@ $border-light: #162b58;
   padding: 20px 14px;
   box-sizing: border-box;
   cursor: pointer;
-  border: 1.5px dashed rgba(6, 182, 212, 0.45);
-  background: linear-gradient(145deg, rgba(8, 25, 62, 0.75), rgba(3, 12, 32, 0.9));
+  border: 1.5px dashed rgba(14, 165, 233, 0.45);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(230, 242, 255, 0.96));
   backdrop-filter: blur(8px);
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), inset 0 0 20px rgba(6, 182, 212, 0.05);
+  box-shadow: 0 14px 32px rgba(59, 130, 246, 0.12), inset 0 0 20px rgba(6, 182, 212, 0.04);
   border-radius: 12px;
   transition: all 0.25s ease;
 
@@ -113,7 +113,7 @@ $border-light: #162b58;
     font-size: 12.5px;
     font-weight: 700;
     line-height: 1.35;
-    color: #f1f5f9;
+    color: #0f172a;
   }
 
   p {
@@ -121,7 +121,7 @@ $border-light: #162b58;
     max-width: 100%;
     font-size: 10.5px;
     line-height: 1.5;
-    color: #94a3b8;
+    color: #475569;
   }
 
   .uploadEyebrow { margin-top: 2px; }
@@ -170,9 +170,9 @@ $border-light: #162b58;
   gap: 6px;
   overflow-y: auto;
   padding: 14px;
-  color: #94a3b8;
-  background: rgba(4, 13, 33, 0.7);
-  border: 1px solid #142a5c;
+  color: #475569;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid #bfd7f4;
   border-radius: 10px;
   font: 9px 'IBM Plex Mono', monospace;
   scrollbar-width: thin;
@@ -197,9 +197,9 @@ $border-light: #162b58;
 
   strong {
     padding: 6px 8px;
-    color: #f1f5f9;
-    background: rgba(15, 30, 70, 0.6);
-    border: 1px solid rgba(6, 182, 212, 0.2);
+    color: #0f172a;
+    background: rgba(224, 239, 255, 0.9);
+    border: 1px solid rgba(14, 165, 233, 0.2);
     border-radius: 4px;
     font-weight: 500;
   }
@@ -287,13 +287,13 @@ $border-light: #162b58;
 
 .previewNote {
   padding: 14px;
-  color: #94a3b8;
-  background: rgba(4, 13, 33, 0.7);
-  border: 1px solid #142a5c;
+  color: #475569;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid #bfd7f4;
   border-radius: 10px;
 
   strong {
-    color: #38bdf8;
+    color: #0f172a;
     font: 9px 'IBM Plex Mono', monospace;
     letter-spacing: 0.1em;
   }
@@ -302,14 +302,14 @@ $border-light: #162b58;
     margin: 8px 0 0;
     font-size: 11.5px;
     line-height: 1.6;
-    color: #cbd5e1;
+    color: #334155;
   }
 }
 
 .emptyDetections {
   overflow: hidden;
-  background: rgba(4, 13, 33, 0.7);
-  border: 1px solid #142a5c;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid #bfd7f4;
   border-radius: 10px;
   display: flex;
   flex-direction: column;
@@ -322,13 +322,13 @@ $border-light: #162b58;
     border-bottom: 1px solid #142a5c;
 
     strong {
-      color: #f1f5f9;
+      color: #0f172a;
       font: 700 12px/1.2 'Poppins', sans-serif;
       letter-spacing: 0.04em;
     }
 
     span {
-      color: #64748b;
+      color: #475569;
       font: 8px 'IBM Plex Mono', monospace;
     }
   }
@@ -339,12 +339,7 @@ $border-light: #162b58;
   align-items: center;
   gap: 10px;
   padding: 11px 14px;
-  border-bottom: 1px solid rgba(20, 42, 92, 0.6);
-  transition: background 0.15s ease;
-
-  &:hover {
-    background: rgba(14, 165, 233, 0.08);
-  }
+  border-bottom: 1px solid rgba(191, 215, 244, 0.8);
 
   > i {
     width: 8px;
@@ -368,14 +363,14 @@ $border-light: #162b58;
 
     b {
       overflow: hidden;
-      color: #e2e8f0;
+      color: #0f172a;
       font: 600 11px 'Poppins', sans-serif;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
     small {
-      color: #64748b;
+      color: #475569;
       font: 8px 'IBM Plex Mono', monospace;
     }
   }
@@ -408,7 +403,7 @@ $border-light: #162b58;
   color: $text-dark;
   font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   overflow: hidden;
-  background: #020713;
+  background: $bg-page;
 }
 
 .header {
@@ -416,12 +411,12 @@ $border-light: #162b58;
   justify-content: space-between;
   align-items: center;
   padding: 12px 24px;
-  background: linear-gradient(90deg, #040c1e 0%, #091a3c 100%);
-  border-bottom: 1px solid #142a5c;
+  background: linear-gradient(90deg, #edf7ff 0%, #dfeefc 100%);
+  border-bottom: 1px solid #bfd7f4;
   color: $on-navy;
   font-size: 12.5px;
   flex-shrink: 0;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.08);
 
   .vesselInfo {
     display: flex;
@@ -429,15 +424,15 @@ $border-light: #162b58;
     align-items: center;
     color: $on-navy-muted;
 
-    .divider { color: rgba(255, 255, 255, 0.15); }
+    .divider { color: rgba(15, 23, 42, 0.2); }
   }
 
   .vesselInputGroup {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    background: rgba(4, 13, 33, 0.85);
-    border: 1px solid #19356d;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid #bfd7f4;
     border-radius: 4px;
     padding: 3px 7px;
     transition: all 0.15s ease;
@@ -460,7 +455,7 @@ $border-light: #162b58;
     background: transparent;
     border: none;
     outline: none;
-    color: #ffffff;
+    color: #0f172a;
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     font-weight: 600;
@@ -573,7 +568,7 @@ $border-light: #162b58;
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  background: #020713;
+  background: linear-gradient(180deg, #f3f9ff 0%, #edf5ff 100%);
 }
 
 .mainContent {
@@ -592,11 +587,11 @@ $border-light: #162b58;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  background: #030c1d;
-  border: 1px solid #142a5c;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid #bfd7f4;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 14px 32px rgba(0, 5, 20, 0.5);
+  box-shadow: 0 14px 32px rgba(59, 130, 246, 0.12);
 
   &.fullscreenMode,
   &:fullscreen,
@@ -631,9 +626,9 @@ $border-light: #162b58;
     font-size: 11.5px;
     font-weight: 700;
     letter-spacing: 0.6px;
-    color: #94a3b8;
-    background: #06132d;
-    border-bottom: 1px solid #142a5c;
+    color: #475569;
+    background: #edf7ff;
+    border-bottom: 1px solid #bfd7f4;
     flex-shrink: 0;
 
     .statusLive { color: $alert-green; }
@@ -688,7 +683,7 @@ $border-light: #162b58;
     flex: 1;
     min-height: 0;
     position: relative;
-    background: #020713;
+    background: linear-gradient(180deg, #f0f8ff 0%, #eaf4ff 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -898,18 +893,18 @@ $border-light: #162b58;
 
   .panelBlock {
     flex-shrink: 0;
-    background: #030c1d;
-    border: 1px solid #142a5c;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid #bfd7f4;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 10px 24px rgba(0, 5, 20, 0.5);
+    box-shadow: 0 10px 24px rgba(59, 130, 246, 0.08);
   }
 
   .panelBlockHeader {
     padding: 12px 14px;
-    background: linear-gradient(135deg, #06132d 0%, #0a1f46 100%);
-    border-bottom: 1px solid #142a5c;
-    color: #f1f5f9;
+    background: linear-gradient(135deg, #edf7ff 0%, #dfeefc 100%);
+    border-bottom: 1px solid #bfd7f4;
+    color: #0f172a;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.5px;
@@ -1016,9 +1011,9 @@ $border-light: #162b58;
     font-weight: 700;
     letter-spacing: 0.3px;
     border-radius: 6px;
-    border: 1px solid #142a5c;
-    background: rgba(10, 25, 55, 0.7);
-    color: #94a3b8;
+    border: 1px solid #bfd7f4;
+    background: rgba(240, 247, 255, 0.9);
+    color: #475569;
     cursor: pointer;
     text-align: center;
     white-space: nowrap;
@@ -1026,21 +1021,21 @@ $border-light: #162b58;
     font-family: inherit;
 
     &:hover {
-      background: rgba(20, 45, 95, 0.8);
-      color: #f1f5f9;
-      border-color: #1e3f80;
+      background: rgba(224, 239, 255, 0.96);
+      color: #0f172a;
+      border-color: #8ec5f5;
     }
   }
 
   .filterChipActive {
-    background: rgba(0, 240, 255, 0.15);
-    color: #00f0ff;
-    border-color: rgba(0, 240, 255, 0.5);
-    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+    background: rgba(14, 165, 233, 0.14);
+    color: #0ea5e9;
+    border-color: rgba(14, 165, 233, 0.55);
+    box-shadow: 0 0 10px rgba(14, 165, 233, 0.12);
 
     &:hover {
-      background: rgba(0, 240, 255, 0.22);
-      color: #00f0ff;
+      background: rgba(14, 165, 233, 0.2);
+      color: #0369a1;
     }
   }
 
@@ -1059,38 +1054,38 @@ $border-light: #162b58;
   .detectionCard {
     padding: 10px 12px;
     border-radius: 8px;
-    background: #06132d;
-    border: 1px solid #142a5c;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #dfeafc;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 2px 8px rgba(0, 5, 20, 0.4);
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.06);
     text-align: left;
 
     &:hover {
       transform: translateY(-1px);
-      border-color: #1e3f80;
-      box-shadow: 0 6px 18px rgba(0, 5, 20, 0.6);
+      border-color: #9ecaf7;
+      box-shadow: 0 6px 18px rgba(14, 165, 233, 0.08);
     }
 
     &:focus-visible {
-      outline: 2px solid #00f0ff;
+      outline: 2px solid #0ea5e9;
     }
   }
 
   .detectionCardAlert {
     border-left: 4px solid #ef4444;
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, #06132d 100%);
+    background: linear-gradient(135deg, rgba(254, 242, 242, 0.96) 0%, rgba(255, 255, 255, 0.9) 100%);
   }
 
   .detectionCardWarn {
     border-left: 4px solid #f59e0b;
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, #06132d 100%);
+    background: linear-gradient(135deg, rgba(255, 247, 237, 0.96) 0%, rgba(255, 255, 255, 0.9) 100%);
   }
 
   .detectionCardSelected {
-    border-color: #00f0ff !important;
-    box-shadow: 0 0 0 1px #00f0ff, 0 8px 24px rgba(0, 240, 255, 0.18) !important;
-    background: #081a3d !important;
+    border-color: #0ea5e9 !important;
+    box-shadow: 0 0 0 1px #0ea5e9, 0 8px 24px rgba(14, 165, 233, 0.12) !important;
+    background: #f3fbff !important;
   }
 
   .cardHeader {
@@ -1109,9 +1104,9 @@ $border-light: #162b58;
   .targetIndexBadge {
     font-size: 10px;
     font-weight: 800;
-    color: #94a3b8;
-    background: rgba(15, 30, 70, 0.8);
-    border: 1px solid rgba(20, 42, 92, 0.8);
+    color: #475569;
+    background: rgba(224, 239, 255, 0.8);
+    border: 1px solid rgba(14, 165, 233, 0.2);
     padding: 2px 5px;
     border-radius: 4px;
     font-family: monospace;
@@ -1193,8 +1188,8 @@ $border-light: #162b58;
     grid-template-columns: 1fr 1fr;
     gap: 6px 10px;
     padding: 8px 10px;
-    background: rgba(4, 15, 36, 0.7);
-    border: 1px solid #0f244e;
+    background: rgba(239, 247, 255, 0.9);
+    border: 1px solid #dfeafc;
     border-radius: 6px;
     margin-bottom: 8px;
   }
@@ -1215,7 +1210,7 @@ $border-light: #162b58;
   .metaValue {
     font-size: 10.5px;
     font-weight: 600;
-    color: #e2e8f0;
+    color: #0f172a;
     font-family: 'IBM Plex Mono', monospace;
   }
 

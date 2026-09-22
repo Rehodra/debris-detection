@@ -3,12 +3,12 @@
   flex-direction: column;
   height: 100%;
   width: 100%;
-  background: #030a16;
+  background: rgba(255, 255, 255, 0.82);
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid #142a5c;
+  border: 1px solid #bfd7f4;
   position: relative;
-  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.4);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.12);
 }
 
 .fullscreenMode {
@@ -26,9 +26,9 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 14px;
-  background: linear-gradient(90deg, #091738 0%, #0d2250 100%);
-  border-bottom: 1px solid #19356d;
-  color: #e2e8f0;
+  background: linear-gradient(90deg, #edf7ff 0%, #dfeefc 100%);
+  border-bottom: 1px solid #bfd7f4;
+  color: #0f172a;
   font-size: 11px;
   letter-spacing: 0.05em;
 }
@@ -159,10 +159,10 @@
   right: 0;
   z-index: 1000;
   width: 280px;
-  background: #040c1d;
-  border: 1px solid #1a3875;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid #bfd7f4;
   border-radius: 6px;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(6, 182, 212, 0.2);
+  box-shadow: 0 12px 28px rgba(59, 130, 246, 0.12), 0 0 0 1px rgba(14, 165, 233, 0.16);
   padding: 6px;
   display: flex;
   flex-direction: column;
@@ -217,12 +217,12 @@
 .sampleMenuName {
   font-size: 11px;
   font-weight: 600;
-  color: #f1f5f9;
+  color: #0f172a;
 }
 
 .sampleMenuDesc {
   font-size: 9px;
-  color: #64748b;
+  color: #475569;
   margin-top: 2px;
   line-height: 1.3;
 }
@@ -238,7 +238,7 @@
   flex: 1;
   min-height: 0;
   position: relative;
-  background: #020713;
+  background: linear-gradient(180deg, #f5fbff 0%, #ebf4ff 100%);
   overflow: hidden;
   transition: box-shadow 0.2s ease;
 }
@@ -403,10 +403,10 @@
   height: 100%;
   padding: 24px;
   text-align: center;
-  color: #94a3b8;
+  color: #475569;
 
   h4 {
-    color: #f1f5f9;
+    color: #0f172a;
     margin: 12px 0 6px;
     font-size: 15px;
   }
@@ -414,7 +414,7 @@
   p {
     margin: 0 0 14px;
     font-size: 12px;
-    color: #64748b;
+    color: #475569;
     max-width: 320px;
   }
 }
@@ -426,11 +426,11 @@
   text-align: center;
   max-width: 440px;
   width: 100%;
-  background: linear-gradient(145deg, rgba(8, 24, 60, 0.7) 0%, rgba(4, 12, 30, 0.85) 100%);
-  border: 1.5px dashed rgba(6, 182, 212, 0.4);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(238, 247, 255, 0.95) 100%);
+  border: 1.5px dashed rgba(14, 165, 233, 0.4);
   border-radius: 12px;
   padding: 32px 24px;
-  box-shadow: 0 12px 32px rgba(2, 6, 23, 0.6), inset 0 0 20px rgba(6, 182, 212, 0.05);
+  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.08), inset 0 0 20px rgba(6, 182, 212, 0.04);
   transition: all 0.25s ease;
 
   &:hover {
@@ -439,7 +439,7 @@
   }
 
   h4 {
-    color: #f8fafc;
+    color: #0f172a;
     font-size: 16px;
     font-weight: 700;
     margin: 14px 0 6px;
@@ -447,7 +447,7 @@
   }
 
   p {
-    color: #94a3b8;
+    color: #475569;
     font-size: 12px;
     line-height: 1.5;
     margin: 0 0 20px;
@@ -597,15 +597,15 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(10, 25, 60, 0.85);
-  border: 1px solid #00f0ff;
-  color: #00f0ff;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(14, 165, 233, 0.4);
+  color: #0f172a;
   padding: 8px 16px;
   border-radius: 4px;
   font-size: 11px;
   font-family: 'IBM Plex Mono', monospace;
   letter-spacing: 0.08em;
-  box-shadow: 0 0 20px rgba(0, 240, 255, 0.25);
+  box-shadow: 0 0 20px rgba(14, 165, 233, 0.12);
 }
 
 .rasterMetaBar {
@@ -613,10 +613,10 @@
   align-items: center;
   gap: 16px;
   padding: 6px 14px;
-  background: #040d1e;
-  border-top: 1px solid #0f2248;
+  background: #f3f9ff;
+  border-top: 1px solid #bfd7f4;
   font-size: 10px;
-  color: #64748b;
+  color: #475569;
   overflow-x: auto;
   white-space: nowrap;
 }
