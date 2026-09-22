@@ -30,171 +30,6 @@ import ExportControls from '../components/sonar/ExportControls';
 
 const DEFAULT_VESSEL: VesselParams = { vesselLat: 13.05, vesselLon: 80.42, vesselHeadingDeg: 90 };
 
-const defaultSampleTargets: MasterTargetResult[] = [
-  {
-    detection_id: 'TRK-042-01',
-    class_id: 1,
-    class_name: 'ghost_net',
-    display_name: 'Entangled Net',
-    category: 'HAZARDOUS DEBRIS',
-    calibrated_confidence: 0.91,
-    ai_confidence: 0.89,
-    trust_tier: 'VERIFIED_TARGET',
-    bbox: {
-      x_min: 180,
-      y_min: 160,
-      x_max: 370,
-      y_max: 320,
-      width: 190,
-      height: 160,
-      normalized_x_min: 0.22,
-      normalized_y_min: 0.20,
-      normalized_x_max: 0.46,
-      normalized_y_max: 0.40,
-    },
-    shadow_evidence: {
-      has_shadow: true,
-      shadow_score: 0.88,
-      shadow_length_m: 4.2,
-      estimated_height_m: 1.65,
-      cardinal_direction: 'NE',
-      direction_degrees: 45,
-    },
-    dimensions: {
-      pixel_width: 190,
-      pixel_height: 160,
-      length_m: 3.4,
-      width_m: 2.1,
-      height_m: 1.65,
-      across_track_m: 2.1,
-      along_track_m: 3.4,
-      slant_range_m: 28.5,
-      ground_range_m: 26.2,
-      area_sq_m: 7.14,
-      estimated_volume_m3: 5.89,
-      dry_mass_metric_tons: 1.2,
-      submerged_weight_kn: 3.4,
-      recommended_crane_lift_tons: 1.8,
-      seabed_stability_index: 2.4,
-      seabed_mobility_status: 'Settled / Stable',
-      measurement_method: 'sonar_raster_geometry',
-      measurement_status: 'verified_complete',
-      warnings: [],
-    },
-    coordinates: { latitude: 10.48234, longitude: 80.21441 },
-    georeference: {
-      status: 'calculated',
-      coordinate_reference: 'WGS84',
-      latitude: 10.48234,
-      longitude: 80.21441,
-      source_ping_index: 142,
-      waterfall_row: 142,
-      across_track_pixel: 275,
-      across_track_offset_m: 8.4,
-      slant_range_m: 28.5,
-      heading_deg: 90,
-      layback_applied: false,
-      warnings: [],
-    },
-    clearance: {
-      water_depth_m: 28.0,
-      object_height_m: 1.65,
-      clearance_m: 26.35,
-      threatens_shallow_draft: false,
-      threatens_medium_draft: false,
-      threatens_deep_draft: false,
-    },
-    risk_score: 85,
-    risk_tier: 'HIGH',
-    color_hex: '#ea580c',
-  },
-  {
-    detection_id: 'TRK-042-02',
-    class_id: 2,
-    class_name: 'shipwreck',
-    display_name: 'Shipwreck',
-    category: 'MAJOR OBSTRUCTION',
-    calibrated_confidence: 0.95,
-    ai_confidence: 0.96,
-    trust_tier: 'VERIFIED_TARGET',
-    bbox: {
-      x_min: 440,
-      y_min: 360,
-      x_max: 720,
-      y_max: 560,
-      width: 280,
-      height: 200,
-      normalized_x_min: 0.55,
-      normalized_y_min: 0.45,
-      normalized_x_max: 0.90,
-      normalized_y_max: 0.70,
-    },
-    shadow_evidence: {
-      has_shadow: true,
-      shadow_score: 0.94,
-      shadow_length_m: 8.5,
-      estimated_height_m: 4.8,
-      cardinal_direction: 'E',
-      direction_degrees: 90,
-    },
-    dimensions: {
-      pixel_width: 280,
-      pixel_height: 200,
-      length_m: 14.2,
-      width_m: 6.5,
-      height_m: 4.8,
-      across_track_m: 6.5,
-      along_track_m: 14.2,
-      slant_range_m: 35.0,
-      ground_range_m: 32.8,
-      area_sq_m: 92.3,
-      estimated_volume_m3: 221.5,
-      dry_mass_metric_tons: 45.0,
-      submerged_weight_kn: 320.0,
-      recommended_crane_lift_tons: 67.5,
-      seabed_stability_index: 4.5,
-      seabed_mobility_status: 'Settled / Stable',
-      measurement_method: 'sonar_raster_geometry',
-      measurement_status: 'verified_complete',
-      warnings: [],
-    },
-    coordinates: { latitude: 10.48292, longitude: 80.21528 },
-    georeference: {
-      status: 'calculated',
-      coordinate_reference: 'WGS84',
-      latitude: 10.48292,
-      longitude: 80.21528,
-      source_ping_index: 380,
-      waterfall_row: 380,
-      across_track_pixel: 580,
-      across_track_offset_m: 16.2,
-      slant_range_m: 35.0,
-      heading_deg: 90,
-      layback_applied: false,
-      warnings: [],
-    },
-    clearance: {
-      water_depth_m: 8.0,
-      object_height_m: 4.8,
-      clearance_m: 3.2,
-      threatens_shallow_draft: true,
-      threatens_medium_draft: true,
-      threatens_deep_draft: true,
-    },
-    risk_score: 92,
-    risk_tier: 'CRITICAL',
-    color_hex: '#ef4444',
-    action_recommendations: [
-      {
-        category: 'NAVIGATION',
-        priority: 'IMMEDIATE',
-        action_text: 'Broadcast Notice to Mariners (NOTMAR). Navigational clearance <= 3.5m threatens shallow draft vessels.',
-        authority_standard: 'USCG / IMO NOTMAR',
-      },
-    ],
-  },
-];
-
 export const SonarAnalysis: React.FC = () => {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -208,18 +43,7 @@ export const SonarAnalysis: React.FC = () => {
   const [filter, setFilter] = useState<'all' | 'verified' | 'high_risk'>('all');
   const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
   const [showLayers, setShowLayers] = useState<boolean>(true);
-  const [sampleIndex, setSampleIndex] = useState<number>(0);
   const [isDropzoneDragging, setIsDropzoneDragging] = useState<boolean>(false);
-
-  const sampleFrames = ['/new.png', '/accident.jpg', '/2nd.jpg', '/3rd.jpg', '/4th.jpg'];
-
-  const SAMPLE_SURVEYS = [
-    { name: 'Survey Line 01: Multi-Debris Field', path: '/new.png', desc: 'Normalized acoustic mosaic with multiple target contacts' },
-    { name: 'Survey Line 02: Shipwreck Contact', path: '/accident.jpg', desc: 'Acoustic shadow and structural debris contact' },
-    { name: 'Survey Line 03: Channel Fairway A', path: '/2nd.jpg', desc: 'Acoustic sweep across fairway transit corridor' },
-    { name: 'Survey Line 04: Fairway Obstruction B', path: '/3rd.jpg', desc: 'Seafloor anomaly in high acoustic backscatter sector' },
-    { name: 'Survey Line 05: Deep Anchor Sector', path: '/4th.jpg', desc: 'Deep benthic survey sector with seabed hazards' },
-  ];
 
   const processUploadedFile = async (file: File) => {
     setSelectedFile(file);
@@ -308,32 +132,11 @@ export const SonarAnalysis: React.FC = () => {
     e.target.value = '';
   };
 
-  const handleSelectSample = (index: number) => {
-    setSampleIndex(index);
-    // 1. Show the sample sonar image FIRST!
-    setImageSrc(sampleFrames[index]);
-    setIsRawSonar(false);
-    setSelectedFile(null);
-    setAnalysis(null);
-    setSonarResponse(null);
-    setNavigationTrack(null);
-    setSelectedTargetId(null);
-    setError(null);
-    setIsAnalyzing(true);
-
-    // 2. Let the acoustic scanline sweep across the image for 1.4s, then reveal results
-    setTimeout(() => {
-      setIsAnalyzing(false);
-      setSelectedTargetId(defaultSampleTargets[0]?.detection_id ?? null);
-    }, 1400);
-  };
 
   const analysisDone = analysis !== null;
   const missionId = sonarResponse?.mission_id || analysis?.mission_id || (imageSrc ? 'MSN-LOCAL-01' : null);
-  // While analyzing/scanning, suppress targets so results NEVER appear before the scan completes!
-  const targets: MasterTargetResult[] = isAnalyzing
-    ? []
-    : (analysis?.targets ?? (imageSrc && !analysisDone ? defaultSampleTargets : []));
+  // Only show targets from actual analysis; never fall back to static default data!
+  const targets: MasterTargetResult[] = isAnalyzing ? [] : (analysis?.targets ?? []);
   const hasTargets = targets.length > 0;
 
   const verifiedCount = targets.filter((t) => t.trust_tier === 'VERIFIED_TARGET').length;
@@ -564,14 +367,34 @@ export const SonarAnalysis: React.FC = () => {
               </div>
               <div
                 className={styles.previewImage}
-                onClick={() => handleSelectSample(0)}
+                onClick={() => {
+                  const input = document.getElementById('sonar-upload') as HTMLInputElement;
+                  input?.click();
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsDropzoneDragging(true);
+                }}
+                onDragLeave={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsDropzoneDragging(false);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsDropzoneDragging(false);
+                  const file = e.dataTransfer.files?.[0];
+                  if (file) processUploadedFile(file);
+                }}
                 style={{ cursor: 'pointer' }}
-                title="Click to load sample acoustic scan"
+                title="Click or drop survey file to upload and begin analysis"
               >
                 <div className={styles.previewImagePlaceholder}>
                   <Radar size={32} />
-                  <span>SAMPLE RASTER VIEW</span>
-                  <i>Click to load in workstation</i>
+                  <span>UPLOAD RASTER OR SONAR FILE</span>
+                  <i>Click or drop photo here to analyze</i>
                 </div>
               </div>
               <div className={styles.previewNote}>
@@ -630,13 +453,7 @@ export const SonarAnalysis: React.FC = () => {
                     }
                   }}
                   onUploadFile={processUploadedFile}
-                  activeFileName={
-                    selectedFile?.name ||
-                    (imageSrc ? (SAMPLE_SURVEYS[sampleIndex]?.name ?? `SURVEY_SAMPLE_0${sampleIndex + 1}`) : null)
-                  }
-                  samples={SAMPLE_SURVEYS}
-                  onSelectSample={handleSelectSample}
-                  selectedSampleIndex={selectedFile ? -1 : sampleIndex}
+                  activeFileName={selectedFile?.name || 'Sonar Survey Recording'}
                 />
               </div>
 
