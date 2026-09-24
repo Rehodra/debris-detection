@@ -1,4 +1,4 @@
-# AQUATRACE: MarineDebrisDetect-X (Dual-Engine)
+# AQUATRACE (Dual-Engine)
 ### Autonomous Underwater Marine Debris & Open-Set Hydrographic Anomaly Detection System
 
 [![System Status](https://img.shields.io/badge/System-AQUATRACE%20MarineScan%20v1.0-0077be.svg)](#)
@@ -20,10 +20,10 @@ Autonomous Underwater Vehicles (AUVs) and diver recovery operations face severe 
    - **Open-Set / Out-of-Distribution (OOD) Anomalies:** Improvised waste, shattered hull fragments, un-annotated degraded hazards that standard supervised detectors miss completely.
 2. **Acoustic Clutter & False Alarms:** Sonar backscatter exhibits speckle interference, beam fading, motion distortion (roll/pitch/yaw), and complex natural textures (sand ripples, flat rock beds) causing rampant false-positive alarms.
 
-**AQUATRACE (MarineDebrisDetect-X)** solves this by introducing a **Dual-Engine Hybrid Architecture** coupled with a **Deterministic Physics-Informed Verification Layer**:
+**AQUATRACE** solves this by introducing a **Dual-Engine Hybrid Architecture** coupled with a **Deterministic Physics-Informed Verification Layer**:
 - **Supervised Branch:** TensorRT INT8-optimized **YOLO11-Seg** for real-time multi-scale instance segmentation of annotated debris classes.
 - **Unsupervised Branch:** A **Streaming Mahalanobis PatchCore** engine constructing nominal seabed representations to flag novel anomalies without prior training.
-- **Physics Layer:** Deterministic acoustic shadow extraction ($I_{blackhat}$) and trigonometric height profiling ($h_{OBJ} = L_{shadow} \cdot \tan\theta$) eliminating false alarms from flat seabed textures.
+- **Physics Layer:** Deterministic acoustic shadow extraction (I_blackhat) and trigonometric height profiling (h_OBJ = L_shadow · tan θ) eliminating false alarms from flat seabed textures.
 - **Human-in-the-Loop (HITL) Memory Surgery:** Enables instant, zero-backpropagation prototype editing directly from field operator feedback.
 
 ---
@@ -50,7 +50,7 @@ Tested on an acoustic side-scan sonar benchmark comprising real-world underwater
 | **U-Net (ConvNeXt-B)** | Supervised | 81.8% | 0.810 | 0.802 | N/A | 45.8 ms | 3.4 GB |
 | **Vanilla PatchCore (ResNet50)** | Unsupervised | N/A | N/A | N/A | 0.942 | 68.4 ms | 5.4 GB |
 | **Mahalanobis PatchCore** | Unsupervised | N/A | N/A | N/A | 0.968 | 22.3 ms | 2.6 GB |
-| **MarineDebrisDetect-X (Dual Engine)** | **Hybrid Engine** | **89.7%** | **0.886** | **0.892** | **0.974** | **27.8 ms** | **3.7 GB** |
+| **AQUATRACE (Dual Engine)** | **Hybrid Engine** | **89.7%** | **0.886** | **0.892** | **0.974** | **27.8 ms** | **3.7 GB** |
 
 ---
 
@@ -87,7 +87,7 @@ graph TD
         subgraph BranchB["Branch B: Unsupervised Anomaly Engine (OOD)"]
             WRN["WideResNet-50-2 Multi-Scale Feature Aggregation"]
             CORESET["Greedy Minimax Coreset Subsampling (~1% Memory)"]
-            MAHAL["Streaming Mahalanobis Whitening: z̃ = Σ^(-1/2)(z - μ)"]
+            MAHAL["Streaming Mahalanobis Whitening: z_tilde = Σ^(-1/2)(z - μ)"]
             SCORE_B["Nearest Whitened Prototype Search + Anomaly Score P_CAE"]
         end
     end
@@ -143,40 +143,52 @@ graph TD
 
 ### 🌟 Novelty 1: Streaming Mahalanobis Whitening for Sonar Anomaly Detection
 * **Limitation of Prior Art:** Standard anomaly models (e.g., standard PatchCore) rely on Euclidean distance in latent space. In side-scan sonar, periodic natural structures like sand ripples and sedimentary dunes introduce high directional variance. Standard Euclidean distance causes severe false alarms on these natural formations.
-* **Our Solution:** The system computes the running background mean ($\mu$) and covariance matrix ($\Sigma$) of nominal seabed textures, applying an incremental whitening transformation:
-  $$\tilde{z} = \Sigma^{-1/2}(z - \mu)$$
+* **Our Solution:** The system computes the running background mean (μ) and covariance matrix (Σ) of nominal seabed textures, applying an incremental whitening transformation:
+  ```
+  z_tilde = Σ^(-1/2) · (z - μ)
+  ```
 * **Mathematical Property:** The Euclidean distance between two whitened patch vectors is mathematically identical to the full Mahalanobis distance in the original feature space:
-  $$\|\tilde{z}_{test} - \tilde{m}^*\|_2 \equiv \sqrt{(z_{test} - m^*)^T \Sigma^{-1} (z_{test} - m^*)}$$
-* **Edge Advantage:** By computing $\mu$ and $\Sigma$ incrementally in a streaming manner, peak onboard RAM consumption during initialization is cut by ~52% while executing at Euclidean compute speed ($O(d)$ dot products).
+  ```
+  ||z_tilde_test - m_tilde*||_2 ≡ √((z_test - m*)^T · Σ^(-1) · (z_test - m*))
+  ```
+* **Edge Advantage:** By computing μ and Σ incrementally in a streaming manner, peak onboard RAM consumption during initialization is cut by ~52% while executing at Euclidean compute speed (O(d) dot products).
 
 ### 🌟 Novelty 2: Training-Free Self-Updating Memory ("Memory Surgery")
 * **Zero-Backpropagation Adaptation:** Traditional neural networks require fine-tuning or retraining backpropagation on GPU servers when deployed in new marine environments.
 * **Online Prototype Editing:**
-  - **False Alarm Triage:** When an operator marks a flagged anomaly as natural clutter in the triage queue, its patch vector is admitted directly into the nominal memory bank $\mathcal{M}_c$ (provided its distance exceeds the intrinsic dispersion threshold $\tau_{spread}$).
-  - **Missed Hazard Rectification:** If an operator manually flags an overlooked hazard, adjacent nominal vectors in $\mathcal{M}_c$ are purged, immediately increasing local detector sensitivity without restarting the system.
+  - **False Alarm Triage:** When an operator marks a flagged anomaly as natural clutter in the triage queue, its patch vector is admitted directly into the nominal memory bank M_c (provided its distance exceeds the intrinsic dispersion threshold τ_spread).
+  - **Missed Hazard Rectification:** If an operator manually flags an overlooked hazard, adjacent nominal vectors in M_c are purged, immediately increasing local detector sensitivity without restarting the system.
 
 ### 🌟 Novelty 3: Deterministic Physics-Informed Verification Layer
 Neural networks are vulnerable to high-intensity backscatter noise spikes and dark acoustic gaps. The system grounds every detection in sonar acoustic propagation:
 1. **Morphological Black-Hat Shadow Extraction:**
-   $$I_{blackhat} = (I \bullet K) - I$$
+   ```
+   I_blackhat = (I • K) - I
+   ```
    Isolates zero-return acoustic shadow zones behind physical elevations.
 2. **Swath Direction Alignment:**
-   Acoustic shadows must project outward from the vessel nadir (Port Channel $\to$ Left; Starboard Channel $\to$ Right). Inward or oblique shadows are discarded as acoustic artifacts.
+   Acoustic shadows must project outward from the vessel nadir (Port Channel → Left; Starboard Channel → Right). Inward or oblique shadows are discarded as acoustic artifacts.
 3. **Trigonometric Height Profiling:**
    Converts diagonal slant-range time-of-flight to true horizontal ground range:
-   $$R_{GROUND} = \sqrt{R_{SLANT}^2 - H^2}$$
+   ```
+   R_GROUND = √(R_SLANT² - H²)
+   ```
    Computes physical debris elevation above the seafloor:
-   $$h_{OBJ} = L_{SHADOW} \cdot \tan\theta = \frac{L_{SHADOW} \cdot H}{R_{GROUND}}$$
-   Where $H$ is vehicle altitude, $L_{SHADOW}$ is shadow length, and $\theta$ is the local grazing angle.
+   ```
+   h_OBJ = L_SHADOW · tan θ = (L_SHADOW · H) / R_GROUND
+   ```
+   Where H is vehicle altitude, L_SHADOW is shadow length, and θ is the local grazing angle.
 
 ### 🌟 Novelty 4: Sequential AI Triggering & Weighted Soft Fusion
-* **Primary Supervised Classifier ($P_{YOLO}$):** Fires first to recognize trained classes (ghost nets, pipelines, wrecks, containers).
-* **Fallback Anomaly Engine ($P_{CAE}$):** Fires sequentially only when $P_{YOLO} = 0$, guaranteeing that known targets are classified rapidly while open-set foreign objects trigger the distance-based anomaly pipeline.
+* **Primary Supervised Classifier (P_YOLO):** Fires first to recognize trained classes (ghost nets, pipelines, wrecks, containers).
+* **Fallback Anomaly Engine (P_CAE):** Fires sequentially only when P_YOLO = 0, guaranteeing that known targets are classified rapidly while open-set foreign objects trigger the distance-based anomaly pipeline.
 * **Soft Fusion Formulation:**
-  $$C_{final} = \alpha \cdot (P_{YOLO} \lor P_{CAE}) + \beta \cdot S_{shadow} + \gamma \cdot S_{geometry}$$
-  - $\alpha$: Active AI detector confidence score
-  - $\beta$: Shadow evidence (existence, contrast ratio $\bar{I}_{highlight} / \bar{I}_{background} > \tau$, and contiguous adjacency $\le 3\text{ px}$)
-  - $\gamma$: Geometric height plausibility score
+  ```
+  C_final = α · (P_YOLO ∨ P_CAE) + β · S_shadow + γ · S_geometry
+  ```
+  - α: Active AI detector confidence score
+  - β: Shadow evidence (existence, contrast ratio Ī_highlight / Ī_background > τ, and contiguous adjacency ≤ 3 px)
+  - γ: Geometric height plausibility score
 
 ---
 
@@ -298,25 +310,33 @@ python -m unittest discover -s app/tests -p "test_*.py" -v
 ## 📐 Mathematical Reference
 
 ### Acoustic Slant-to-Ground Conversion
-$$R_{GROUND} = \sqrt{R_{SLANT}^2 - H^2}$$
+```
+R_GROUND = √(R_SLANT² - H²)
+```
 
 ### Physical Object Elevation
-$$h_{OBJ} = L_{SHADOW} \times \tan\theta = \frac{L_{SHADOW} \times H}{R_{GROUND}}$$
+```
+h_OBJ = L_SHADOW × tan θ = (L_SHADOW × H) / R_GROUND
+```
 
 ### Streaming Mahalanobis Whitening
-$$\mu_t = \mu_{t-1} + \frac{1}{t}(z_t - \mu_{t-1})$$
-$$\Sigma_t = \frac{t-1}{t}\Sigma_{t-1} + \frac{1}{t}(z_t - \mu_t)(z_t - \mu_{t-1})^T$$
-$$\tilde{z} = \Sigma_t^{-1/2}(z - \mu_t)$$
+```
+μ_t = μ_(t-1) + (1/t) · (z_t - μ_(t-1))
+Σ_t = ((t-1)/t) · Σ_(t-1) + (1/t) · (z_t - μ_t)(z_t - μ_(t-1))^T
+z_tilde = Σ_t^(-1/2) · (z - μ_t)
+```
 
 ### Weighted Soft Confidence Fusion
-$$C_{final} = \alpha \cdot \max(P_{YOLO}, P_{CAE}) + \beta \cdot S_{shadow} + \gamma \cdot S_{geometry}$$
-*Recommended Calibration:* $\alpha = 0.45$, $\beta = 0.35$, $\gamma = 0.20$.
+```
+C_final = α · max(P_YOLO, P_CAE) + β · S_shadow + γ · S_geometry
+```
+*Recommended Calibration:* α = 0.45, β = 0.35, γ = 0.20.
 
 ---
 
 ## 👥 Team & Acknowledgements
 
-**Project:** AQUATRACE (MarineDebrisDetect-X)  
+**Project:** AQUATRACE  
 **Team Name:** The Blue Vanguards  
 **Team ID:** 160075  
 
