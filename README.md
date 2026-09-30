@@ -29,7 +29,7 @@ Autonomous Underwater Vehicles (AUVs) and diver recovery operations face severe 
 
 ## 📊 Key Benchmark & Evaluation Results
 
-Tested on an acoustic side-scan sonar benchmark comprising real-world underwater debris (ghost fishing nets, pipelines, metallic cargo containers, and submerged wrecks) evaluated on an edge **NVIDIA Jetson Orin NX (15W power cap)**:
+Tested on an acoustic side-scan sonar benchmark comprising real-world underwater debris (ghost fishing nets, pipelines, metallic cargo containers, and submerged wrecks) 
 
 | Metric | Score | Validation Standard |
 | :--- | :---: | :--- |
