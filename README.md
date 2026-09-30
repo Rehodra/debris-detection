@@ -50,7 +50,10 @@ Tested on an acoustic side-scan sonar benchmark comprising real-world underwater
 | **AquaTrace (Dual Engine)** | **Hybrid Engine** | **0.897** | **0.892** |
 
 ---
+## 🧠 Model Prediction & Morphological Analysis
+<img width="1318" height="632" alt="Screenshot 2026-09-05 113135" src="https://github.com/user-attachments/assets/79169f7f-6731-4fcf-8dc2-eded8b1d64a2" />
 
+---
 ## 🏛️ System Architecture
 
 ```mermaid
