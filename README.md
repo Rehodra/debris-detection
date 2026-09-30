@@ -1,12 +1,11 @@
 # AQUATRACE (Dual-Engine)
 ### Autonomous Underwater Marine Debris & Open-Set Hydrographic Anomaly Detection System
 
-[![System Status](https://img.shields.io/badge/System-AQUATRACE%20MarineScan%20v1.0-0077be.svg)](#)
+[![System Status](https://img.shields.io/badge/System-AQUATRACE%20v1.0-0077be.svg)](#)
 [![Team](https://img.shields.io/badge/Team-The%20Blue%20Vanguards-00b4d8.svg)](#)
 [![Team ID](https://img.shields.io/badge/Team%20ID-160075-90e0ef.svg)](#)
 [![Precision](https://img.shields.io/badge/Precision-89.7%25-brightgreen.svg)](#)
-[![mAP@50](https://img.shields.io/badge/mAP%4050-88.6%25-success.svg)](#)
-[![Pixel AUROC](https://img.shields.io/badge/Pixel%20AUROC-97.4%25-blue.svg)](#)
+[![mAP@50](https://img.shields.io/badge/mAP%4050-89.2%25-success.svg)](#)
 [![Edge Platform](https://img.shields.io/badge/Target-NVIDIA%20Jetson%20Orin%20NX%20(15W)-orange.svg)](#)
 [![Tests Passing](https://img.shields.io/badge/tests-160%2F163%20passing-brightgreen.svg)](#)
 
@@ -38,19 +37,17 @@ Tested on an acoustic side-scan sonar benchmark comprising real-world underwater
 | **mAP@50 (Mean Average Precision)** | **88.6%** (0.886) | Intersection over Union (IoU 0.50) instance segmentation |
 | **Recall** | **89.2%** (0.892) | Combined capture across supervised targets and open-set hazards |
 | **Pixel AUROC (Anomaly)** | **97.4%** (0.974) | Unsupervised pixel-level anomaly localization |
-| **Inference Latency** | **27.8 ms** | Real-time edge throughput (~36 FPS) on Jetson Orin NX |
-| **Edge RAM Footprint** | **3.7 GB** | Unified memory footprint on 8GB / 16GB embedded systems |
+
 
 ### 🔬 Comparative Architecture Benchmark
 
-| Detection Architecture | Paradigm | Precision | mAP@50 | Recall | Pixel AUROC | Inference Latency (Jetson Orin NX) | Edge RAM Footprint |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **YOLOv8x-Seg** | Supervised | 83.1% | 0.824 | 0.741 | N/A | 31.2 ms | 2.1 GB |
-| **YOLO11-Seg (TensorRT INT8)** | Supervised | 85.3% | 0.841 | 0.782 | N/A | **5.1 ms** | **1.1 GB** |
-| **U-Net (ConvNeXt-B)** | Supervised | 81.8% | 0.810 | 0.802 | N/A | 45.8 ms | 3.4 GB |
-| **Vanilla PatchCore (ResNet50)** | Unsupervised | N/A | N/A | N/A | 0.942 | 68.4 ms | 5.4 GB |
-| **Mahalanobis PatchCore** | Unsupervised | N/A | N/A | N/A | 0.968 | 22.3 ms | 2.6 GB |
-| **AQUATRACE (Dual Engine)** | **Hybrid Engine** | **89.7%** | **0.886** | **0.892** | **0.974** | **27.8 ms** | **3.7 GB** |
+| Detection Architecture | Paradigm | Precision (mAP@50) | Recall |
+| :--- | :---: | :---: | :---: |
+| **YOLO11-Seg (TensorRT INT8)** | Supervised | 0.841 | 0.782 |
+| **U-Net (ConvNeXt-B)** | Supervised | 0.810 | 0.802 |
+| **Vanilla PatchCore (ResNet50)** | Unsupervised | N/A | N/A |
+| **Mahalanobis PatchCore** | Unsupervised | N/A | N/A |
+| **AquaTrace (Dual Engine)** | **Hybrid Engine** | **0.897** | **0.892** |
 
 ---
 
